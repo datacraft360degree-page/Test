@@ -70,15 +70,22 @@
       font-size: 0.75rem; /* text-xs */
     }
 
-    /* Desktop View Mode (Bigger Font & Expanded Spacing) */
+    /* Desktop View Mode (Full Screen & Bigger Font) */
     body.mode-desktop {
       font-size: 0.875rem; /* text-sm */
+    }
+
+    body.mode-desktop header > div,
+    body.mode-desktop main {
+      max-width: 100% !important;
+      padding-left: 2rem !important;
+      padding-right: 2rem !important;
     }
 
     body.mode-desktop input,
     body.mode-desktop select,
     body.mode-desktop button {
-      font-size: 0.8125rem !important; /* Slightly larger inputs/buttons */
+      font-size: 0.8125rem !important;
     }
 
     body.mode-desktop .tab-btn {
@@ -252,8 +259,8 @@
         <div class="relative flex items-center bg-slate-100 border border-slate-200 rounded-full px-2 py-1">
           <i class="fa-solid fa-sliders text-slate-500 text-[10px] ml-1 mr-1"></i>
           <select id="theme-view-select" onchange="changeDisplayTheme(this.value)" class="bg-transparent text-[11px] font-semibold text-slate-700 focus:outline-none cursor-pointer">
-            <option value="compact">Mobile (Compact)</option>
-            <option value="desktop">Desktop (Bigger Font)</option>
+            <option value="compact">Mobile (Compact View)</option>
+            <option value="desktop">Desktop (Full Screen View)</option>
           </select>
         </div>
 
