@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- SheetJS for Exporting to Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- html2canvas for Generating JPEG Receipts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -14,7 +16,6 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: #F2F4F7;
-      transition: font-size 0.2s ease, padding 0.2s ease;
     }
     
     ::-webkit-scrollbar {
@@ -63,40 +64,9 @@
       border-style: solid;
       border-color: transparent transparent #1E293B transparent;
     }
-
-    /* --- THEME/VIEW STYLES --- */
-    /* Mobile / Compact View Mode (Default UI) */
-    body.mode-compact {
-      font-size: 0.75rem; /* text-xs */
-    }
-
-    /* Desktop View Mode (Full Screen & Bigger Font) */
-    body.mode-desktop {
-      font-size: 0.875rem; /* text-sm */
-    }
-
-    body.mode-desktop header > div,
-    body.mode-desktop main {
-      max-width: 100% !important;
-      padding-left: 2rem !important;
-      padding-right: 2rem !important;
-    }
-
-    body.mode-desktop input,
-    body.mode-desktop select,
-    body.mode-desktop button {
-      font-size: 0.8125rem !important;
-    }
-
-    body.mode-desktop .tab-btn {
-      padding-left: 1rem;
-      padding-right: 1rem;
-      padding-top: 0.375rem;
-      padding-bottom: 0.375rem;
-    }
   </style>
 </head>
-<body id="app-body" class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased mode-compact" onclick="closeCommentBox()">
+<body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
   <!-- LOGIN MODAL OVERLAY -->
   <div id="login-overlay" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
@@ -253,17 +223,8 @@
         <button onclick="switchTab('calendar')" id="btn-calendar" class="tab-btn px-3 py-1 rounded-full transition-all text-slate-600 hover:text-slate-900">Calendar</button>
       </nav>
 
-      <!-- Action Buttons & Display Mode Dropdown -->
+      <!-- Action Buttons -->
       <div class="flex items-center space-x-1.5">
-        <!-- Display Mode Dropdown Switcher -->
-        <div class="relative flex items-center bg-slate-100 border border-slate-200 rounded-full px-2 py-1">
-          <i class="fa-solid fa-sliders text-slate-500 text-[10px] ml-1 mr-1"></i>
-          <select id="theme-view-select" onchange="changeDisplayTheme(this.value)" class="bg-transparent text-[11px] font-semibold text-slate-700 focus:outline-none cursor-pointer">
-            <option value="compact">Mobile (Compact View)</option>
-            <option value="desktop">Desktop (Full Screen View)</option>
-          </select>
-        </div>
-
         <button onclick="openAlertModal()" title="View Alerts" class="relative bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-solid fa-bell text-[10px]"></i> Alerts
           <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
@@ -709,6 +670,16 @@
               </div>
             </div>
 
+            <!-- Meal Plan Inclusions Checkbox -->
+            <div class="sm:col-span-3 pt-2 border-t border-slate-200/60">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="cust-include-meals" checked class="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer">
+                <label for="cust-include-meals" class="font-bold text-slate-700 cursor-pointer flex items-center gap-1 select-none text-[11px]">
+                  <i class="fa-solid fa-utensils text-emerald-600"></i> Include Meal Description in Invoice (*Include Breakfast, Lunch, Evening snack & Dinner)
+                </label>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -858,8 +829,11 @@
         </div>
       </div>
 
-      <div class="flex justify-end space-x-2 pt-2 no-print border-t border-slate-100">
+      <div class="flex flex-wrap justify-end space-x-2 gap-y-2 pt-2 no-print border-t border-slate-100">
         <button type="button" onclick="closeInvoiceModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Close</button>
+        <button type="button" id="inv-whatsapp-btn" onclick="sendReceiptViaWhatsApp()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fa-brands fa-whatsapp text-sm"></i> Send receipt via WhatsApp
+        </button>
         <button type="button" onclick="window.print()" id="inv-print-btn" class="px-4 py-1.5 bg-blue-600 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1 transition">
           <i class="fa-solid fa-print"></i> Print Invoice
         </button>
@@ -869,29 +843,7 @@
 
   <script>
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000; // 1 Hour Buffer in Milliseconds
-
-    /* DISPLAY THEME/VIEW SWITCHER FUNCTION */
-    function changeDisplayTheme(mode) {
-      const body = document.getElementById('app-body');
-      if (!body) return;
-
-      if (mode === 'desktop') {
-        body.classList.remove('mode-compact');
-        body.classList.add('mode-desktop');
-        localStorage.setItem('webapp_display_mode', 'desktop');
-      } else {
-        body.classList.remove('mode-desktop');
-        body.classList.add('mode-compact');
-        localStorage.setItem('webapp_display_mode', 'compact');
-      }
-    }
-
-    function initDisplayTheme() {
-      const savedMode = localStorage.getItem('webapp_display_mode') || 'compact';
-      const selectElem = document.getElementById('theme-view-select');
-      if (selectElem) selectElem.value = savedMode;
-      changeDisplayTheme(savedMode);
-    }
+    let activeModalBooking = null; // Currently opened invoice booking reference
 
     window.addEventListener('beforeunload', function (e) {
       if (isLoggedIn) {
@@ -1288,7 +1240,7 @@
         { roomNo: 2, capacity: 2 },
         { roomNo: 3, capacity: 4 },
         { roomNo: 4, capacity: 4 },
-        { roomNo: 5, capacity: 4 }
+        { roomNo: 5, capacity: 5 }
       ],
       masterAgents: [
         { agentName: "Self", phone: "Direct", roomNo: "All Rooms" },
@@ -1331,7 +1283,11 @@
 
         let foodSummary = "";
         if (b.foodOrders && b.foodOrders.length > 0) {
-          foodSummary = b.foodOrders.map(f => `${f.foodDesc || 'Food'} (${f.plates || 1} Plates - ₹${f.foodCharge || 0})`).join(", ");
+          foodSummary = b.foodOrders.map(f => {
+            const pCount = f.plates || 1;
+            const pLabel = pCount === 1 ? 'Plate' : 'Plates';
+            return `${f.foodDesc || 'Food'} (${pCount} ${pLabel} - ₹${f.foodCharge || 0})`;
+          }).join(", ");
         }
 
         return {
@@ -1471,7 +1427,7 @@
                 { roomNo: 2, capacity: 2 },
                 { roomNo: 3, capacity: 4 },
                 { roomNo: 4, capacity: 4 },
-                { roomNo: 5, capacity: 4 }
+                { roomNo: 5, capacity: 5 }
               ];
             }
             if (!state.masterAgents) {
@@ -1516,7 +1472,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      initDisplayTheme();
       checkAuthStatus();
       loadSavedData();
       setMinBookingDates();
@@ -1835,12 +1790,103 @@
       document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
 
+    /* WHATSAPP RECEIPT SENDER WITH JPG GENERATION & UPI LINK */
+    async function sendReceiptViaWhatsApp() {
+      if (!activeModalBooking) {
+        alert("⚠️ Booking information not found!");
+        return;
+      }
+
+      const b = activeModalBooking;
+      const advPayment = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
+
+      if (advPayment <= 0) {
+        alert("⚠️ WhatsApp receipt can only be sent if Advance Payment is greater than ₹0!");
+        return;
+      }
+
+      let phone = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
+      if (!phone) {
+        alert("⚠️ Please provide a valid guest contact number to send WhatsApp receipt.");
+        return;
+      }
+
+      // Prepend India Country Code (91) if 10-digit number
+      if (phone.length === 10) {
+        phone = '91' + phone;
+      }
+
+      const invoiceElement = document.getElementById('printable-invoice');
+      const waBtn = document.getElementById('inv-whatsapp-btn');
+      
+      const originalText = waBtn.innerHTML;
+      waBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Generating JPG Receipt...`;
+      waBtn.disabled = true;
+
+      try {
+        // Render invoice section to HTML5 Canvas
+        const canvas = await html2canvas(invoiceElement, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          ignoreElements: (element) => element.classList.contains('no-print')
+        });
+
+        const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+        const imageFile = new File([imageBlob], `Invoice_${b.bookingCode}.jpg`, { type: 'image/jpeg' });
+
+        const upiId = "kapil98.ram@okaxis";
+        const upiPayLink = `upi://pay?pa=${upiId}&pn=Aniruddha%20Homestay&am=${advPayment}&cu=INR&tn=Booking%20Advance%20${b.bookingCode}`;
+
+        const messageText = `*Aniruddha Homestay - Booking Receipt*\n\n` +
+          `Dear *${b.name}*,\n` +
+          `Thank you for booking with us! Here is your booking receipt (*${b.bookingCode}*).\n\n` +
+          `*Booking Details:*\n` +
+          `• Room No: ${b.roomNo}\n` +
+          `• Total Amount: ₹${b.totalAmount}\n` +
+          `• Advance Amount Received: ₹${advPayment}\n` +
+          `• Balance Due: ₹${b.totalDue}\n\n` +
+          `*Payment via UPI:* You can also complete your payment using UPI ID: *${upiId}*\n` +
+          `Direct UPI Payment Link: ${upiPayLink}\n\n` +
+          `We look forward to hosting you! 🏠`;
+
+        // Attempt Web Share API (native share dialog allows direct image sharing to WhatsApp)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+          await navigator.share({
+            files: [imageFile],
+            title: `Receipt ${b.bookingCode}`,
+            text: messageText
+          });
+        } else {
+          // Fallback: Download JPG image and open WhatsApp message link directly
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(imageBlob);
+          link.download = `Invoice_${b.bookingCode}.jpg`;
+          link.click();
+
+          const encodedMessage = encodeURIComponent(messageText);
+          const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
+          
+          alert("📋 The JPEG Receipt Image has been saved to your downloads!\n\nOpening WhatsApp... Please attach the downloaded image image file to your chat.");
+          window.open(whatsappUrl, '_blank');
+        }
+      } catch (err) {
+        console.error("WhatsApp Receipt Generation Error:", err);
+        alert("⚠️ Failed to generate receipt image. Please try again.");
+      } finally {
+        waBtn.innerHTML = originalText;
+        waBtn.disabled = false;
+      }
+    }
+
     /* PRINT INVOICE */
     function printInvoice(bookingId) {
       const bIndex = state.bookings.findIndex(item => item.id === bookingId);
       if (bIndex === -1) return;
 
       const b = state.bookings[bIndex];
+      activeModalBooking = b; // Store global reference for WhatsApp sharing
+      
       const now = new Date().getTime();
       const checkOutTime = getEffectiveCheckoutTime(b);
 
@@ -1851,8 +1897,22 @@
 
       const readOnlyNotice = document.getElementById('inv-readonly-notice');
       const invPrintBtn = document.getElementById('inv-print-btn');
+      const waBtn = document.getElementById('inv-whatsapp-btn');
       const invBadge = document.getElementById('inv-badge');
       const invIdContainer = document.getElementById('inv-id-container');
+
+      const advPaid = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
+
+      // Enable/Disable WhatsApp button based on advance payment condition
+      if (waBtn) {
+        if (advPaid > 0) {
+          waBtn.disabled = false;
+          waBtn.title = "Send Receipt as JPG image via WhatsApp";
+        } else {
+          waBtn.disabled = true;
+          waBtn.title = "WhatsApp Receipt requires Advance Payment > ₹0";
+        }
+      }
 
       if (invIdContainer) {
         invIdContainer.querySelector('strong').innerText = b.invoiceNo || 'INV-2026-0000001';
@@ -1929,7 +1989,10 @@
       document.getElementById('inv-guest-contact').innerText = `Contact: ${b.contactNo || 'N/A'}`;
       document.getElementById('inv-guest-id').innerText = `ID No: ${b.idNo || 'N/A'}`;
 
-      document.getElementById('inv-room').innerText = `Room No: ${b.roomNo} (${b.capacity || 1} Person)`;
+      const roomCap = parseInt(b.capacity) || 1;
+      const roomCapLabel = roomCap === 1 ? 'Person' : 'Persons';
+
+      document.getElementById('inv-room').innerText = `Room No: ${b.roomNo} (${roomCap} ${roomCapLabel})`;
       document.getElementById('inv-checkin').innerText = `Check-in: ${formatDateTime(b.checkIn)}`;
       
       // Initial Check-Out Date
@@ -1949,9 +2012,17 @@
       tbody.innerHTML = '';
 
       const roomTotal = (b.noOfDays || 0) * (b.perDayPrice || 0) * (b.capacity || 1);
+      
+      // Check meal inclusion setting (defaults to true if undefined)
+      const showMealsNote = b.includeMeals !== false;
+      const mealNotesStr = showMealsNote ? '<span class="text-[9px] text-slate-500 block font-normal">(*Include Breakfast,Lunch,Evening snack & Dinner)</span>' : '';
+
       const roomTr = document.createElement('tr');
       roomTr.innerHTML = `
-        <td class="p-2.5 font-semibold text-slate-800">Room ${b.roomNo} Accommodation (${b.capacity || 1} Persons) ${b.hasExtendedCheckout ? '<span class="text-[9px] text-blue-600 block font-normal">(Includes extended stay duration)</span>' : ''}</td>
+        <td class="p-2.5 font-semibold text-slate-800">
+          Room ${b.roomNo} Accommodation (${roomCap} ${roomCapLabel}) ${b.hasExtendedCheckout ? '<span class="text-[9px] text-blue-600 block font-normal">(Includes extended stay duration)</span>' : ''}
+          ${mealNotesStr}
+        </td>
         <td class="p-2.5 text-center">${b.noOfDays} Days</td>
         <td class="p-2.5 text-right">₹${(b.perDayPrice || 0).toLocaleString('en-IN')}</td>
         <td class="p-2.5 text-right font-semibold text-slate-800">₹${roomTotal.toLocaleString('en-IN')}</td>
@@ -1963,9 +2034,12 @@
           if (fo.foodCharge > 0) {
             const foodTr = document.createElement('tr');
             const foodDateTimeFmt = fo.foodDateTime ? ` (${formatDateTime(fo.foodDateTime)})` : '';
+            const plateCount = parseInt(fo.plates) || 1;
+            const plateLabel = plateCount === 1 ? 'Plate' : 'Plates';
+
             foodTr.innerHTML = `
               <td class="p-2.5 font-semibold text-slate-800">Extra Food <span class="text-[9px] text-slate-500 font-normal block">${fo.foodDesc || 'Food Item'}${foodDateTimeFmt}</span></td>
-              <td class="p-2.5 text-center">${fo.plates || 1} Plates</td>
+              <td class="p-2.5 text-center">${plateCount} ${plateLabel}</td>
               <td class="p-2.5 text-right">₹${(fo.itemPrice || 0).toLocaleString('en-IN')}</td>
               <td class="p-2.5 text-right font-semibold text-slate-800">₹${(fo.foodCharge || 0).toLocaleString('en-IN')}</td>
             `;
@@ -1993,6 +2067,7 @@
     }
 
     function closeInvoiceModal() {
+      activeModalBooking = null;
       document.getElementById('invoice-modal').classList.add('hidden');
     }
 
@@ -2185,6 +2260,7 @@
       const extChkBox = document.getElementById('cust-has-extended-checkout');
       const extDateInput = document.getElementById('cust-ext-checkout-date');
       const extTimeInput = document.getElementById('cust-ext-checkout-time');
+      const mealsChkBox = document.getElementById('cust-include-meals');
 
       if (bookingId) {
         const b = state.bookings.find(item => item.id === bookingId);
@@ -2232,6 +2308,10 @@
             const [eDate, eTime] = b.extendedCheckOut.split('T');
             extDateInput.value = eDate || '';
             extTimeInput.value = eTime || '12:00';
+          }
+
+          if (mealsChkBox) {
+            mealsChkBox.checked = b.includeMeals !== undefined ? !!b.includeMeals : true;
           }
 
           const initialCheckOutTime = new Date(b.checkOut).getTime();
@@ -2289,6 +2369,8 @@
         extChkBox.checked = false;
         extChkBox.disabled = false;
         toggleExtendedCheckoutFields(false);
+
+        if (mealsChkBox) mealsChkBox.checked = true;
 
         document.getElementById('cust-price').value = 1200;
         
@@ -2477,6 +2559,8 @@
         }
       }
 
+      const includeMeals = document.getElementById('cust-include-meals')?.checked ?? true;
+
       const foodWin = getModalFoodWindow();
       const foodOrdersList = [];
       let foodValidationError = false;
@@ -2587,6 +2671,7 @@
         checkOut: checkOut,
         hasExtendedCheckout: hasExtendedCheckout,
         extendedCheckOut: extendedCheckOut,
+        includeMeals: includeMeals,
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         foodOrders: foodOrdersList,
@@ -2764,6 +2849,9 @@
           `;
         }
 
+        const tableCap = parseInt(b.capacity) || 1;
+        const tableCapLabel = tableCap === 1 ? 'Person' : 'Persons';
+
         const tr = document.createElement('tr');
         tr.className = `${statusBgClass} transition border-b border-slate-100`;
         tr.innerHTML = `
@@ -2780,7 +2868,7 @@
           <td class="py-2.5 px-3 font-mono text-[10px]">${b.idNo || '-'}</td>
           <td class="py-2.5 px-3">${idProofCellHtml}</td>
           <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Room ${b.roomNo}</span></td>
-          <td class="py-2.5 px-3 font-bold text-slate-700">${b.capacity || 1} Person</td>
+          <td class="py-2.5 px-3 font-bold text-slate-700">${tableCap} ${tableCapLabel}</td>
           <td class="py-2.5 px-3 ${!isMasterValid ? 'text-rose-900' : 'text-slate-600'} text-[10px]">${b.agentInfo || '-'}</td>
           <td class="py-2.5 px-3 text-[10px]">
             <div class="font-semibold ${!isMasterValid ? 'text-rose-950' : 'text-slate-700'}">${checkInFmt}</div>
