@@ -1831,7 +1831,7 @@
       const formattedAmount = Number(advPayment) % 1 === 0 ? Number(advPayment).toString() : Number(advPayment).toFixed(2);
       
       // Standardized NPCI compliant UPI Deep Link schema
-      const upiPayLink = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${formattedAmount}&cu=INR&tn=${transactionNote}`;
+      const upiPayLink = `http://upi://pay?pa=${upiId}&pn=${payeeName}&am=${formattedAmount}&cu=INR&tn=${transactionNote}`;
 
       const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
       const roomCap = parseInt(b.capacity) || 1;
