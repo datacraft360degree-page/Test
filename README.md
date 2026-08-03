@@ -1797,8 +1797,8 @@
       document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
 
-    /* WHATSAPP RECEIPT SENDER WITH DIRECT WHATSAPP REDIRECTION & JPEG ATTACHMENT CONVERSION */
-    async function sendReceiptViaWhatsApp() {
+    /* WHATSAPP RECEIPT SENDER WITH DIRECT WHATSAPP REDIRECTION & DRAFTED MESSAGE */
+    function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");
         return;
@@ -1821,6 +1821,7 @@
       }
 
       const fullPhoneNumber = rawCountryCode + phone;
+
       const upiId = "kapil98.ram@okaxis";
       const upiPayLink = `upi://pay?pa=${upiId}&pn=Aniruddha%20Homestay&am=${advPayment}&cu=INR&tn=Booking%20Advance%20${b.bookingCode}`;
 
@@ -1844,68 +1845,10 @@
         `Direct UPI Link: ${upiPayLink}\n\n` +
         `We look forward to hosting you! 🏠`;
 
-      const invoiceElem = document.getElementById('printable-invoice');
-      const waBtn = document.getElementById('inv-whatsapp-btn');
-      const originalText = waBtn ? waBtn.innerHTML : '';
+      const encodedMessage = encodeURIComponent(messageText);
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${fullPhoneNumber}&text=${encodedMessage}`;
 
-      if (waBtn) {
-        waBtn.disabled = true;
-        waBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-sm"></i> Generating Receipt Image...`;
-      }
-
-      try {
-        // Convert printable receipt element to HTML5 Canvas
-        const canvas = await html2canvas(invoiceElem, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          ignoreElements: (element) => element.classList.contains('no-print')
-        });
-
-        // Convert canvas into Blob JPEG file
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
-        const fileName = `Receipt_${b.bookingCode || 'Homestay'}.jpg`;
-        const imageFile = new File([blob], fileName, { type: 'image/jpeg' });
-
-        // Native Share (Mobile device sharing directly to WhatsApp app with attached image file)
-        if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
-          await navigator.share({
-            files: [imageFile],
-            title: `Booking Receipt - ${b.bookingCode}`,
-            text: messageText
-          });
-        } else {
-          // Desktop Browser / Non-supported Native Share Fallback:
-          // 1. Download JPEG Receipt Image automatically
-          const imgUrl = URL.createObjectURL(blob);
-          const downloadLink = document.createElement('a');
-          downloadLink.href = imgUrl;
-          downloadLink.download = fileName;
-          document.body.appendChild(downloadLink);
-          downloadLink.click();
-          document.body.removeChild(downloadLink);
-          setTimeout(() => URL.revokeObjectURL(imgUrl), 1000);
-
-          // 2. Direct to WhatsApp Web with drafted text
-          const encodedMessage = encodeURIComponent(messageText);
-          const whatsappUrl = `https://api.whatsapp.com/send?phone=${fullPhoneNumber}&text=${encodedMessage}`;
-          window.open(whatsappUrl, '_blank');
-
-          alert(`📸 Receipt Image Saved!\n\nThe JPEG receipt (${fileName}) has been downloaded to your device.\nWhatsApp is opening now—you can drag/attach the downloaded JPEG receipt into the chat.`);
-        }
-      } catch (err) {
-        console.error("Error generating JPEG receipt image:", err);
-        // Fallback to text message if image generation fails
-        const encodedMessage = encodeURIComponent(messageText);
-        const whatsappUrl = `https://api.whatsapp.com/send?phone=${fullPhoneNumber}&text=${encodedMessage}`;
-        window.open(whatsappUrl, '_blank');
-      } finally {
-        if (waBtn) {
-          waBtn.disabled = false;
-          waBtn.innerHTML = originalText;
-        }
-      }
+      window.open(whatsappUrl, '_blank');
     }
 
     /* PRINT INVOICE & MANAGE WHATSAPP VISIBILITY */
