@@ -592,9 +592,13 @@
               <label class="block font-semibold text-slate-600 mb-0.5">ID Number</label>
               <input type="text" id="cust-id" maxlength="16" pattern="[A-Za-z0-9\s]*" oninput="this.value = this.value.replace(/[^A-Za-z0-9\s]/g, '')" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
             </div>
+            <!-- EDITABLE COUNTRY CODE & GUEST CONTACT NUMBER -->
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Contact No</label>
-              <input type="text" id="cust-contact" maxlength="10" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
+              <div class="flex gap-1">
+                <input type="text" id="cust-country-code" value="+91" placeholder="+91" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-center text-blue-700">
+                <input type="text" id="cust-contact" maxlength="12" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500">
+              </div>
             </div>
             <div class="sm:col-span-2">
               <label class="block font-semibold text-slate-600 mb-0.5 flex justify-between items-center">
@@ -831,6 +835,7 @@
 
       <div class="flex flex-wrap justify-end space-x-2 gap-y-2 pt-2 no-print border-t border-slate-100">
         <button type="button" onclick="closeInvoiceModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Close</button>
+        <!-- SEND VIA WHATSAPP BUTTON (VISIBLE ONLY FOR UPCOMING/LIVE BOOKINGS) -->
         <button type="button" id="inv-whatsapp-btn" onclick="sendReceiptViaWhatsApp()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
           <i class="fa-brands fa-whatsapp text-sm"></i> Send receipt via WhatsApp
         </button>
@@ -1290,12 +1295,14 @@
           }).join(", ");
         }
 
+        const fullContactNo = `${b.countryCode || '+91'} ${b.contactNo || ''}`.trim();
+
         return {
           "Booking ID": b.bookingCode || "-",
           "Invoice ID": b.invoiceNo || "-",
           "Status": statusStr,
           "Guest Name": b.name || "-",
-          "Contact No": b.contactNo || "-",
+          "Contact No": fullContactNo || "-",
           "ID Number": b.idNo || "-",
           "Attached ID": b.idProofBase64 ? "Yes" : "No",
           "Address": b.address || "-",
@@ -1790,8 +1797,8 @@
       document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
 
-    /* WHATSAPP RECEIPT SENDER WITH JPG GENERATION & UPI LINK */
-    async function sendReceiptViaWhatsApp() {
+    /* WHATSAPP RECEIPT SENDER WITH DIRECT WHATSAPP REDIRECTION & DRAFTED MESSAGE */
+    function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");
         return;
@@ -1805,81 +1812,46 @@
         return;
       }
 
+      let rawCountryCode = b.countryCode ? b.countryCode.replace(/\D/g, '') : '91';
       let phone = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
+      
       if (!phone) {
         alert("⚠️ Please provide a valid guest contact number to send WhatsApp receipt.");
         return;
       }
 
-      // Prepend India Country Code (91) if 10-digit number
-      if (phone.length === 10) {
-        phone = '91' + phone;
-      }
+      const fullPhoneNumber = rawCountryCode + phone;
 
-      const invoiceElement = document.getElementById('printable-invoice');
-      const waBtn = document.getElementById('inv-whatsapp-btn');
-      
-      const originalText = waBtn.innerHTML;
-      waBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Generating JPG Receipt...`;
-      waBtn.disabled = true;
+      const upiId = "kapil98.ram@okaxis";
+      const upiPayLink = `upi://pay?pa=${upiId}&pn=Aniruddha%20Homestay&am=${advPayment}&cu=INR&tn=Booking%20Advance%20${b.bookingCode}`;
 
-      try {
-        // Render invoice section to HTML5 Canvas
-        const canvas = await html2canvas(invoiceElement, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          ignoreElements: (element) => element.classList.contains('no-print')
-        });
+      const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
+      const roomCap = parseInt(b.capacity) || 1;
+      const roomCapLabel = roomCap === 1 ? 'Person' : 'Persons';
 
-        const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
-        const imageFile = new File([imageBlob], `Invoice_${b.bookingCode}.jpg`, { type: 'image/jpeg' });
+      const messageText = `*Aniruddha Homestay - Booking Receipt*\n\n` +
+        `Dear *${b.name}*,\n` +
+        `Thank you for booking with us! Here are your booking details:\n\n` +
+        `*Reservation Details:*\n` +
+        `• Booking ID: *${b.bookingCode}*\n` +
+        `• Room No: ${b.roomNo} (${roomCap} ${roomCapLabel})\n` +
+        `• Check-In: ${formatDateTime(b.checkIn)}\n` +
+        `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
+        `*Billing Summary:*\n` +
+        `• Total Amount: ₹${b.totalAmount}\n` +
+        `• Advance Received: ₹${advPayment}\n` +
+        `• Balance Due: ₹${b.totalDue}\n\n` +
+        `*Pay via UPI:* You can complete payments using UPI ID: *${upiId}*\n` +
+        `Direct UPI Link: ${upiPayLink}\n\n` +
+        `We look forward to hosting you! 🏠`;
 
-        const upiId = "kapil98.ram@okaxis";
-        const upiPayLink = `upi://pay?pa=${upiId}&pn=Aniruddha%20Homestay&am=${advPayment}&cu=INR&tn=Booking%20Advance%20${b.bookingCode}`;
+      const encodedMessage = encodeURIComponent(messageText);
+      const whatsappUrl = `https://api.whatsapp.com/send?phone=${fullPhoneNumber}&text=${encodedMessage}`;
 
-        const messageText = `*Aniruddha Homestay - Booking Receipt*\n\n` +
-          `Dear *${b.name}*,\n` +
-          `Thank you for booking with us! Here is your booking receipt (*${b.bookingCode}*).\n\n` +
-          `*Booking Details:*\n` +
-          `• Room No: ${b.roomNo}\n` +
-          `• Total Amount: ₹${b.totalAmount}\n` +
-          `• Advance Amount Received: ₹${advPayment}\n` +
-          `• Balance Due: ₹${b.totalDue}\n\n` +
-          `*Payment via UPI:* You can also complete your payment using UPI ID: *${upiId}*\n` +
-          `Direct UPI Payment Link: ${upiPayLink}\n\n` +
-          `We look forward to hosting you! 🏠`;
-
-        // Attempt Web Share API (native share dialog allows direct image sharing to WhatsApp)
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
-          await navigator.share({
-            files: [imageFile],
-            title: `Receipt ${b.bookingCode}`,
-            text: messageText
-          });
-        } else {
-          // Fallback: Download JPG image and open WhatsApp message link directly
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(imageBlob);
-          link.download = `Invoice_${b.bookingCode}.jpg`;
-          link.click();
-
-          const encodedMessage = encodeURIComponent(messageText);
-          const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
-          
-          alert("📋 The JPEG Receipt Image has been saved to your downloads!\n\nOpening WhatsApp... Please attach the downloaded image image file to your chat.");
-          window.open(whatsappUrl, '_blank');
-        }
-      } catch (err) {
-        console.error("WhatsApp Receipt Generation Error:", err);
-        alert("⚠️ Failed to generate receipt image. Please try again.");
-      } finally {
-        waBtn.innerHTML = originalText;
-        waBtn.disabled = false;
-      }
+      window.open(whatsappUrl, '_blank');
     }
 
-    /* PRINT INVOICE */
+    /* PRINT INVOICE & MANAGE WHATSAPP VISIBILITY */
     function printInvoice(bookingId) {
       const bIndex = state.bookings.findIndex(item => item.id === bookingId);
       if (bIndex === -1) return;
@@ -1892,6 +1864,8 @@
 
       const isClosed = now > checkOutTime;
       const isInactive = b.inactive;
+      const isLiveOrUpcoming = !isInactive && !isClosed;
+
       const hasDue = (b.totalDue || 0) > 0;
       const today = formatDate(new Date());
 
@@ -1903,14 +1877,19 @@
 
       const advPaid = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
 
-      // Enable/Disable WhatsApp button based on advance payment condition
+      // WHATSAPP BUTTON VISIBILITY: ONLY VISIBLE FOR UPCOMING / LIVE BOOKINGS (NOT CLOSED OR INACTIVE)
       if (waBtn) {
-        if (advPaid > 0) {
-          waBtn.disabled = false;
-          waBtn.title = "Send Receipt as JPG image via WhatsApp";
+        if (isLiveOrUpcoming) {
+          waBtn.classList.remove('hidden');
+          if (advPaid > 0) {
+            waBtn.disabled = false;
+            waBtn.title = "Send Receipt via WhatsApp";
+          } else {
+            waBtn.disabled = true;
+            waBtn.title = "WhatsApp Receipt requires Advance Payment > ₹0";
+          }
         } else {
-          waBtn.disabled = true;
-          waBtn.title = "WhatsApp Receipt requires Advance Payment > ₹0";
+          waBtn.classList.add('hidden'); // Hide for Closed or Inactive status
         }
       }
 
@@ -1986,7 +1965,9 @@
       const fullLocation = [b.address, b.city, b.state, b.country, b.zipCode].filter(Boolean).map(formatTitleCase).join(', ');
       document.getElementById('inv-guest-name').innerText = formatTitleCase(b.name) || 'N/A';
       document.getElementById('inv-guest-address').innerText = `Address: ${fullLocation || 'N/A'}`;
-      document.getElementById('inv-guest-contact').innerText = `Contact: ${b.contactNo || 'N/A'}`;
+      
+      const fullGuestPhone = `${b.countryCode || '+91'} ${b.contactNo || ''}`.trim();
+      document.getElementById('inv-guest-contact').innerText = `Contact: ${fullGuestPhone || 'N/A'}`;
       document.getElementById('inv-guest-id').innerText = `ID No: ${b.idNo || 'N/A'}`;
 
       const roomCap = parseInt(b.capacity) || 1;
@@ -2277,6 +2258,7 @@
           document.getElementById('cust-country').value = formatTitleCase(b.country || '');
           document.getElementById('cust-zip').value = b.zipCode || '';
           document.getElementById('cust-id').value = b.idNo || '';
+          document.getElementById('cust-country-code').value = b.countryCode || '+91';
           document.getElementById('cust-contact').value = b.contactNo || '';
 
           if (b.idProofBase64) {
@@ -2364,6 +2346,7 @@
         
         populateRoomDropdown(state.roomsCapacity.length > 0 ? state.roomsCapacity[0].roomNo : 1);
 
+        document.getElementById('cust-country-code').value = "+91";
         document.getElementById('cust-checkin-time').value = "12:00";
         document.getElementById('cust-checkout-time').value = "11:00";
         extChkBox.checked = false;
@@ -2650,6 +2633,8 @@
 
       const totalPaid = initialAdvAmt + clearedDueAmt;
       
+      const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
+
       const newBooking = {
         id: id || `bk_${Date.now()}`,
         bookingCode: existingCode,
@@ -2661,6 +2646,7 @@
         country: formatTitleCase(document.getElementById('cust-country').value.trim()),
         zipCode: document.getElementById('cust-zip').value.trim(),
         idNo: document.getElementById('cust-id').value.trim(),
+        countryCode: countryCodeVal,
         contactNo: document.getElementById('cust-contact').value.trim(),
         idProofBase64: document.getElementById('cust-id-file-base64').value,
         idProofFileName: document.getElementById('cust-id-file-name').value,
@@ -2851,6 +2837,7 @@
 
         const tableCap = parseInt(b.capacity) || 1;
         const tableCapLabel = tableCap === 1 ? 'Person' : 'Persons';
+        const contactDisplay = `${b.countryCode || '+91'} ${b.contactNo || '-'}`.trim();
 
         const tr = document.createElement('tr');
         tr.className = `${statusBgClass} transition border-b border-slate-100`;
@@ -2864,7 +2851,7 @@
             ${b.inactive ? '<span class="bg-slate-600 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Inactive</span>' : (!isMasterValid ? '<span class="bg-rose-700 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Master Removed</span>' : '')}
           </td>
           <td class="py-2.5 px-3 font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">${b.name}</td>
-          <td class="py-2.5 px-3 font-medium">${b.contactNo || '-'}</td>
+          <td class="py-2.5 px-3 font-medium whitespace-nowrap">${contactDisplay}</td>
           <td class="py-2.5 px-3 font-mono text-[10px]">${b.idNo || '-'}</td>
           <td class="py-2.5 px-3">${idProofCellHtml}</td>
           <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Room ${b.roomNo}</span></td>
