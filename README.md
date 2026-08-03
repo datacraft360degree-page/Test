@@ -1259,7 +1259,8 @@
     };
 
     function isRoomInMaster(roomNo) {
-      return state.roomsCapacity.some(m => parseInt(m.roomNo) === parseInt(roomNo));
+      if (!state.roomsCapacity) return true;
+      return state.roomsCapacity.some(m => String(m.roomNo) === String(roomNo));
     }
 
     /* EXPORT TO EXCEL */
@@ -1823,7 +1824,14 @@
       const fullPhoneNumber = rawCountryCode + phone;
 
       const upiId = "kapil98.ram@okaxis";
-      const upiPayLink = `upi://pay?pa=${upiId}&pn=Aniruddha%20Homestay&am=${advPayment}&cu=INR&tn=Booking%20Advance%20${b.bookingCode}`;
+      const payeeName = encodeURIComponent("Aniruddha Homestay");
+      const transactionNote = encodeURIComponent(`Booking Advance ${b.bookingCode}`);
+      
+      // Formatting amount without trailing zeros for whole numbers (e.g. 10 instead of 10.00)
+      const formattedAmount = Number(advPayment) % 1 === 0 ? Number(advPayment).toString() : Number(advPayment).toFixed(2);
+      
+      // Standardized NPCI compliant UPI Deep Link schema
+      const upiPayLink = `upi://pay?pa=${upiId}&pn=${payeeName}&am=${formattedAmount}&cu=INR&tn=${transactionNote}`;
 
       const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
       const roomCap = parseInt(b.capacity) || 1;
@@ -1854,7 +1862,10 @@
     /* PRINT INVOICE & MANAGE WHATSAPP VISIBILITY */
     function printInvoice(bookingId) {
       const bIndex = state.bookings.findIndex(item => item.id === bookingId);
-      if (bIndex === -1) return;
+      if (bIndex === -1) {
+        alert("Booking details not found!");
+        return;
+      }
 
       const b = state.bookings[bIndex];
       activeModalBooking = b; // Store global reference for WhatsApp sharing
@@ -1959,7 +1970,7 @@
         }
       }
 
-      document.getElementById('inv-booking-id').innerText = b.bookingCode;
+      document.getElementById('inv-booking-id').innerText = b.bookingCode || 'N/A';
       document.getElementById('inv-date').innerText = today;
 
       const fullLocation = [b.address, b.city, b.state, b.country, b.zipCode].filter(Boolean).map(formatTitleCase).join(', ');
@@ -2004,7 +2015,7 @@
           Room ${b.roomNo} Accommodation (${roomCap} ${roomCapLabel}) ${b.hasExtendedCheckout ? '<span class="text-[9px] text-blue-600 block font-normal">(Includes extended stay duration)</span>' : ''}
           ${mealNotesStr}
         </td>
-        <td class="p-2.5 text-center">${b.noOfDays} Days</td>
+        <td class="p-2.5 text-center">${b.noOfDays || 0} Days</td>
         <td class="p-2.5 text-right">₹${(b.perDayPrice || 0).toLocaleString('en-IN')}</td>
         <td class="p-2.5 text-right font-semibold text-slate-800">₹${roomTotal.toLocaleString('en-IN')}</td>
       `;
@@ -2033,7 +2044,7 @@
       const clearDueAmt = b.clearedDue || 0;
 
       document.getElementById('inv-sum-total').innerText = `₹${(b.totalAmount || 0).toLocaleString('en-IN')}`;
-      document.getElementById('inv-sum-advance').innerText = `₹${initialAdv.toLocaleString('en-IN')}`;
+      document.getElementById('inv-sum-advance').innerText = `₹${(initialAdv || 0).toLocaleString('en-IN')}`;
       document.getElementById('inv-sum-due').innerText = `₹${(b.totalDue || 0).toLocaleString('en-IN')}`;
 
       const clearDueRow = document.getElementById('inv-clear-due-row');
