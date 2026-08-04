@@ -592,7 +592,7 @@
               <label class="block font-semibold text-slate-600 mb-0.5">ID Number</label>
               <input type="text" id="cust-id" maxlength="16" pattern="[A-Za-z0-9\s]*" oninput="this.value = this.value.replace(/[^A-Za-z0-9\s]/g, '')" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
             </div>
-            <!-- EDITABLE COUNTRY CODE & GUEST CONTACT NUMBER (LIMIT 10 DIGITS) -->
+            <!-- EDITABLE COUNTRY CODE & GUEST CONTACT NUMBER (OPTIONAL) -->
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Contact No</label>
               <div class="flex gap-1">
@@ -1963,8 +1963,8 @@
       document.getElementById('inv-guest-name').innerText = formatTitleCase(b.name) || 'N/A';
       document.getElementById('inv-guest-address').innerText = `Address: ${fullLocation || 'N/A'}`;
       
-      const fullGuestPhone = `${b.countryCode || '+91'} ${b.contactNo || ''}`.trim();
-      document.getElementById('inv-guest-contact').innerText = `Contact: ${fullGuestPhone || 'N/A'}`;
+      const fullGuestPhone = b.contactNo ? `${b.countryCode || '+91'} ${b.contactNo}`.trim() : '-';
+      document.getElementById('inv-guest-contact').innerText = `Contact: ${fullGuestPhone}`;
       document.getElementById('inv-guest-id').innerText = `ID No: ${b.idNo || 'N/A'}`;
 
       document.getElementById('inv-room').innerText = `Room No: ${b.roomNo}`;
@@ -2637,7 +2637,7 @@
       }
 
       const contactNoVal = document.getElementById('cust-contact').value.trim();
-      if (contactNoVal.length !== 10) {
+      if (contactNoVal && contactNoVal.length !== 10) {
         alert("⚠️ Please provide a valid 10-digit guest contact number.");
         return;
       }
@@ -2971,7 +2971,7 @@
         const tableCap = parseInt(b.capacity) || 1;
         const tableCapLabel = tableCap === 1 ? 'Person' : 'Persons';
         const extraPersonsText = (b.extraPersons && b.extraPersons > 0) ? `<span class="text-amber-700 font-bold block text-[9px]">(+${b.extraPersons} Extra)</span>` : '';
-        const contactDisplay = `${b.countryCode || '+91'} ${b.contactNo || '-'}`.trim();
+        const contactDisplay = b.contactNo ? `${b.countryCode || '+91'} ${b.contactNo}`.trim() : '-';
 
         const tr = document.createElement('tr');
         tr.className = `${statusBgClass} transition border-b border-slate-100`;
