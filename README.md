@@ -1832,7 +1832,7 @@
       document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
 
-    /* WHATSAPP RECEIPT SENDER WITH AUTOMATIC ADVANCE PAYMENT UPI LINK */
+    /* WHATSAPP RECEIPT SENDER WITH AUTOMATIC ADVANCE PAYMENT UPI ID & QR CODE */
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");
@@ -1840,12 +1840,6 @@
       }
 
       const b = activeModalBooking;
-      const advPayment = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
-
-      if (advPayment <= 0) {
-        alert("⚠️ WhatsApp receipt can only be sent if Advance Payment is greater than ₹0!");
-        return;
-      }
 
       let rawCountryCode = b.countryCode ? b.countryCode.replace(/\D/g, '') : '91';
       let phone = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
@@ -1856,12 +1850,10 @@
       }
 
       const fullPhoneNumber = rawCountryCode + phone;
-
-      // Formatting advance amount
-      const formattedAmount = Number(advPayment) % 1 === 0 ? Number(advPayment).toString() : Number(advPayment).toFixed(2);
+      const upiId = "kapil98.ram@okaxis";
       
-      // Automatic UPI payment link targeting kapil98.ram@okaxis without preapproved amount (&am=)
-      const upiPayLink = `upi://pay?pa=kapil98.ram@okaxis&pn=Aniruddha%20Homestay&cu=INR&tn=Advance%20Booking%20Payment%20${b.bookingCode}`;
+      // Dynamic QR Code generation for the UPI ID
+      const upiQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=Aniruddha%20Homestay`)}`;
 
       const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
 
@@ -1875,10 +1867,10 @@
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
         `*Billing Summary:*\n` +
         `• Total Amount: ₹${b.totalAmount}\n` +
-        `• Advance Received: ₹${advPayment}\n` +
         `• Balance Due: ₹${b.totalDue}\n\n` +
-        `*Pay Advance Payment via UPI (₹${formattedAmount}):*\n` +
-        `${upiPayLink}\n\n` +
+        `*UPI Payment Details:*\n` +
+        `• UPI ID: *${upiId}*\n` +
+        `• Scan QR Code to Pay: ${upiQrCodeUrl}\n\n` +
         `We look forward to hosting you! 🏠`;
 
       const encodedMessage = encodeURIComponent(messageText);
@@ -1914,19 +1906,12 @@
       const invBadge = document.getElementById('inv-badge');
       const invIdContainer = document.getElementById('inv-id-container');
 
-      const advPaid = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
-
       // WHATSAPP BUTTON VISIBILITY: ONLY VISIBLE FOR UPCOMING / LIVE BOOKINGS (NOT CLOSED OR INACTIVE)
       if (waBtn) {
         if (isLiveOrUpcoming) {
           waBtn.classList.remove('hidden');
-          if (advPaid > 0) {
-            waBtn.disabled = false;
-            waBtn.title = "Send Receipt via WhatsApp";
-          } else {
-            waBtn.disabled = true;
-            waBtn.title = "WhatsApp Receipt requires Advance Payment > ₹0";
-          }
+          waBtn.disabled = false;
+          waBtn.title = "Send Receipt via WhatsApp";
         } else {
           waBtn.classList.add('hidden'); // Hide for Closed or Inactive status
         }
