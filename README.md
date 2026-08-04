@@ -1832,7 +1832,7 @@
       document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
 
-    /* WHATSAPP RECEIPT SENDER WITH AUTOMATIC ADVANCE PAYMENT UPI ID & QR CODE */
+    /* WHATSAPP RECEIPT SENDER WITH ADVANCED AMOUNT & WITHOUT QR CODE */
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");
@@ -1851,9 +1851,6 @@
 
       const fullPhoneNumber = rawCountryCode + phone;
       const upiId = "kapil98.ram@okaxis";
-      
-      // Dynamic QR Code generation for the UPI ID
-      const upiQrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`upi://pay?pa=${upiId}&pn=Aniruddha%20Homestay`)}`;
 
       const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
 
@@ -1867,10 +1864,10 @@
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
         `*Billing Summary:*\n` +
         `• Total Amount: ₹${b.totalAmount}\n` +
+        `• Advance Amount: ₹${b.advanced}\n` +
         `• Balance Due: ₹${b.totalDue}\n\n` +
         `*UPI Payment Details:*\n` +
-        `• UPI ID: *${upiId}*\n` +
-        `• Scan QR Code to Pay: ${upiQrCodeUrl}\n\n` +
+        `• UPI ID: *${upiId}*\n\n` +
         `We look forward to hosting you! 🏠`;
 
       const encodedMessage = encodeURIComponent(messageText);
