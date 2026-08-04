@@ -792,8 +792,11 @@
           <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: info@businessportal.com</p>
         </div>
         <div class="text-right">
-          <span id="inv-badge" class="inline-block bg-blue-50 text-blue-700 text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase mb-1 border border-blue-100">e-Invoice</span>
-          <p id="inv-id-container" class="text-[10px] text-slate-500">Invoice ID: <strong id="inv-id" class="text-slate-800 font-mono">INV-2026-0000001</strong></p>
+          <!-- E-INVOICE NUMBER & BADGE CONTAINER (HIDDEN IF DUE NOT CLEAR) -->
+          <div id="e-invoice-section">
+            <span id="inv-badge" class="inline-block bg-blue-50 text-blue-700 text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase mb-1 border border-blue-100">e-Invoice</span>
+            <p id="inv-id-container" class="text-[10px] text-slate-500">Invoice ID: <strong id="inv-id" class="text-slate-800 font-mono">INV-2026-0000001</strong></p>
+          </div>
           <p class="text-[10px] text-slate-500">Booking ID: <strong id="inv-booking-id" class="text-blue-600 font-mono">BKG-2026-0000001</strong></p>
           <p class="text-[10px] text-slate-500">Issued On: <strong id="inv-date" class="text-slate-800"></strong></p>
         </div>
@@ -866,7 +869,7 @@
 
       <div class="flex flex-wrap justify-end space-x-2 gap-y-2 pt-2 no-print border-t border-slate-100">
         <button type="button" onclick="closeInvoiceModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Close</button>
-        <!-- SEND VIA WHATSAPP BUTTON (ALWAYS VISIBLE, INACTIVE WHEN CONDITIONS ARE NOT MET) -->
+        <!-- SEND VIA WHATSAPP BUTTON (ONLY AVAILABLE IN UPCOMING & LIVE) -->
         <button type="button" id="inv-whatsapp-btn" onclick="sendReceiptViaWhatsApp()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1.5 transition cursor-pointer">
           <i class="fa-brands fa-whatsapp text-sm"></i> Send receipt via WhatsApp
         </button>
@@ -1884,7 +1887,7 @@
       window.open(whatsappUrl, '_blank');
     }
 
-    /* PRINT INVOICE & MANAGE WHATSAPP INACTIVITY STATE */
+    /* PRINT INVOICE & MANAGE WHATSAPP AVAILABILITY AND E-INVOICE VISIBILITY */
     function printInvoice(bookingId) {
       const bIndex = state.bookings.findIndex(item => item.id === bookingId);
       if (bIndex === -1) {
@@ -1900,22 +1903,44 @@
       const readOnlyNotice = document.getElementById('inv-readonly-notice');
       const invPrintBtn = document.getElementById('inv-print-btn');
       const waBtn = document.getElementById('inv-whatsapp-btn');
-      const invBadge = document.getElementById('inv-badge');
+      const eInvoiceSection = document.getElementById('e-invoice-section');
       const invIdContainer = document.getElementById('inv-id-container');
 
-      // WHATSAPP BUTTON INACTIVITY LOGIC: Always visible, inactive if advanced payment <= 0 or contact not 10 digits
-      if (waBtn) {
-        waBtn.classList.remove('hidden'); // Do not hide
-        const contactDigits = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
-        const hasValidContact = contactDigits.length === 10;
-        const hasAdvanced = (parseFloat(b.advanced) || 0) > 0;
+      const now = new Date().getTime();
+      const cIn = new Date(b.checkIn).getTime();
+      const cOut = getEffectiveCheckoutTime(b);
+      const isClosed = now > cOut;
+      const isInactive = b.inactive;
+      const isLive = now >= cIn && now <= cOut;
+      const isUpcoming = now < cIn;
 
-        if (hasValidContact && hasAdvanced) {
-          waBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          waBtn.title = "Send Receipt via WhatsApp";
+      // RULE 1: Send via WhatsApp button ONLY available in upcoming & live not for closed or inactive
+      if (waBtn) {
+        if (isClosed || isInactive) {
+          waBtn.classList.add('hidden');
         } else {
-          waBtn.classList.add('opacity-50', 'cursor-not-allowed');
-          waBtn.title = "Inactive: Advance payment must be > 0 and contact number must be 10 digits.";
+          waBtn.classList.remove('hidden');
+          const contactDigits = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
+          const hasValidContact = contactDigits.length === 10;
+          const hasAdvanced = (parseFloat(b.advanced) || 0) > 0;
+
+          if (hasValidContact && hasAdvanced) {
+            waBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            waBtn.title = "Send Receipt via WhatsApp";
+          } else {
+            waBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            waBtn.title = "Inactive: Advance payment must be > 0 and contact number must be 10 digits.";
+          }
+        }
+      }
+
+      // RULE 2: If due not clear then hide E-invoice number from receipt/invoice only show booking id details, If due clear then unhide E-invoice number.
+      const hasDue = (b.totalDue || 0) > 0;
+      if (eInvoiceSection) {
+        if (hasDue) {
+          eInvoiceSection.classList.add('hidden');
+        } else {
+          eInvoiceSection.classList.remove('hidden');
         }
       }
 
