@@ -592,12 +592,12 @@
               <label class="block font-semibold text-slate-600 mb-0.5">ID Number</label>
               <input type="text" id="cust-id" maxlength="16" pattern="[A-Za-z0-9\s]*" oninput="this.value = this.value.replace(/[^A-Za-z0-9\s]/g, '')" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500">
             </div>
-            <!-- EDITABLE COUNTRY CODE & GUEST CONTACT NUMBER -->
+            <!-- EDITABLE COUNTRY CODE & GUEST CONTACT NUMBER (LIMIT 10 DIGITS) -->
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Contact No</label>
               <div class="flex gap-1">
                 <input type="text" id="cust-country-code" value="+91" placeholder="+91" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-center text-blue-700">
-                <input type="text" id="cust-contact" maxlength="12" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500">
+                <input type="text" id="cust-contact" maxlength="10" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500">
               </div>
             </div>
             <div class="sm:col-span-2">
@@ -866,7 +866,7 @@
 
       <div class="flex flex-wrap justify-end space-x-2 gap-y-2 pt-2 no-print border-t border-slate-100">
         <button type="button" onclick="closeInvoiceModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Close</button>
-        <!-- SEND VIA WHATSAPP BUTTON (VISIBLE ONLY FOR UPCOMING/LIVE BOOKINGS) -->
+        <!-- SEND VIA WHATSAPP BUTTON -->
         <button type="button" id="inv-whatsapp-btn" onclick="sendReceiptViaWhatsApp()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
           <i class="fa-brands fa-whatsapp text-sm"></i> Send receipt via WhatsApp
         </button>
@@ -1844,8 +1844,13 @@
       let rawCountryCode = b.countryCode ? b.countryCode.replace(/\D/g, '') : '91';
       let phone = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
       
-      if (!phone) {
-        alert("⚠️ Please provide a valid guest contact number to send WhatsApp receipt.");
+      if (!phone || phone.length !== 10) {
+        alert("⚠️ Please provide a valid 10-digit guest contact number to send WhatsApp receipt.");
+        return;
+      }
+
+      if (!(parseFloat(b.advanced) > 0)) {
+        alert("⚠️ Advanced payment must be greater than 0 to send WhatsApp receipt.");
         return;
       }
 
@@ -1903,14 +1908,19 @@
       const invBadge = document.getElementById('inv-badge');
       const invIdContainer = document.getElementById('inv-id-container');
 
-      // WHATSAPP BUTTON VISIBILITY: ONLY VISIBLE FOR UPCOMING / LIVE BOOKINGS (NOT CLOSED OR INACTIVE)
+      // WHATSAPP BUTTON ACTIVATION LOGIC:
+      // Activated only if advanced payment > 0 and 10-digit guest contact number provided (and status allows)
       if (waBtn) {
-        if (isLiveOrUpcoming) {
+        const contactDigits = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
+        const hasValidContact = contactDigits.length === 10;
+        const hasAdvanced = (parseFloat(b.advanced) || 0) > 0;
+
+        if (isLiveOrUpcoming && hasValidContact && hasAdvanced) {
           waBtn.classList.remove('hidden');
           waBtn.disabled = false;
           waBtn.title = "Send Receipt via WhatsApp";
         } else {
-          waBtn.classList.add('hidden'); // Hide for Closed or Inactive status
+          waBtn.classList.add('hidden'); // Hidden or disabled if conditions are not met
         }
       }
 
@@ -2687,6 +2697,12 @@
         return;
       }
 
+      const contactNoVal = document.getElementById('cust-contact').value.trim();
+      if (contactNoVal.length !== 10) {
+        alert("⚠️ Please provide a valid 10-digit guest contact number.");
+        return;
+      }
+
       const today = new Date().toISOString().split('T')[0];
       const inDate = document.getElementById('cust-checkin-date').value;
       const outDate = document.getElementById('cust-checkout-date').value;
@@ -2854,7 +2870,7 @@
         zipCode: document.getElementById('cust-zip').value.trim(),
         idNo: document.getElementById('cust-id').value.trim(),
         countryCode: countryCodeVal,
-        contactNo: document.getElementById('cust-contact').value.trim(),
+        contactNo: contactNoVal,
         idProofBase64: document.getElementById('cust-id-file-base64').value,
         idProofFileName: document.getElementById('cust-id-file-name').value,
         roomNo: roomNo,
