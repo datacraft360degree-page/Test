@@ -168,7 +168,7 @@
 
   <script>
     // Set deployment web app URL here
-    const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ0apWBEOs8VaSYg86bCBnDjruKF163bKyH6T13fQeBloPZXbgA7fWUH9FvwgvLEtd/exec";
 
     // Application Global State
     let state = {
