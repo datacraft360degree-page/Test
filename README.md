@@ -11,6 +11,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google API Client Libraries -->
+  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
   <style>
     /* Samsung One UI Smooth Styling & Compact Scrollbar */
     body {
@@ -262,6 +267,9 @@
         </button>
         <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+        </button>
+        <button onclick="handleAuthClick()" id="btn-google-sync" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
+          <i class="fa-brands fa-google text-[10px]"></i> Sync Sheet
         </button>
         <button onclick="openExportModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-solid fa-file-excel text-[10px]"></i> Export
@@ -913,6 +921,105 @@
   </div>
 
   <script>
+    // --- GOOGLE SHEETS API CONFIGURATION ---
+    const CLIENT_ID = '279874048891-0djgo0gjnlcnr3j59vh8jk6611vsrcu9.apps.googleusercontent.com';
+    const API_KEY = 'API key 1';
+    const SPREADSHEET_ID = 'https://docs.google.com/spreadsheets/d/1d21x3jicl-ukU6nUEbWtVpu7xNij70xToaYbCjM3VUk/edit?gid';
+    const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
+
+    function gapiLoaded() {
+      gapi.load('client', intializeGapiClient);
+    }
+
+    async function intializeGapiClient() {
+      await gapi.client.init({
+        apiKey: API_KEY,
+        discoveryDocs: [DISCOVERY_DOC],
+      });
+      gapiInited = true;
+    }
+
+    function gisLoaded() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // defined at request time
+      });
+      gisInited = true;
+    }
+
+    function handleAuthClick() {
+      if (!gapiInited || !gisInited) {
+        alert("Google API scripts are still loading. Please try again in a moment.");
+        return;
+      }
+      
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          throw (resp);
+        }
+        await syncToGoogleSheet();
+      };
+
+      if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({prompt: 'consent'});
+      } else {
+        tokenClient.requestAccessToken({prompt: ''});
+      }
+    }
+
+    async function syncToGoogleSheet() {
+      if (!state.bookings || state.bookings.length === 0) {
+        alert("No booking records available to sync!");
+        return;
+      }
+
+      try {
+        const exportData = state.bookings.map(b => [
+          b.bookingCode || "-",
+          b.name || "-",
+          b.contactNo || "-",
+          b.roomNo || "-",
+          b.checkIn ? formatDateTime(b.checkIn) : "-",
+          b.checkOut ? formatDateTime(b.checkOut) : "-",
+          b.perDayPrice || 0,
+          b.noOfDays || 0,
+          b.totalAmount || 0,
+          b.advanced || 0,
+          b.totalDue || 0,
+          b.inactive ? "Inactive" : "Active"
+        ]);
+
+        const headers = ["Booking ID", "Guest Name", "Contact", "Room No", "Check-In", "Check-Out", "Price/Day", "Days", "Total Amount", "Advance Paid", "Balance Due", "Status"];
+        const values = [headers, ...exportData];
+
+        const body = { values: values };
+        
+        await gapi.client.sheets.spreadsheets.values.update({
+          spreadsheetId: SPREADSHEET_ID,
+          range: 'Sheet1!A1',
+          valueInputOption: 'USER_ENTERED',
+          resource: body
+        });
+        
+        const toast = document.getElementById('toast');
+        const msg = document.getElementById('toast-message');
+        msg.innerText = 'Successfully synced to Google Sheets!';
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+        
+      } catch (err) {
+        console.error("Google Sheets Sync Error:", err);
+        alert("Error syncing to Google Sheets. Check console for details.");
+      }
+    }
+    // ----------------------------------------
+
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000; // 1 Hour Buffer in Milliseconds
     let activeModalBooking = null; // Currently opened invoice booking reference
 
@@ -3416,3 +3523,4 @@
   </script>
 </body>
 </html>
+
