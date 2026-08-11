@@ -1,4 +1,4 @@
-<Aniruddha Homestay>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2909,15 +2909,34 @@
       // 1. Collect form data
       const bookingData = {
         id: document.getElementById('editBookingId').value, // Unique Booking ID
-        guestName: document.getElementById('editGuestName').value,
-        phone: document.getElementById('editPhone').value,
-        roomNo: document.getElementById('editRoomNo').value,
-        checkIn: document.getElementById('editCheckIn').value,
-        checkOut: document.getElementById('editCheckOut').value,
-        amount: document.getElementById('editAmount').value,
-        status: document.getElementById('editStatus').value,
-        paymentMode: document.getElementById('editPaymentMode').value
-      };
+    invoiceId: document.getElementById('edit_invoiceId').value,
+    status: document.getElementById('edit_status').value,
+    guestName: document.getElementById('edit_guestName').value,
+    contactNo: document.getElementById('edit_contactNo').value,
+    idNumber: document.getElementById('edit_idNumber').value,
+    attachedId: document.getElementById('edit_attachedId').value,
+    address: document.getElementById('edit_address').value,
+    city: document.getElementById('edit_city').value,
+    state: document.getElementById('edit_state').value,
+    country: document.getElementById('edit_country').value,
+    pinCode: document.getElementById('edit_pinCode').value,
+    roomNo: document.getElementById('edit_roomNo').value,
+    capacity: parseInt(document.getElementById('edit_capacity').value) || 1,
+    extraPersons: parseInt(document.getElementById('edit_extraPersons').value) || 0,
+    extraPersonJoined: document.getElementById('edit_extraPersonJoined').value,
+    extraPersonCheckout: document.getElementById('edit_extraPersonCheckout').value,
+    agentInfo: document.getElementById('edit_agentInfo').value,
+    checkIn: document.getElementById('edit_checkIn').value,
+    checkOut: document.getElementById('edit_checkOut').value,
+    extendedCheckOut: document.getElementById('edit_extendedCheckout').value,
+    stayDays: parseInt(document.getElementById('edit_stayDays').value) || 1,
+    pricePerDay: parseFloat(document.getElementById('edit_pricePerDay').value) || 0,
+    foodOrders: parseFloat(document.getElementById('edit_foodOrders').value) || 0,
+    totalAmount: parseFloat(document.getElementById('edit_totalAmount').value) || 0,
+    advancePaid: parseFloat(document.getElementById('edit_advancePaid').value) || 0,
+    clearedDue: parseFloat(document.getElementById('edit_clearedDue').value) || 0,
+    balanceDue: parseFloat(document.getElementById('edit_balanceDue').value) || 0
+  };
 
       // 2. Ensure Google Sheet Web App URL is defined
       const GOOGLE_SHEET_URL = localStorage.getItem('googleSheetUrl') || "https://script.google.com/macros/s/AKfycbwdntzxByvN73YUv3WPj1B3owXWT1y61b_dKFF9z2GEVYjG237-bUQPvqNUY67CruM/exec";
