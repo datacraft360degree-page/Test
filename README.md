@@ -920,10 +920,57 @@
 
   <script>
 
-// Function to show the confirmation modal
-function promptWipeOutData() {
-  document.getElementById('wipe-data-modal').classList.remove('hidden');
+// 1. Function called ONLY when the header "Wipe Out Data" button is clicked
+function promptWipeOutData(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  // Ensure modal is shown only upon explicit user click
+  const modal = document.getElementById('wipe-data-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+  }
 }
+
+// 2. Function to cancel and close the Wipe Data modal
+function closeWipeDataModal() {
+  const modal = document.getElementById('wipe-data-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+// 3. Explicit Wipe Execution - NEVER called automatically
+function executeWipeOutData() {
+  // Confirm action standard check
+  const confirmFirst = confirm("CRITICAL WARNING: Are you sure you want to permanently delete ALL bookings and settings?");
+  if (!confirmFirst) return;
+
+  try {
+    // Clear LocalStorage
+    localStorage.clear();
+
+    // Reset in-memory data structures
+    if (typeof bookings !== 'undefined') bookings = [];
+    if (typeof masterRooms !== 'undefined') masterRooms = [];
+    if (typeof masterAgents !== 'undefined') masterAgents = [];
+
+    // Hide Modal
+    closeWipeDataModal();
+
+    // Show Notification
+    alert("All saved data has been wiped successfully.");
+
+    // Refresh UI or reload page safely
+    location.reload();
+  } catch (error) {
+    console.error("Error during data wipe:", error);
+    alert("Failed to wipe data properly.");
+  }
+}
+
 
 // Function to close the modal
 function closeWipeDataModal() {
@@ -3637,31 +3684,5 @@ async function saveEditedBooking(event) {
       if (box) box.classList.add('hidden');
     }
   </script>
-
-<div id="wipe-data-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
-  <div class="bg-white rounded-3xl shadow-2xl border border-rose-100 max-w-sm w-full p-6 space-y-4 text-center">
-    <div class="bg-rose-100 text-rose-600 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-sm">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-    </div>
-    
-    <div>
-      <h3 class="text-sm font-bold text-slate-900">Wipe All Saved Data?</h3>
-      <p class="text-[11px] text-slate-500 mt-1">
-        This action will permanently delete <strong class="text-rose-600">ALL bookings, guest records, and custom settings</strong> from both Local Storage and connected Google Sheets.
-      </p>
-      <p class="text-[10px] text-slate-400 mt-1 italic">This operation cannot be undone!</p>
-    </div>
-
-    <div class="flex space-x-2 pt-2">
-      <button type="button" onclick="closeWipeDataModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-2xl text-xs transition">
-        Cancel
-      </button>
-      <button type="button" onclick="confirmWipeOutData()" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-2xl shadow-sm transition text-xs flex items-center justify-center gap-1.5">
-        <i class="fa-solid fa-trash-can text-[11px]"></i> Yes, Wipe Data
-      </button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
