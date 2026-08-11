@@ -725,7 +725,8 @@
 
               <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Total Capacity</label>
-                <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" readonly />
+                <!-- Removed readonly here for editability[cite: 1] -->
+                <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
               </div>
             </div>
 
@@ -825,21 +826,17 @@
           <div id="food-orders-container" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- CAB FARE SECTION -->
-        <div id="sec-cab-fare" class="bg-indigo-50/40 p-3 rounded-2xl border border-indigo-100 space-y-2.5 transition-all">
-          <h4 class="text-[9px] font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
-            <i class="fa-solid fa-taxi text-indigo-600"></i> Cab Fare Details
-          </h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare per trip (₹)</label>
-              <input type="number" id="cust-cab-fare" value="0" min="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 font-bold text-indigo-700" />
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Remark</label>
-              <input type="text" id="cust-cab-remark" placeholder="e.g. Airport drop" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500" />
-            </div>
+        <!-- CAB FARE SECTION[cite: 1] -->
+        <div id="sec-cab-fare" class="bg-indigo-50/40 p-3 rounded-2xl border border-indigo-200/80 space-y-2.5 transition-all">
+          <div class="flex justify-between items-center">
+            <h4 class="text-[9px] font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-taxi text-indigo-600"></i> Cab Fare Details
+            </h4>
+            <button type="button" id="btn-add-cab-trip" onclick="addCabTripRow()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1 transition shadow-sm">
+              <i class="fa-solid fa-plus text-[9px]"></i> Add Cab Trip
+            </button>
           </div>
+          <div id="cab-trips-container" class="space-y-2 max-h-40 overflow-y-auto pr-1 mt-2"></div>
         </div>
 
         <!-- Billing Calculation Box -->
@@ -1064,7 +1061,7 @@ async function executeGoogleSheetWipe() {
 }
     
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwFD7ASOkJ1XnRUrH9pEiTz4Lolm8zwaKOCr2nkLN__dvR1_51zWGxIJ1ZlV82X2r2O/exec"; // <-- Replace this with your URL from Step 1
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwFD7ASOkJ1XnRUrH9pEiTz4Lolm8zwaKOCr2nkLN__dvR1_51zWGxIJ1ZlV82X2r2O/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000; // 1 Hour Buffer in Milliseconds
     let activeModalBooking = null; // Currently opened invoice booking reference
@@ -1577,6 +1574,17 @@ async function executeGoogleSheetWipe() {
             return `${f.foodDesc || 'Food'} (${pCount} ${pLabel} - ₹${f.foodCharge || 0})`;
           }).join(", ");
         }
+        
+        // Cab Trips Processing[cite: 1]
+        let cabSummary = "";
+        let totalCabFare = 0;
+        if (b.cabTrips && b.cabTrips.length > 0) {
+          totalCabFare = b.cabTrips.reduce((acc, t) => acc + (t.rate || 0), 0);
+          cabSummary = b.cabTrips.map(t => `${t.tripName} (₹${t.rate || 0}) - ${t.remark || 'No remark'}`).join(", ");
+        } else if (b.cabFare !== undefined) {
+           totalCabFare = b.cabFare || 0;
+           cabSummary = b.cabRemark || 'No remark';
+        }
 
         const fullContactNo = `${b.countryCode || '+91'} ${b.contactNo || ''}`.trim();
 
@@ -1605,8 +1613,8 @@ async function executeGoogleSheetWipe() {
           "Stay Days": b.noOfDays || 0,
           "Price / Day": b.perDayPrice || 0,
           "Food Orders": foodSummary || "None",
-          "Cab Fare": b.cabFare || 0,
-          "Cab Remark": b.cabRemark || "-",
+          "Cab Fare Details": cabSummary || "-",
+          "Total Cab Fare": totalCabFare || 0,
           "Total Amount": b.totalAmount || 0,
           "Advance Paid": b.advanced || 0,
           "Cleared Due": b.clearedDue || 0,
@@ -2347,18 +2355,24 @@ async function executeGoogleSheetWipe() {
         });
       }
       
-      if (b.cabFare && b.cabFare > 0) {
-        const cabTr = document.createElement('tr');
-        cabTr.innerHTML = `
-          <td class="p-2.5 font-semibold text-indigo-900">
-            Cab Fare
-            ${b.cabRemark ? `<span class="text-[9px] text-indigo-700 font-normal block">Remark: ${b.cabRemark}</span>` : ''}
-          </td>
-          <td class="p-2.5 text-center">1 Trip</td>
-          <td class="p-2.5 text-right">₹${(b.cabFare || 0).toLocaleString('en-IN')}</td>
-          <td class="p-2.5 text-right font-semibold text-indigo-900">₹${(b.cabFare || 0).toLocaleString('en-IN')}</td>
-        `;
-        tbody.appendChild(cabTr);
+      // Cab Trips Processing in Invoice[cite: 1]
+      if (b.cabTrips && b.cabTrips.length > 0) {
+        b.cabTrips.forEach(trip => {
+          if (trip.rate > 0) {
+             const cabTr = document.createElement('tr');
+             const dtFormat = trip.dateTime ? ` (${formatDateTime(trip.dateTime)})` : '';
+             cabTr.innerHTML = `
+              <td class="p-2.5 font-semibold text-indigo-900">
+                Cab Fare - ${trip.tripName}${dtFormat}
+                ${trip.remark ? `<span class="text-[9px] text-indigo-700 font-normal block">Remark: ${trip.remark}</span>` : ''}
+              </td>
+              <td class="p-2.5 text-center">1 Trip</td>
+              <td class="p-2.5 text-right">₹${(trip.rate || 0).toLocaleString('en-IN')}</td>
+              <td class="p-2.5 text-right font-semibold text-indigo-900">₹${(trip.rate || 0).toLocaleString('en-IN')}</td>
+            `;
+            tbody.appendChild(cabTr);
+          }
+        });
       }
 
       const initialAdv = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
@@ -2482,6 +2496,60 @@ async function executeGoogleSheetWipe() {
       }
     }
 
+    // Cab Fare Dynamics[cite: 1]
+    function addCabTripRow(rate = 0, dateStr = '', timeStr = '', remark = '', disabled = false) {
+      const container = document.getElementById('cab-trips-container');
+      const tripCount = container.children.length + 1;
+      const itemRow = document.createElement('div');
+      itemRow.className = "cab-trip-row grid grid-cols-1 sm:grid-cols-12 gap-1.5 items-end bg-white p-2.5 rounded-2xl border border-indigo-200/80 shadow-xs";
+
+      const disabledAttr = disabled ? 'disabled' : '';
+      const bgClass = disabled ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white';
+
+      if (!dateStr) {
+         const inDate = document.getElementById('cust-checkin-date')?.value;
+         if (inDate) dateStr = inDate;
+      }
+      if (!timeStr) timeStr = '12:00';
+
+      itemRow.innerHTML = `
+        <div class="sm:col-span-2">
+          <label class="block font-semibold text-slate-600 mb-0.5">Trip Name</label>
+          <input type="text" value="Trip ${tripCount}" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-slate-500 font-bold cursor-not-allowed text-[10px]">
+        </div>
+        <div class="sm:col-span-4">
+          <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-regular fa-clock text-indigo-600 mr-1"></i> Date & Time</label>
+          <div class="flex gap-1">
+            <input type="date" value="${dateStr}" ${disabledAttr} class="cust-cab-date w-3/5 ${bgClass} border border-slate-200 rounded-xl px-1.5 py-1 focus:outline-none focus:border-indigo-500 font-medium text-[10px]">
+            <input type="time" value="${timeStr}" ${disabledAttr} class="cust-cab-time w-2/5 ${bgClass} border border-slate-200 rounded-xl px-1 py-1 focus:outline-none focus:border-indigo-500 font-medium text-[10px]">
+          </div>
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block font-semibold text-slate-600 mb-0.5">Rate/Trip (₹)</label>
+          <input type="number" value="${rate}" min="0" ${disabledAttr} oninput="calculateModalBilling()" class="cust-cab-rate w-full ${bgClass} border border-slate-200 rounded-xl px-2 py-1 focus:outline-none focus:border-indigo-500 font-bold text-indigo-700">
+        </div>
+        <div class="sm:col-span-3">
+          <label class="block font-semibold text-slate-600 mb-0.5">Remark</label>
+          <input type="text" value="${remark}" ${disabledAttr} placeholder="e.g. Airport drop" class="cust-cab-remark w-full ${bgClass} border border-slate-200 rounded-xl px-2.5 py-1 focus:outline-none focus:border-indigo-500 text-[10px]">
+        </div>
+        <div class="sm:col-span-1 flex justify-end">
+          <button type="button" onclick="removeCabTripRow(this)" ${disabledAttr} class="text-rose-500 hover:text-rose-700 p-1.5 ${disabled ? 'hidden' : ''}" title="Remove Trip">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      `;
+      container.appendChild(itemRow);
+      calculateModalBilling();
+    }
+
+    function removeCabTripRow(btn) {
+      const row = btn.closest('.cab-trip-row');
+      if (row) {
+        row.remove();
+        calculateModalBilling();
+      }
+    }
+
     function setInputEnabled(elem, isEnabled) {
       if (!elem) return;
       elem.disabled = !isEnabled;
@@ -2548,6 +2616,7 @@ async function executeGoogleSheetWipe() {
       if (clearBillInput) clearBillInput.value = 0;
 
       document.getElementById('food-orders-container').innerHTML = '';
+      document.getElementById('cab-trips-container').innerHTML = ''; // Cab dynamics reset
       populateAgentDropdown();
 
       setSectionEditability('sec-guest-info', !isClosedAndWithin3Days);
@@ -2609,6 +2678,16 @@ async function executeGoogleSheetWipe() {
           addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       }
+      
+      const addCabBtn = document.getElementById('btn-add-cab-trip');
+      if (addCabBtn) {
+        addCabBtn.disabled = isClosedAndWithin3Days;
+        if (isClosedAndWithin3Days) {
+          addCabBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      }
 
       setSectionEditability('sec-cab-fare', !isClosedAndWithin3Days);
       setSectionEditability('sec-billing-summary', true);
@@ -2663,6 +2742,7 @@ async function executeGoogleSheetWipe() {
         
         populateRoomDropdown(b.roomNo);
         populateAgentDropdown(b.agentInfo);
+        document.getElementById('cust-capacity').value = b.capacity || 1;
 
         if (extraPersonsInput) extraPersonsInput.value = b.extraPersons || 0;
         
@@ -2720,8 +2800,14 @@ async function executeGoogleSheetWipe() {
           });
         }
         
-        document.getElementById('cust-cab-fare').value = b.cabFare || 0;
-        document.getElementById('cust-cab-remark').value = b.cabRemark || '';
+        // Cab Trips Processing[cite: 1]
+        if (b.cabTrips && b.cabTrips.length > 0) {
+          b.cabTrips.forEach(trip => {
+            addCabTripRow(trip.rate || 0, trip.dateStr || '', trip.timeStr || '', trip.remark || '', isClosedAndWithin3Days);
+          });
+        } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
+          addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedAndWithin3Days);
+        }
 
         document.getElementById('cust-price').value = b.perDayPrice;
         
@@ -2768,9 +2854,6 @@ async function executeGoogleSheetWipe() {
           mealsChkBox.disabled = false;
         }
 
-        document.getElementById('cust-cab-fare').value = 0;
-        document.getElementById('cust-cab-remark').value = '';
-
         document.getElementById('cust-price').value = 1200;
         
         const advanceElem = document.getElementById('cust-advance');
@@ -2808,7 +2891,10 @@ async function executeGoogleSheetWipe() {
       document.getElementById('booking-modal').classList.add('hidden');
     }
 
+    // Extra Person Date Validations[cite: 1]
     function handleExtraPersonDatesChange() {
+      const mainInDate = document.getElementById('cust-checkin-date')?.value;
+      const mainInTime = document.getElementById('cust-checkin-time')?.value || '12:00';
       const mainOutDate = document.getElementById('cust-checkout-date')?.value;
       const mainOutTime = document.getElementById('cust-checkout-time')?.value || '11:00';
       const hasExt = document.getElementById('cust-has-extended-checkout')?.checked;
@@ -2824,9 +2910,22 @@ async function executeGoogleSheetWipe() {
           latestOutT = extT || '12:00';
         }
       }
-
+      
+      const epInDateElem = document.getElementById('cust-extra-person-date');
+      const epInTimeElem = document.getElementById('cust-extra-person-time');
       const epOutDateElem = document.getElementById('cust-extra-person-out-date');
       const epOutTimeElem = document.getElementById('cust-extra-person-out-time');
+
+      if (epInDateElem && epInDateElem.value && mainInDate) {
+        const epInFull = new Date(`${epInDateElem.value}T${epInTimeElem.value || '12:00'}`);
+        const mainInFull = new Date(`${mainInDate}T${mainInTime}`);
+
+        if (epInFull < mainInFull) {
+          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(mainInFull.toISOString())}).`);
+          epInDateElem.value = mainInDate;
+          epInTimeElem.value = mainInTime;
+        }
+      }
 
       if (epOutDateElem && epOutDateElem.value && latestOutD) {
         const epOutFull = new Date(`${epOutDateElem.value}T${epOutTimeElem.value || '11:00'}`);
@@ -2963,7 +3062,11 @@ async function executeGoogleSheetWipe() {
         foodTotalCharge += parseFloat(input.value) || 0;
       });
       
-      const cabFare = parseFloat(document.getElementById('cust-cab-fare')?.value) || 0;
+      // Calculate Cab Trips Total[cite: 1]
+      let cabFare = 0;
+      document.querySelectorAll('.cust-cab-rate').forEach(input => {
+        cabFare += parseFloat(input.value) || 0;
+      });
 
       const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
 
@@ -3011,6 +3114,8 @@ async function executeGoogleSheetWipe() {
       const today = new Date().toISOString().split('T')[0];
       const inDate = document.getElementById('cust-checkin-date').value;
       const outDate = document.getElementById('cust-checkout-date').value;
+      const inTime = document.getElementById('cust-checkin-time').value || '00:00';
+      const outTime = document.getElementById('cust-checkout-time').value || '00:00';
 
       const bookingModalId = document.getElementById('modal-booking-id').value;
 
@@ -3027,9 +3132,6 @@ async function executeGoogleSheetWipe() {
         alert("⚠️ Please select at least one Room No.");
         return;
       }
-
-      const inTime = document.getElementById('cust-checkin-time').value || '00:00';
-      const outTime = document.getElementById('cust-checkout-time').value || '00:00';
 
       const checkIn = `${inDate}T${inTime}`;
       const checkOut = `${outDate}T${outTime}`;
@@ -3063,6 +3165,7 @@ async function executeGoogleSheetWipe() {
 
       const latestCheckoutStr = (hasExtendedCheckout && extendedCheckOut) ? extendedCheckOut : checkOut;
       const latestCheckoutDt = new Date(latestCheckoutStr);
+      const mainCheckInDt = new Date(checkIn);
 
       if (extraPersons > 0) {
         const epDate = document.getElementById('cust-extra-person-date')?.value;
@@ -3080,6 +3183,12 @@ async function executeGoogleSheetWipe() {
 
         const epInDt = new Date(extraPersonJoined);
         let epOutDt = new Date(extraPersonOut);
+        
+        // Strict Extra Person Constraints[cite: 1]
+        if (epInDt < mainCheckInDt) {
+           alert(`⚠️ Additional Person Check-In date & time cannot be earlier than the main Check-In date & time (${formatDateTime(checkIn)}).`);
+           return;
+        }
 
         if (epOutDt > latestCheckoutDt) {
           alert(`⚠️ Additional Person Check-Out date & time cannot exceed main/extended Check-Out date & time (${formatDateTime(latestCheckoutStr)}).`);
@@ -3129,6 +3238,27 @@ async function executeGoogleSheetWipe() {
         alert(`❌ Extra Food Order Validation Error!\n\nAll Extra Food order times must be strictly after 15 minutes of Check-In (${minStr}) and at least 30 minutes before Check-Out / Extended Check-Out (${maxStr}).`);
         return;
       }
+      
+      // Save Cab Trips Mapping[cite: 1]
+      const cabTripsList = [];
+      document.querySelectorAll('.cab-trip-row').forEach((row, index) => {
+        const rate = parseFloat(row.querySelector('.cust-cab-rate').value) || 0;
+        const dateVal = row.querySelector('.cust-cab-date').value || '';
+        const timeVal = row.querySelector('.cust-cab-time').value || '';
+        const remark = row.querySelector('.cust-cab-remark').value || '';
+        const dt = (dateVal && timeVal) ? `${dateVal}T${timeVal}` : '';
+
+        if (rate > 0 || remark) {
+          cabTripsList.push({
+            tripName: `Trip ${index + 1}`,
+            dateStr: dateVal,
+            timeStr: timeVal,
+            dateTime: dt,
+            rate: rate,
+            remark: remark
+          });
+        }
+      });
 
       const effectiveCheckout = (hasExtendedCheckout && extendedCheckOut) ? extendedCheckOut : checkOut;
       const newIn = new Date(checkIn).getTime();
@@ -3182,8 +3312,6 @@ async function executeGoogleSheetWipe() {
       const totalAmt = parseFloat(document.getElementById('cust-total').value) || 0;
       const initialAdvAmt = parseFloat(document.getElementById('cust-advance').getAttribute('data-initial-adv')) || parseFloat(document.getElementById('cust-advance').value) || 0;
       const clearedDueAmt = parseFloat(document.getElementById('cust-clear-bill').value) || 0;
-      const cabFareVal = parseFloat(document.getElementById('cust-cab-fare').value) || 0;
-      const cabRemarkVal = document.getElementById('cust-cab-remark').value.trim();
 
       const totalPaid = initialAdvAmt + clearedDueAmt;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
@@ -3218,8 +3346,7 @@ async function executeGoogleSheetWipe() {
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         foodOrders: foodOrdersList,
-        cabFare: cabFareVal,
-        cabRemark: cabRemarkVal,
+        cabTrips: cabTripsList,
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
         clearedDue: clearedDueAmt,
@@ -3342,9 +3469,17 @@ async function executeGoogleSheetWipe() {
           }
         }
         
+        // Dynamic Cab rendering based on Array length[cite: 1]
         let cabSummaryHtml = '';
-        if (b.cabFare && b.cabFare > 0) {
-          cabSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-indigo-800 font-semibold'}"><i class="fa-solid fa-taxi text-[8px] mr-0.5"></i>Cab: +₹${b.cabFare}</div>`;
+        let totalCab = 0;
+        if (b.cabTrips && b.cabTrips.length > 0) {
+            totalCab = b.cabTrips.reduce((acc, t) => acc + (t.rate || 0), 0);
+        } else if (b.cabFare > 0) {
+            totalCab = b.cabFare; 
+        }
+        
+        if (totalCab > 0) {
+          cabSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-indigo-800 font-semibold'}"><i class="fa-solid fa-taxi text-[8px] mr-0.5"></i>Cab: +₹${totalCab}</div>`;
         }
 
         const printOnClick = `printInvoice('${b.id}')`;
