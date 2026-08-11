@@ -255,22 +255,27 @@
       </nav>
 
       <!-- Action Buttons -->
-      <div class="flex items-center space-x-1.5">
-        <button onclick="openAlertModal()" title="View Alerts" class="relative bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-bell text-[10px]"></i> Alerts
-          <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
-        </button>
-        <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-        </button>
-        <button onclick="openExportModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-file-excel text-[10px]"></i> Export
-        </button>
-        <button onclick="logoutUser()" title="Logout" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-right-from-bracket text-[10px]"></i> Logout
-        </button>
-      </div>
-    </div>
+     <div class="flex items-center space-x-1.5">
+  <button onclick="openAlertModal()" title="View Alerts" class="relative bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
+    <i class="fa-solid fa-bell text-[10px]"></i> Alerts
+    <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
+  </button>
+  <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
+    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+  </button>
+  <button onclick="openExportModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
+    <i class="fa-solid fa-file-excel text-[10px]"></i> Export
+  </button>
+
+  <button onclick="promptWipeOutData()" title="Clear All Data & Reset" class="bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition shadow-xs">
+    <i class="fa-solid fa-trash-arrow-up text-[10px]"></i> Wipe Out Data
+  </button>
+
+  <button onclick="logoutUser()" title="Logout" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
+    <i class="fa-solid fa-right-from-bracket text-[10px]"></i> Logout
+  </button>
+</div>
+
   </header>
 
   <!-- Notification Toast -->
@@ -913,6 +918,87 @@
   </div>
 
   <script>
+
+// Function to show the confirmation modal
+function promptWipeOutData() {
+  document.getElementById('wipe-data-modal').classList.remove('hidden');
+}
+
+// Function to close the modal
+function closeWipeDataModal() {
+  document.getElementById('wipe-data-modal').classList.add('hidden');
+}
+
+// Function to reset state and clear cloud & local data
+async function confirmWipeOutData() {
+  closeWipeDataModal();
+
+  const toast = document.getElementById('toast');
+  const msg = document.getElementById('toast-message');
+
+  if (toast && msg) {
+    msg.innerText = 'Wiping out all data...';
+    toast.classList.remove('hidden');
+  }
+
+  // 1. Reset JavaScript State to fresh default baseline
+  state = {
+    bookings: [],
+    roomsCapacity: [
+      { roomNo: 1, capacity: 4 },
+      { roomNo: 2, capacity: 2 },
+      { roomNo: 3, capacity: 4 },
+      { roomNo: 4, capacity: 4 },
+      { roomNo: 5, capacity: 5 }
+    ],
+    masterAgents: [
+      { agentName: "Self", phone: "Direct", roomNo: "All Rooms" },
+      { agentName: "A1", phone: "1234567890", roomNo: "All Rooms" },
+      { agentName: "A2", phone: "1234567890", roomNo: "All Rooms" },
+      { agentName: "A3", phone: "1234567890", roomNo: "All Rooms" },
+      { agentName: "A4", phone: "1234567890", roomNo: "All Rooms" }
+    ],
+    yearlyCounters: {},
+    dashSelectedYear: defaultAppYear,
+    selectedYear: defaultAppYear
+  };
+
+  // 2. Clear LocalStorage
+  localStorage.removeItem('webapp_data');
+  localStorage.setItem('webapp_data', JSON.stringify(state));
+
+  // 3. Sync empty reset state to Google Sheets (if connected)
+  if (typeof GOOGLE_SHEET_API_URL !== 'undefined' && GOOGLE_SHEET_API_URL.startsWith('http')) {
+    try {
+      await fetch(GOOGLE_SHEET_API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state)
+      });
+    } catch (err) {
+      console.warn("Could not wipe data on Google Sheets backend:", err);
+    }
+  }
+
+  // 4. Refresh UI Views
+  initDashboard();
+  populateRoomDropdown();
+  populateAgentDropdown();
+  searchMasterBookingById();
+  renderBookingsTable();
+  renderRoomCapacityTable();
+  renderMasterAgentTable();
+  renderCalendar(defaultAppYear);
+  checkUpcomingCheckoutsWithDue();
+
+  // 5. Show completion notification
+  if (toast && msg) {
+    msg.innerText = 'All data wiped out! Started fresh baseline.';
+    setTimeout(() => toast.classList.add('hidden'), 3500);
+  }
+}
+
 
     // Replace this with your actual Google Apps Script Web App URL
 const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwdntzxByvN73YUv3WPj1B3owXWT1y61b_dKFF9z2GEVYjG237-bUQPvqNUY67CruM/exec";
@@ -3475,5 +3561,31 @@ function loadLocalStorageFallback() {
       if (box) box.classList.add('hidden');
     }
   </script>
+
+<div id="wipe-data-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
+  <div class="bg-white rounded-3xl shadow-2xl border border-rose-100 max-w-sm w-full p-6 space-y-4 text-center">
+    <div class="bg-rose-100 text-rose-600 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-sm">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    
+    <div>
+      <h3 class="text-sm font-bold text-slate-900">Wipe All Saved Data?</h3>
+      <p class="text-[11px] text-slate-500 mt-1">
+        This action will permanently delete <strong class="text-rose-600">ALL bookings, guest records, and custom settings</strong> from both Local Storage and connected Google Sheets.
+      </p>
+      <p class="text-[10px] text-slate-400 mt-1 italic">This operation cannot be undone!</p>
+    </div>
+
+    <div class="flex space-x-2 pt-2">
+      <button type="button" onclick="closeWipeDataModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-2xl text-xs transition">
+        Cancel
+      </button>
+      <button type="button" onclick="confirmWipeOutData()" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-2xl shadow-sm transition text-xs flex items-center justify-center gap-1.5">
+        <i class="fa-solid fa-trash-can text-[11px]"></i> Yes, Wipe Data
+      </button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
