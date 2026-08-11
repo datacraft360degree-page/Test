@@ -275,8 +275,7 @@
     <i class="fa-solid fa-right-from-bracket text-[10px]"></i> Logout
   </button>
 </div>
-
-  </header>
+</header>
 
   <!-- Notification Toast -->
   <div id="toast" class="hidden fixed bottom-6 right-6 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl shadow-xl z-50 flex items-center gap-2.5 no-print border border-slate-800 text-[11px]">
