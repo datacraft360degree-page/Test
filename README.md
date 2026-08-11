@@ -4,46 +4,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Begin Jekyll SEO tag v2.8.0 -->
 <meta name="generator" content="Jekyll v3.10.0" />
-<meta property="og:title" content="Test" />
+<meta property="og:title" content="Aniruddha-Business-Portal" />
 <meta property="og:locale" content="en_US" />
-<link rel="canonical" href="https://datacraft360degree-page.github.io/Test/" />
-<meta property="og:url" content="https://datacraft360degree-page.github.io/Test/" />
-<meta property="og:site_name" content="Test" />
+<link rel="canonical" href="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/" />
+<meta property="og:url" content="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/" />
+<meta property="og:site_name" content="Aniruddha-Business-Portal" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Test" />
+<meta property="twitter:title" content="Aniruddha-Business-Portal" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","headline":"Test","name":"Test","url":"https://datacraft360degree-page.github.io/Test/"}</script>
-<!-- End Jekyll SEO tag -->
+{"@context":"https://schema.org","@type":"WebSite","headline":"Aniruddha-Business-Portal","name":"Aniruddha-Business-Portal","url":"https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/"}</script>
 
-    <link rel="stylesheet" href="/Test/assets/css/style.css?v=1a46f3fa793c940ba908cd2cc195662dd0bbab15">
-    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
-
-<!-- Setup Google Analytics -->
-
-
-
-<!-- You can set your favicon here -->
-<!-- link rel="shortcut icon" type="image/x-icon" href="/Test/favicon.ico" -->
-
-<!-- end custom head snippets -->
-
+    <link rel="stylesheet" href="/Aniruddha-Business-Portal/assets/css/style.css?v=7e4491ec774c1bfaa552164c4c7f9ea896c9e28e">
   </head>
   <body>
     <div class="container-lg px-3 my-5 markdown-body">
       
-      <h1><a href="https://datacraft360degree-page.github.io/Test/"></a></h1>
-      
-<html lang="en">
+      <h1><a href="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/">Aniruddha-Business-Portal</a></h1>
+
+      <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Business Portal - Web Application</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS for Exporting to Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- html2canvas for Generating JPEG Receipts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     /* Samsung One UI Smooth Styling & Compact Scrollbar */
@@ -102,13 +93,13 @@
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
+  <!-- LOGIN MODAL OVERLAY -->
   <div id="login-overlay" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full p-6 space-y-4 text-left">
       <div class="text-center space-y-1">
         <div class="bg-blue-50 text-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-sm">
           <i class="fa-solid fa-lock"></i>
         </div>
-        <h2 class="text-base font-bold text-slate-900 mt-2">Homestay Business Portal</h2>
         <p class="text-[11px] text-slate-500">Please enter your credentials to access the system</p>
       </div>
 
@@ -144,6 +135,7 @@
     </div>
   </div>
 
+  <!-- MASTER DATA ACCESS PASSWORD MODAL -->
   <div id="master-auth-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-xs w-full p-5 space-y-3 text-left">
       <div class="text-center space-y-1">
@@ -181,6 +173,7 @@
     </div>
   </div>
 
+  <!-- MASTER DATA PERMANENT DELETION RECONFIRMATION POPUP MODAL -->
   <div id="master-delete-confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-rose-100 max-w-sm w-full p-5 space-y-3 text-center">
       <div class="bg-rose-50 text-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-sm">
@@ -201,6 +194,7 @@
     </div>
   </div>
 
+  <!-- SESSION AUTO LOGOUT WARNING MODAL -->
   <div id="logout-warning-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-xl border border-slate-100 max-w-xs w-full p-5 space-y-3 text-center">
       <div class="bg-amber-50 text-amber-600 w-10 h-10 rounded-2xl flex items-center justify-center mx-auto text-lg">
@@ -216,6 +210,7 @@
     </div>
   </div>
 
+  <!-- EXPORT TO EXCEL DATE RANGE MODAL -->
   <div id="export-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full p-5 space-y-4 text-left">
       <div class="flex justify-between items-center pb-2 border-b border-slate-100">
@@ -246,6 +241,7 @@
     </div>
   </div>
 
+  <!-- Excel Comment Box Popout -->
   <div id="excel-comment-box" onclick="event.stopPropagation()" class="excel-comment-box hidden absolute z-50 bg-slate-900 text-white text-[11px] rounded-2xl p-3 shadow-2xl border border-slate-800 space-y-2 w-64 transition-all duration-150">
     <div class="font-bold text-blue-400 border-b border-slate-800 pb-1.5 flex justify-between items-center text-[10px]">
       <span class="flex items-center gap-1.5">
@@ -259,6 +255,7 @@
     <div id="comm-booking-list" class="space-y-1.5 max-h-56 overflow-y-auto pr-0.5"></div>
   </div>
 
+  <!-- Compact One UI Header Navigation -->
   <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/60 text-slate-900 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col md:flex-row justify-between items-center gap-2.5">
       <div class="flex items-center space-x-2.5">
@@ -266,11 +263,11 @@
           <i class="fa-solid fa-hotel text-sm"></i>
         </div>
         <div>
-          <h1 class="text-sm font-bold tracking-tight leading-none text-slate-900">Homestay Business Portal 🏠</h1>
           <p class="text-[10px] text-slate-500 mt-0.5">Management &amp; Booking Control System</p>
         </div>
       </div>
       
+      <!-- One UI Pill Navigation -->
       <nav class="flex space-x-1 bg-slate-100 p-1 rounded-full text-[11px] font-medium">
         <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn px-3 py-1 rounded-full transition-all active-tab bg-white text-blue-600 shadow-sm font-bold">Dashboard</button>
         <button onclick="switchTab('booking')" id="btn-booking" class="tab-btn px-3 py-1 rounded-full transition-all text-slate-600 hover:text-slate-900">Booking Details</button>
@@ -280,63 +277,72 @@
         <button onclick="switchTab('calendar')" id="btn-calendar" class="tab-btn px-3 py-1 rounded-full transition-all text-slate-600 hover:text-slate-900">Calendar</button>
       </nav>
 
-      <div id="wipe-data-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-3xl shadow-2xl border border-rose-100 max-w-sm w-full p-6 space-y-4 text-center">
-          <div class="bg-rose-100 text-rose-600 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-sm">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-          </div>
-          
-          <div>
-            <h3 class="text-sm font-bold text-slate-900">Wipe All Saved Data?</h3>
-            <p class="text-[11px] text-slate-500 mt-1">
-              This action will permanently delete <strong class="text-rose-600">ALL bookings, guest records, and custom settings</strong> from both this device and Google Sheets.
-            </p>
-            <p class="text-[10px] text-slate-400 mt-1 italic">This operation cannot be undone!</p>
-          </div>
-
-          <div class="flex space-x-2 pt-2">
-            <button type="button" onclick="closeWipeDataModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-2xl text-xs transition">
-              Cancel
-            </button>
-            <button type="button" onclick="confirmWipeOutData()" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-2xl shadow-sm transition text-xs flex items-center justify-center gap-1">
-              <i class="fa-solid fa-trash-can"></i> Confirm Wipe
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap items-center justify-center sm:justify-end gap-1.5">
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-1.5">
         <button onclick="openAlertModal()" title="View Alerts" class="relative bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-bell text-[8px]"></i> Alerts
+          <i class="fa-solid fa-bell text-[10px]"></i> Alerts
           <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
         </button>
-
         <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-floppy-disk text-[8px]"></i> Save
+          <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+        </button>
+        
+        <div id="wipe-layer-1-modal" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+          <div class="bg-white rounded-3xl shadow-2xl border border-rose-100 max-w-sm w-full p-6 text-center space-y-4">
+            <div class="bg-rose-100 text-rose-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-3xl shadow-sm">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900">Initiate Data Wipe?</h3>
+              <p class="text-xs text-slate-600 mt-2">You are about to delete ALL data from the Google Sheet. This affects bookings, rooms, and agents.</p>
+            </div>
+            <div class="flex space-x-3 pt-2">
+              <button type="button" onclick="closeWipeModals()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 rounded-xl text-xs transition">Cancel</button>
+              <button type="button" onclick="proceedToWipeLayer2()" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-xs">Proceed</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="wipe-layer-2-modal" class="hidden fixed inset-0 z-[70] bg-rose-900/80 backdrop-blur-md flex items-center justify-center p-4 no-print">
+          <div class="bg-black rounded-3xl shadow-2xl border border-rose-600 max-w-sm w-full p-6 text-center space-y-4">
+            <div class="text-rose-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto text-4xl animate-pulse">
+              <i class="fa-solid fa-skull-crossbones"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-black text-white uppercase tracking-widest">Final Warning</h3>
+              <p class="text-xs text-rose-200 mt-2">This action is <strong class="text-white">IRREVERSIBLE</strong>. All records will be permanently deleted from the database. Are you absolutely sure?</p>
+            </div>
+            <div class="flex space-x-3 pt-2">
+              <button type="button" onclick="closeWipeModals()" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition">Cancel</button>
+              <button type="button" id="btn-final-wipe" onclick="executeGoogleSheetWipe()" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl shadow-lg shadow-rose-900/50 transition text-xs">ERASE ALL DATA</button>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="requestDataWipe()" class="bg-rose-600 hover:bg-rose-700 text-white border border-rose-800 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition shadow-sm">
+          <i class="fa-solid fa-skull-crossbones text-[8px]"></i> Wipe Data
         </button>
 
         <button onclick="openExportModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-file-excel text-[8px]"></i> Export
+          <i class="fa-solid fa-file-excel text-[10px]"></i> Export
         </button>
-
-        <button onclick="promptWipeOutData()" title="Clear All Data &amp; Reset" class="bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition shadow-xs">
-          <i class="fa-solid fa-trash-arrow-up text-[8px]"></i> Wipe Out Data
-        </button>
-
         <button onclick="logoutUser()" title="Logout" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-right-from-bracket text-[8px]"></i> Logout
+          <i class="fa-solid fa-right-from-bracket text-[10px]"></i> Logout
         </button>
-      </div> 
+      </div>
     </div>
   </header>
 
+  <!-- Notification Toast -->
   <div id="toast" class="hidden fixed bottom-6 right-6 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl shadow-xl z-50 flex items-center gap-2.5 no-print border border-slate-800 text-[11px]">
     <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
     <span id="toast-message" class="font-medium">Changes Auto save successfully!</span>
   </div>
 
+  <!-- Main Content Area -->
   <main class="max-w-7xl mx-auto px-4 py-4 flex-1 w-full no-print space-y-4">
 
+    <!-- DASHBOARD TAB -->
     <section id="tab-dashboard" class="tab-content space-y-4">
       <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-5 text-white shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
@@ -352,6 +358,7 @@
         </div>
       </div>
 
+      <!-- Summary Filter Banner Indicator -->
       <div class="flex items-center justify-between bg-white px-4 py-2 rounded-2xl border border-slate-200/60 shadow-sm">
         <span class="text-[11px] font-semibold text-slate-600 flex items-center gap-2">
           <i class="fa-solid fa-chart-line text-blue-600"></i>
@@ -362,6 +369,7 @@
         </button>
       </div>
 
+      <!-- One UI Rounded Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
           <div>
@@ -393,6 +401,7 @@
         </div>
       </div>
 
+      <!-- Active years Directory Table Hidden -->
       <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="mb-3 flex justify-between items-center">
           <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
@@ -404,6 +413,7 @@
       </div>
     </section>
 
+    <!-- BOOKING DETAILS TAB -->
     <section id="tab-booking" class="tab-content hidden space-y-4">
       <div class="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 pb-3 border-b border-slate-100">
@@ -431,6 +441,7 @@
           </div>
           
           <div class="flex items-center space-x-2 w-full md:w-auto">
+            <!-- Search by Date -->
             <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
               <label for="booking-date-search" class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 pl-1">
                 <i class="fa-solid fa-calendar-day text-blue-600"></i> Search Date:
@@ -447,6 +458,7 @@
           </div>
         </div>
 
+        <!-- Bookings Table View -->
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -472,8 +484,10 @@
       </div>
     </section>
 
+    <!-- MASTER DATA TAB -->
     <section id="tab-master" class="tab-content hidden space-y-4">
       
+      <!-- Room Capacity Table -->
       <div class="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
           <div>
@@ -501,6 +515,7 @@
         </div>
       </div>
 
+      <!-- Agent Information Table -->
       <div class="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
           <div>
@@ -529,6 +544,7 @@
         </div>
       </div>
 
+      <!-- BOOKING ID TYPING SEARCH & DELETION CONTROL -->
       <div class="bg-white rounded-3xl shadow-sm border border-rose-200/80 p-4 space-y-3">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-2.5">
           <div>
@@ -572,6 +588,7 @@
       </div>
     </section>
 
+    <!-- CALENDAR TAB -->
     <section id="tab-calendar" class="tab-content hidden space-y-4">
       <div class="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="flex justify-between items-center mb-4">
@@ -595,6 +612,7 @@
 
   </main>
 
+  <!-- POPUP MODAL: CHECK-OUT ALERT LIST -->
   <div id="alert-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-lg w-full flex flex-col max-h-[85vh] overflow-hidden">
       <div class="bg-amber-500 p-4 text-white flex justify-between items-center">
@@ -616,7 +634,8 @@
     </div>
   </div>
 
-  <div id="booking-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto no-print">
+  <!-- COMPACT ADD / EDIT BOOKING MODAL -->
+ <div id="booking-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-3xl w-full p-5 space-y-3 my-4 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-2.5 border-b border-slate-100">
         <div>
@@ -630,11 +649,12 @@
       <form id="booking-form" onsubmit="handleSaveBooking(event)" class="space-y-3 text-[11px]">
         <input type="hidden" id="modal-booking-id" />
 
+        <!-- GUEST DETAILS -->
         <div id="sec-guest-info" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <i class="fa-solid fa-user-tag text-blue-600"></i> Guest Information
           </h4>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Guest Name <span class="text-rose-500">*</span></label>
               <input type="text" id="cust-name" required="" pattern="[A-Za-z\s]+" oninput="this.value = formatTitleCase(this.value.replace(/[^A-Za-z\s]/g, ''))" title="Please enter Guest Name using characters only" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500" />
@@ -663,6 +683,7 @@
               <label class="block font-semibold text-slate-600 mb-0.5">ID Number</label>
               <input type="text" id="cust-id" maxlength="16" pattern="[A-Za-z0-9\s]*" oninput="this.value = this.value.replace(/[^A-Za-z0-9\s]/g, '')" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500" />
             </div>
+            <!-- EDITABLE COUNTRY CODE & GUEST CONTACT NUMBER (OPTIONAL) -->
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Contact No</label>
               <div class="flex gap-1">
@@ -685,26 +706,30 @@
           </div>
         </div>
 
+        <!-- Room & Stay Schedule Box -->
         <div id="sec-room-dates" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <i class="fa-solid fa-bed text-blue-600"></i> Room Selection &amp; Stay Dates
           </h4>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Room No</label>
-              <select id="cust-room" onchange="autoCaptureRoomDetails()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600"></select>
+              <label class="block font-semibold text-slate-600 mb-0.5">Room No(s) (Ctrl+Click)</label>
+              <select id="cust-room" multiple onchange="autoCaptureRoomDetails()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600" style="height: 5.5rem;"></select>
             </div>
             
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Agent Info</label>
-              <select id="cust-agent" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700"></select>
+            <div class="flex flex-col gap-2">
+              <div>
+                <label class="block font-semibold text-slate-600 mb-0.5">Agent Info</label>
+                <select id="cust-agent" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700"></select>
+              </div>
+
+              <div>
+                <label class="block font-semibold text-slate-600 mb-0.5">Total Capacity</label>
+                <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" readonly />
+              </div>
             </div>
 
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Capacity (Person)</label>
-              <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
-            </div>
-
+            <!-- EXTRA PERSON(S) COUNT FIELD -->
             <div>
               <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
                 <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
@@ -712,11 +737,12 @@
               <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
             </div>
 
+            <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
               <label class="block font-bold text-amber-900 mb-1 flex items-center gap-1">
                 <i class="fa-solid fa-clock-rotate-left text-amber-600"></i> Additional Person Stay Window (Custom Dates Required)
               </label>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Person Check-In</label>
                   <div class="flex gap-1">
@@ -734,7 +760,7 @@
               </div>
             </div>
 
-            <div class="sm:col-span-4 grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60 items-end">
+            <div class="sm:col-span-4 grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
               <div>
                 <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-arrival text-emerald-600 mr-1"></i> Check In</label>
                 <div class="flex gap-1">
@@ -752,6 +778,7 @@
               </div>
             </div>
 
+            <!-- Extended Check Out Checkbox & Fields -->
             <div id="sec-extended-checkout-wrapper" class="sm:col-span-4 pt-2 border-t border-slate-200/60">
               <div class="flex items-center gap-2 mb-1">
                 <input type="checkbox" id="cust-has-extended-checkout" onchange="toggleExtendedCheckoutFields(this.checked)" class="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer" />
@@ -771,6 +798,7 @@
               </div>
             </div>
 
+            <!-- Meal Plan Inclusions Checkbox -->
             <div class="sm:col-span-4 pt-2 border-t border-slate-200/60">
               <div class="flex items-center gap-2">
                 <input type="checkbox" id="cust-include-meals" checked="" class="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer" />
@@ -783,6 +811,7 @@
           </div>
         </div>
 
+        <!-- EXTRA FOOD SECTION WITH DATE & TIME -->
         <div id="sec-extra-food" class="bg-amber-50/60 p-3 rounded-2xl border border-amber-200/80 space-y-2.5 transition-all">
           <div class="flex justify-between items-center">
             <h4 class="text-[9px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
@@ -796,11 +825,41 @@
           <div id="food-orders-container" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
         </div>
 
+        <!-- CAB FARE SECTION -->
+        <div id="sec-cab-fare" class="bg-indigo-50/40 p-3 rounded-2xl border border-indigo-100 space-y-2.5 transition-all">
+          <h4 class="text-[9px] font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-taxi text-indigo-600"></i> Cab Fare Details
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare per trip (₹)</label>
+              <input type="number" id="cust-cab-fare" value="0" min="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 font-bold text-indigo-700" />
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-0.5">Remark</label>
+              <input type="text" id="cust-cab-remark" placeholder="e.g. Airport drop" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-indigo-500" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Billing Calculation Box -->
         <div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-2.5 transition-all">
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
             <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
           </h4>
-          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 items-end">
+          
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
+             <div>
+                <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
+                <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+             </div>
+             <div>
+                <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
+                <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+             </div>
+          </div>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Days</label>
               <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
@@ -836,9 +895,11 @@
     </div>
   </div>
 
-   <div id="invoice-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+   <!-- FIXED & PRINTABLE INVOICE / BOOKING RECEIPT MODAL -->
+  <div id="invoice-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-xl w-full p-5 sm:p-6 space-y-4 relative my-auto max-h-[92vh] overflow-y-auto" id="printable-invoice">
       
+      <!-- Read-Only Notice Bar (Shown for Closed/Inactive Bookings) -->
       <div id="inv-readonly-notice" class="hidden bg-slate-900 text-amber-300 text-[10px] font-bold px-3.5 py-2 rounded-2xl flex items-center justify-between border border-slate-800 no-print">
         <span class="flex items-center gap-1.5">
           <i class="fa-solid fa-lock text-amber-400"></i> Read-Only View Mode (Editing Disabled)
@@ -853,6 +914,7 @@
           <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: info@businessportal.com</p>
         </div>
         <div class="text-right">
+          <!-- E-INVOICE NUMBER & BADGE CONTAINER (HIDDEN IF DUE NOT CLEAR) -->
           <div id="e-invoice-section">
             <span id="inv-badge" class="inline-block bg-blue-50 text-blue-700 text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase mb-1 border border-blue-100">e-Invoice</span>
             <p id="inv-id-container" class="text-[10px] text-slate-500">Invoice ID: <strong id="inv-id" class="text-slate-800 font-mono">INV-2026-0000001</strong></p>
@@ -909,6 +971,7 @@
             <span>Balance Due:</span>
             <span id="inv-sum-due">₹0</span>
           </div>
+          <!-- DYNAMICALLY DISPLAYED CLEAR DUE ROW -->
           <div id="inv-clear-due-row" class="hidden flex justify-between text-emerald-700 font-bold border-t border-slate-100 pt-1">
             <span>Clear Due:</span>
             <strong id="inv-sum-clear-due">₹0</strong>
@@ -928,9 +991,11 @@
 
       <div class="flex flex-wrap justify-end space-x-2 gap-y-2 pt-2 no-print border-t border-slate-100">
         <button type="button" onclick="closeInvoiceModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Close</button>
+        <!-- SEND VIA WHATSAPP BUTTON (ONLY AVAILABLE IN UPCOMING & LIVE) -->
         <button type="button" id="inv-whatsapp-btn" onclick="sendReceiptViaWhatsApp()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1.5 transition cursor-pointer">
           <i class="fa-brands fa-whatsapp text-sm"></i> Send receipt via WhatsApp
         </button>
+        <!-- STATIC PRINT BUTTON -->
         <button type="button" onclick="window.print()" id="inv-print-btn" class="px-4 py-1.5 bg-blue-600 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1 transition hover:bg-blue-700 cursor-pointer">
           <i class="fa-solid fa-print"></i> Print Invoice
         </button>
@@ -939,9 +1004,68 @@
   </div>
 
   <script>
-    // Replace this with your actual Google Apps Script Web App URL
-    const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwdntzxByvN73YUv3WPj1B3owXWT1y61b_dKFF9z2GEVYjG237-bUQPvqNUY67CruM/exec";
 
+    // --- DOUBLE LAYER DATA WIPE OUT LOGIC ---
+function requestDataWipe() {
+  if (!isMasterUnlocked) {
+    alert("You must unlock Master Data access first to perform a data wipe.");
+    openMasterAuthModal();
+    return;
+  }
+  document.getElementById('wipe-layer-1-modal').classList.remove('hidden');
+}
+
+function proceedToWipeLayer2() {
+  document.getElementById('wipe-layer-1-modal').classList.add('hidden');
+  document.getElementById('wipe-layer-2-modal').classList.remove('hidden');
+}
+
+function closeWipeModals() {
+  document.getElementById('wipe-layer-1-modal').classList.add('hidden');
+  document.getElementById('wipe-layer-2-modal').classList.add('hidden');
+}
+
+async function executeGoogleSheetWipe() {
+  const btn = document.getElementById('btn-final-wipe');
+  btn.innerText = "WIPING DATA...";
+  btn.disabled = true;
+
+  try {
+    const payload = { action: "wipeData" };
+    await fetch(GAS_API_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    // Reset local state
+    state.bookings = [];
+    state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }];
+    state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
+    
+    // Refresh UI
+    populateRoomDropdown();
+    populateAgentDropdown();
+    searchMasterBookingById();
+    renderBookingsTable();
+    renderRoomCapacityTable();
+    renderMasterAgentTable();
+    updateDashboardCards();
+    renderCalendar(defaultAppYear);
+
+    closeWipeModals();
+    alert("Database has been completely wiped.");
+  } catch (error) {
+    console.error("Wipe error:", error);
+    alert("Failed to wipe database. Please check your connection.");
+  } finally {
+    btn.innerText = "ERASE ALL DATA";
+    btn.disabled = false;
+  }
+}
+    
+
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwFD7ASOkJ1XnRUrH9pEiTz4Lolm8zwaKOCr2nkLN__dvR1_51zWGxIJ1ZlV82X2r2O/exec"; // <-- Replace this with your URL from Step 1
+    
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000; // 1 Hour Buffer in Milliseconds
     let activeModalBooking = null; // Currently opened invoice booking reference
 
@@ -952,96 +1076,6 @@
         return e.returnValue;
       }
     });
-
-    function promptWipeOutData(event) {
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      const modal = document.getElementById('wipe-data-modal');
-      if (modal) {
-        modal.classList.remove('hidden');
-      }
-    }
-
-    function closeWipeDataModal() {
-      const modal = document.getElementById('wipe-data-modal');
-      if (modal) {
-        modal.classList.add('hidden');
-      }
-    }
-
-    async function confirmWipeOutData() {
-      closeWipeDataModal();
-
-      const toast = document.getElementById('toast');
-      const msg = document.getElementById('toast-message');
-
-      if (toast && msg) {
-        msg.innerText = 'Wiping out all data...';
-        toast.classList.remove('hidden');
-      }
-
-      // 1. Reset JavaScript State to fresh default baseline
-      state = {
-        bookings: [],
-        roomsCapacity: [
-          { roomNo: 1, capacity: 4 },
-          { roomNo: 2, capacity: 2 },
-          { roomNo: 3, capacity: 4 },
-          { roomNo: 4, capacity: 4 },
-          { roomNo: 5, capacity: 5 }
-        ],
-        masterAgents: [
-          { agentName: "Self", phone: "Direct", roomNo: "All Rooms" },
-          { agentName: "A1", phone: "1234567890", roomNo: "All Rooms" },
-          { agentName: "A2", phone: "1234567890", roomNo: "All Rooms" },
-          { agentName: "A3", phone: "1234567890", roomNo: "All Rooms" },
-          { agentName: "A4", phone: "1234567890", roomNo: "All Rooms" }
-        ],
-        yearlyCounters: {},
-        dashSelectedYear: defaultAppYear,
-        selectedYear: defaultAppYear
-      };
-
-      // 2. Clear LocalStorage
-      localStorage.removeItem('webapp_data');
-      localStorage.setItem('webapp_data', JSON.stringify(state));
-
-      // 3. Sync empty reset state to Google Sheets (if connected)
-      if (typeof GOOGLE_SHEET_API_URL !== 'undefined' && GOOGLE_SHEET_API_URL.startsWith('http')) {
-        try {
-          await fetch(GOOGLE_SHEET_API_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(state)
-          });
-        } catch (err) {
-          console.warn("Could not wipe data on Google Sheets backend:", err);
-        }
-      }
-
-      // 4. Refresh UI Views
-      initDashboard();
-      populateRoomDropdown();
-      populateAgentDropdown();
-      searchMasterBookingById();
-      renderBookingsTable();
-      renderRoomCapacityTable();
-      renderMasterAgentTable();
-      renderCalendar(defaultAppYear);
-      checkUpcomingCheckoutsWithDue();
-
-      // 5. Show completion notification
-      if (toast && msg) {
-        msg.innerText = 'All data wiped out! Started fresh baseline.';
-        setTimeout(() => toast.classList.add('hidden'), 3500);
-      }
-      
-      alert("All saved data has been wiped successfully.");
-      location.reload();
-    }
 
     function formatTitleCase(text) {
       if (!text) return '';
@@ -1309,7 +1343,6 @@
       isMasterUnlocked = false;
       sessionStorage.removeItem('app_authenticated');
       stopInactivityMonitoring();
-      if (window.autoSaveInterval) clearInterval(window.autoSaveInterval);
       document.getElementById('logout-warning-modal').classList.add('hidden');
       document.getElementById('login-password').value = '';
       document.getElementById('login-overlay').classList.remove('hidden');
@@ -1447,7 +1480,8 @@
 
     function isRoomInMaster(roomNo) {
       if (!state.roomsCapacity) return true;
-      return state.roomsCapacity.some(m => String(m.roomNo) === String(roomNo));
+      let rooms = Array.isArray(roomNo) ? roomNo : String(roomNo).split(',').map(s => s.trim());
+      return rooms.every(r => state.roomsCapacity.some(m => String(m.roomNo) === String(r)));
     }
 
     /* EXPORT TO EXCEL DATE MODAL FUNCTIONS */
@@ -1547,10 +1581,10 @@
         const fullContactNo = `${b.countryCode || '+91'} ${b.contactNo || ''}`.trim();
 
         return {
-          "Booking ID": b.bookingCode || "-",
-          "Invoice ID": b.invoiceNo || "-",
+          "Booking ID": b.BookingID || "-",
+          "Invoice ID": b.InvoiceID || "-",
           "Status": statusStr,
-          "Guest Name": b.name || "-",
+          "Guest Name": b.GuestName || "-",
           "Contact No": fullContactNo || "-",
           "ID Number": b.idNo || "-",
           "Attached ID": b.idProofBase64 ? "Yes" : "No",
@@ -1559,7 +1593,7 @@
           "State": b.state || "-",
           "Country": b.country || "-",
           "Pin/Zip Code": b.zipCode || "-",
-          "Room No": b.roomNo || "-",
+          "Room No": Array.isArray(b.roomNo) ? b.roomNo.join(", ") : (b.roomNo || "-"),
           "Capacity": b.capacity || 1,
           "Extra Persons": b.extraPersons || 0,
           "Extra Person Joined": b.extraPersonJoined ? formatDateTime(b.extraPersonJoined) : "N/A",
@@ -1571,6 +1605,8 @@
           "Stay Days": b.noOfDays || 0,
           "Price / Day": b.perDayPrice || 0,
           "Food Orders": foodSummary || "None",
+          "Cab Fare": b.cabFare || 0,
+          "Cab Remark": b.cabRemark || "-",
           "Total Amount": b.totalAmount || 0,
           "Advance Paid": b.advanced || 0,
           "Cleared Due": b.clearedDue || 0,
@@ -1626,10 +1662,12 @@
         const effectiveOutStr = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
         const tr = document.createElement('tr');
         tr.className = "bg-white hover:bg-slate-50 transition border-b border-slate-100";
+        const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
+        
         tr.innerHTML = `
           <td class="py-2.5 px-3 font-mono font-bold text-blue-600">${b.bookingCode}</td>
           <td class="py-2.5 px-3 font-bold text-slate-800">${b.name}</td>
-          <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Room ${b.roomNo}</span></td>
+          <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Room ${roomsDisplay}</span></td>
           <td class="py-2.5 px-3 text-[10px] text-slate-600">${formatDateTime(b.checkIn)} to ${formatDateTime(effectiveOutStr)}</td>
           <td class="py-2.5 px-3 font-semibold text-slate-800">₹${b.totalAmount}</td>
           <td class="py-2.5 px-3 font-bold text-rose-600">₹${b.totalDue}</td>
@@ -1675,80 +1713,50 @@
     }
 
     async function loadSavedData() {
-      const toast = document.getElementById('toast');
-      const msg = document.getElementById('toast-message');
-      
-      if (msg) msg.innerText = 'Syncing data from Google Sheets...';
-      if (toast) toast.classList.remove('hidden');
+  try {
+    const toast = document.getElementById('toast');
+    const msg = document.getElementById('toast-message');
+    msg.innerText = 'Syncing database...';
+    toast.classList.remove('hidden');
 
-      try {
-        const response = await fetch(GOOGLE_SHEET_API_URL);
-        const result = await response.json();
-
-        if (result.status === 'success' && result.data) {
-          const parsed = result.data;
-          if (parsed.bookings) {
-            state = parsed;
-            if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
-              state.roomsCapacity = [
-                { roomNo: 1, capacity: 4 },
-                { roomNo: 2, capacity: 2 },
-                { roomNo: 3, capacity: 4 },
-                { roomNo: 4, capacity: 4 },
-                { roomNo: 5, capacity: 5 }
-              ];
-            }
-            if (!state.masterAgents) {
-              state.masterAgents = [
-                { agentName: "Self", phone: "Direct", roomNo: "All Rooms" },
-                { agentName: "A1", phone: "1234567890", roomNo: "All Rooms" },
-                { agentName: "A2", phone: "1234567890", roomNo: "All Rooms" },
-                { agentName: "A3", phone: "1234567890", roomNo: "All Rooms" },
-                { agentName: "A4", phone: "1234567890", roomNo: "All Rooms" }
-              ];
-            }
-            state.dashSelectedYear = defaultAppYear;
-            state.selectedYear = defaultAppYear;
-            if (!state.yearlyCounters) {
-              state.yearlyCounters = { [defaultAppYear]: state.bookings.length || 0 };
-            }
-          }
-          // Keep local storage synced as fallback
-          localStorage.setItem('webapp_data', JSON.stringify(state));
-          if (msg) msg.innerText = 'Data synced from Google Sheets!';
-        } else {
-          // Fallback to localStorage if Google Sheet is empty or fails
-          loadLocalStorageFallback();
-        }
-      } catch (err) {
-        console.warn("Could not connect to Google Sheets, using local storage backup:", err);
-        loadLocalStorageFallback();
-      } finally {
-        if (toast) setTimeout(() => toast.classList.add('hidden'), 2500);
-        
-        // Refresh all UI elements after data fetch completes
-        initDashboard();
-        populateRoomDropdown();
-        populateAgentDropdown();
-        searchMasterBookingById();
-        renderBookingsTable();
-        renderRoomCapacityTable();
-        renderMasterAgentTable();
-        renderCalendar(defaultAppYear);
-        checkUpcomingCheckoutsWithDue();
-      }
+    const response = await fetch(GAS_API_URL + "?action=fetchData");
+    const data = await response.json();
+    
+    if (data && data.bookings) {
+      state = data;
+    }
+    
+    // Default Fallbacks
+    if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
+      state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }, { roomNo: 3, capacity: 4 }, { roomNo: 4, capacity: 4 }, { roomNo: 5, capacity: 5 }];
+    }
+    if (!state.masterAgents || state.masterAgents.length === 0) {
+      state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
+    }
+    
+    state.selectedYear = defaultAppYear;
+    state.dashSelectedYear = defaultAppYear;
+    if (!state.yearlyCounters) {
+      state.yearlyCounters = { [defaultAppYear]: state.bookings.length || 0 };
     }
 
-    function loadLocalStorageFallback() {
-      const saved = localStorage.getItem('webapp_data');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (parsed.bookings) state = parsed;
-        } catch(e){}
-      }
-    }
+    // Refresh UI
+    populateRoomDropdown();
+    populateAgentDropdown();
+    searchMasterBookingById();
+    renderBookingsTable();
+    renderRoomCapacityTable();
+    renderMasterAgentTable();
+    renderCalendar(defaultAppYear);
+    updateDashboardCards();
 
+    msg.innerText = 'Database synced successfully!';
+    setTimeout(() => toast.classList.add('hidden'), 2000);
+  } catch (error) {
+    console.error("Error loading data from Google Sheets:", error);
+  }
+}
+    
     function setMinBookingDates() {
       const checkInInput = document.getElementById('cust-checkin-date');
       const checkOutInput = document.getElementById('cust-checkout-date');
@@ -1770,67 +1778,72 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
+    document.addEventListener("DOMContentLoaded", () => {
       checkAuthStatus();
+      loadSavedData();
       setMinBookingDates();
       populateDashboardYearDropdown();
+      initDashboard();
+      populateRoomDropdown();
+      populateAgentDropdown();
       populateCalendarYearDropdown();
+      searchMasterBookingById();
+      renderBookingsTable();
+      renderRoomCapacityTable();
+      renderMasterAgentTable();
+      renderCalendar(defaultAppYear);
 
-      // Load data asynchronously from Google Sheets
-      await loadSavedData();
-
+      checkUpcomingCheckoutsWithDue();
       setInterval(checkUpcomingCheckoutsWithDue, 60000);
-      window.autoSaveInterval = setInterval(triggerPeriodicAutoSave, 300000); // Auto-save every 5 minutes
+      setInterval(triggerPeriodicAutoSave, 300000);
     });
 
     function triggerPeriodicAutoSave() {
       saveChanges(true, true);
     }
 
-    async function saveChanges(isAutoSave = false, quiet = false) {
-      // Always update local storage immediately for fast UI responsiveness
-      localStorage.setItem('webapp_data', JSON.stringify(state));
+   async function saveChanges(isAutoSave = false, quiet = false) {
+  if (!quiet) {
+    const toast = document.getElementById('toast');
+    const msg = document.getElementById('toast-message');
+    msg.innerText = isAutoSave ? 'Auto-saving to cloud...' : 'Saving to Google Sheets...';
+    toast.classList.remove('hidden');
+  }
 
-      const toast = document.getElementById('toast');
-      const msg = document.getElementById('toast-message');
+  try {
+    const payload = {
+      action: "saveData",
+      state: state
+    };
 
-      if (!quiet && toast && msg) {
-        msg.innerText = 'Saving to Google Sheets...';
-        toast.classList.remove('hidden');
+    // text/plain;charset=utf-8 prevents CORS Preflight OPTIONS blocking
+    const response = await fetch(GAS_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (result.status === "success") {
+      if (!quiet) {
+        const msg = document.getElementById('toast-message');
+        msg.innerText = isAutoSave ? 'Changes Auto saved successfully!' : 'Data synced with Google Sheets!';
+        setTimeout(() => document.getElementById('toast').classList.add('hidden'), 3000);
       }
-
-      // Construct tabular structured payload
-      const payload = {
-        bookings: state.bookings,
-        roomsCapacity: state.roomsCapacity,
-        masterAgents: state.masterAgents,
-        yearlyCounters: state.yearlyCounters
-      };
-
-      try {
-        // Send updated state to Google Sheets via Apps Script POST
-        await fetch(GOOGLE_SHEET_API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!quiet && toast && msg) {
-          msg.innerText = isAutoSave ? 'Changes auto-saved to Google Sheets!' : 'Saved to Google Sheets successfully!';
-          setTimeout(() => toast.classList.add('hidden'), 3000);
-        }
-      } catch (err) {
-        console.error("Failed to save to Google Sheets:", err);
-        if (!quiet && toast && msg) {
-          msg.innerText = 'Saved locally (Cloud sync pending)';
-          setTimeout(() => toast.classList.add('hidden'), 3000);
-        }
-      }
+    } else {
+      throw new Error(result.message || "Server Error");
     }
-
+  } catch (error) {
+    console.error("Error saving to Google Sheets:", error);
+    if (!quiet) {
+      alert("Saving Error: " + error.message + "\n\nChecks:\n1. Ensure 'Who has access' is set to 'Anyone' in Web App deployment.\n2. Ensure URL in GAS_API_URL is correct.");
+      document.getElementById('toast').classList.add('hidden');
+    }
+  }
+}
     function populateDashboardYearDropdown() {
       const yearSelect = document.getElementById('dash-year-select');
       if (!yearSelect) return;
@@ -1911,11 +1924,12 @@
       alertList.forEach((b, i) => {
         const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
         const timeFormatted = formatDateTime(effectiveOut);
+        const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
 
         const card = document.createElement('div');
         card.className = "bg-amber-50/60 border border-amber-200/80 rounded-2xl overflow-hidden shadow-xs";
         
-        const alertMessageText = `Checkout: <strong>${timeFormatted}</strong> | Room ${b.roomNo} | Guest: <strong>${b.name}</strong> | Total: ₹${b.totalAmount} | Due: ₹${b.totalDue}`;
+        const alertMessageText = `Checkout: <strong>${timeFormatted}</strong> | Room ${roomsDisplay} | Guest: <strong>${b.name}</strong> | Total: ₹${b.totalAmount} | Due: ₹${b.totalDue}`;
         const alertBadgeHtml = `<span class="text-[11px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">₹${b.totalDue.toLocaleString('en-IN')} Due</span>`;
 
         card.innerHTML = `
@@ -1925,7 +1939,7 @@
               <div>
                 <h4 class="font-bold text-slate-900 text-[11px] flex items-center gap-1.5">
                   ${b.name} <span class="bg-blue-50 text-blue-700 text-[9px] px-2 py-0.5 rounded-full font-mono">${b.bookingCode || 'N/A'}</span>
-                  <span class="bg-slate-100 text-slate-700 text-[9px] px-2 py-0.5 rounded-full font-medium">Room ${b.roomNo}</span>
+                  <span class="bg-slate-100 text-slate-700 text-[9px] px-2 py-0.5 rounded-full font-medium">Room ${roomsDisplay}</span>
                 </h4>
                 <p class="text-[10px] text-slate-600 mt-0.5">${alertMessageText}</p>
               </div>
@@ -1979,16 +1993,20 @@
       }
     }
 
-    function populateRoomDropdown(selectedRoomNo = 1) {
+    function populateRoomDropdown(selectedRoomNos = []) {
       const roomSelect = document.getElementById('cust-room');
       if (!roomSelect) return;
       roomSelect.innerHTML = '';
+
+      let selArr = [];
+      if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
+      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
 
       state.roomsCapacity.forEach(m => {
         const opt = document.createElement('option');
         opt.value = m.roomNo;
         opt.text = `Room ${m.roomNo}`;
-        if (parseInt(m.roomNo) === parseInt(selectedRoomNo)) {
+        if (selArr.includes(String(m.roomNo))) {
           opt.selected = true;
         }
         roomSelect.appendChild(opt);
@@ -2013,12 +2031,16 @@
     }
 
     function autoCaptureRoomDetails() {
-      const selectedRoom = document.getElementById('cust-room').value;
-      const matched = state.roomsCapacity.find(m => parseInt(m.roomNo) === parseInt(selectedRoom));
-
-      if (matched) {
-        document.getElementById('cust-capacity').value = matched.capacity || 1;
+      const roomSelect = document.getElementById('cust-room');
+      let totalCap = 0;
+      for (let opt of roomSelect.options) {
+        if (opt.selected) {
+          const matched = state.roomsCapacity.find(m => String(m.roomNo) === opt.value);
+          if (matched) totalCap += (matched.capacity || 1);
+        }
       }
+      
+      document.getElementById('cust-capacity').value = totalCap > 0 ? totalCap : 1;
       calculateModalBilling();
     }
 
@@ -2143,13 +2165,14 @@
       const upiId = "kapil98.ram@okaxis";
 
       const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
+      const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
 
       const messageText = `*Aniruddha Homestay - Booking Receipt*\n\n` +
         `Dear *${b.name}*,\n` +
         `Thank you for booking with us! Here are your booking details:\n\n` +
         `*Reservation Details:*\n` +
         `• Booking ID: *${b.bookingCode}*\n` +
-        `• Room No: ${b.roomNo}\n` +
+        `• Room No: ${roomsDisplay}\n` +
         `• Check-In: ${formatDateTime(b.checkIn)}\n` +
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
         `*Billing Summary:*\n` +
@@ -2246,7 +2269,8 @@
       document.getElementById('inv-guest-contact').innerText = `Contact: ${fullGuestPhone}`;
       document.getElementById('inv-guest-id').innerText = `ID No: ${b.idNo || 'N/A'}`;
 
-      document.getElementById('inv-room').innerText = `Room No: ${b.roomNo}`;
+      const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
+      document.getElementById('inv-room').innerText = `Room No: ${roomsDisplay}`;
       document.getElementById('inv-checkin').innerText = `Check-in: ${formatDateTime(b.checkIn)}`;
       document.getElementById('inv-checkout').innerText = `Check-out: ${formatDateTime(b.checkOut)}`;
 
@@ -2275,7 +2299,7 @@
       const roomTr = document.createElement('tr');
       roomTr.innerHTML = `
         <td class="p-2.5 font-semibold text-slate-800">
-          Room ${b.roomNo} Accommodation (${roomCapacityCount} ${roomCapacityLabel}) ${b.hasExtendedCheckout ? '<span class="text-[9px] text-blue-600 block font-normal">(Includes extended stay duration)</span>' : ''}
+          Room ${roomsDisplay} Accommodation (${roomCapacityCount} ${roomCapacityLabel}) ${b.hasExtendedCheckout ? '<span class="text-[9px] text-blue-600 block font-normal">(Includes extended stay duration)</span>' : ''}
           ${mealNotesStr}
         </td>
         <td class="p-2.5 text-center">${daysFormattedStr}</td>
@@ -2321,6 +2345,20 @@
             tbody.appendChild(foodTr);
           }
         });
+      }
+      
+      if (b.cabFare && b.cabFare > 0) {
+        const cabTr = document.createElement('tr');
+        cabTr.innerHTML = `
+          <td class="p-2.5 font-semibold text-indigo-900">
+            Cab Fare
+            ${b.cabRemark ? `<span class="text-[9px] text-indigo-700 font-normal block">Remark: ${b.cabRemark}</span>` : ''}
+          </td>
+          <td class="p-2.5 text-center">1 Trip</td>
+          <td class="p-2.5 text-right">₹${(b.cabFare || 0).toLocaleString('en-IN')}</td>
+          <td class="p-2.5 text-right font-semibold text-indigo-900">₹${(b.cabFare || 0).toLocaleString('en-IN')}</td>
+        `;
+        tbody.appendChild(cabTr);
       }
 
       const initialAdv = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
@@ -2572,6 +2610,7 @@
         }
       }
 
+      setSectionEditability('sec-cab-fare', !isClosedAndWithin3Days);
       setSectionEditability('sec-billing-summary', true);
 
       const extraPersonsInput = document.getElementById('cust-extra-persons');
@@ -2624,7 +2663,6 @@
         
         populateRoomDropdown(b.roomNo);
         populateAgentDropdown(b.agentInfo);
-        document.getElementById('cust-capacity').value = b.capacity || 1;
 
         if (extraPersonsInput) extraPersonsInput.value = b.extraPersons || 0;
         
@@ -2681,6 +2719,9 @@
             addFoodOrderItem(fo.foodDesc || '', fo.plates || 1, fo.itemPrice || 0, fo.foodCharge || 0, fDate, fTime, isClosedAndWithin3Days);
           });
         }
+        
+        document.getElementById('cust-cab-fare').value = b.cabFare || 0;
+        document.getElementById('cust-cab-remark').value = b.cabRemark || '';
 
         document.getElementById('cust-price').value = b.perDayPrice;
         
@@ -2698,7 +2739,7 @@
         document.getElementById('modal-title').innerText = 'Add New Booking';
         document.getElementById('modal-booking-id').value = '';
         
-        populateRoomDropdown(state.roomsCapacity.length > 0 ? state.roomsCapacity[0].roomNo : 1);
+        populateRoomDropdown(state.roomsCapacity.length > 0 ? [state.roomsCapacity[0].roomNo] : []);
 
         document.getElementById('cust-country-code').value = "+91";
         document.getElementById('cust-checkin-time').value = "12:00";
@@ -2726,6 +2767,9 @@
           mealsChkBox.checked = true;
           mealsChkBox.disabled = false;
         }
+
+        document.getElementById('cust-cab-fare').value = 0;
+        document.getElementById('cust-cab-remark').value = '';
 
         document.getElementById('cust-price').value = 1200;
         
@@ -2918,8 +2962,10 @@
       document.querySelectorAll('.cust-food-charge').forEach(input => {
         foodTotalCharge += parseFloat(input.value) || 0;
       });
+      
+      const cabFare = parseFloat(document.getElementById('cust-cab-fare')?.value) || 0;
 
-      const total = roomTotal + extraPersonTotal + foodTotalCharge;
+      const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
 
       const advanceInput = document.getElementById('cust-advance');
       let currentAdvVal = parseFloat(advanceInput.value) || 0;
@@ -2938,89 +2984,12 @@
       document.getElementById('cust-days').value = days;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
-    }
-
-    async function saveEditedBooking(event) {
-      if (event) event.preventDefault();
-
-      // 1. Collect form data
-      const bookingData = {
-        id: document.getElementById('editBookingId').value, // Unique Booking ID
-    invoiceId: document.getElementById('edit_invoiceId').value,
-    status: document.getElementById('edit_status').value,
-    guestName: document.getElementById('edit_guestName').value,
-    contactNo: document.getElementById('edit_contactNo').value,
-    idNumber: document.getElementById('edit_idNumber').value,
-    attachedId: document.getElementById('edit_attachedId').value,
-    address: document.getElementById('edit_address').value,
-    city: document.getElementById('edit_city').value,
-    state: document.getElementById('edit_state').value,
-    country: document.getElementById('edit_country').value,
-    pinCode: document.getElementById('edit_pinCode').value,
-    roomNo: document.getElementById('edit_roomNo').value,
-    capacity: parseInt(document.getElementById('edit_capacity').value) || 1,
-    extraPersons: parseInt(document.getElementById('edit_extraPersons').value) || 0,
-    extraPersonJoined: document.getElementById('edit_extraPersonJoined').value,
-    extraPersonCheckout: document.getElementById('edit_extraPersonCheckout').value,
-    agentInfo: document.getElementById('edit_agentInfo').value,
-    checkIn: document.getElementById('edit_checkIn').value,
-    checkOut: document.getElementById('edit_checkOut').value,
-    extendedCheckOut: document.getElementById('edit_extendedCheckout').value,
-    stayDays: parseInt(document.getElementById('edit_stayDays').value) || 1,
-    pricePerDay: parseFloat(document.getElementById('edit_pricePerDay').value) || 0,
-    foodOrders: parseFloat(document.getElementById('edit_foodOrders').value) || 0,
-    totalAmount: parseFloat(document.getElementById('edit_totalAmount').value) || 0,
-    advancePaid: parseFloat(document.getElementById('edit_advancePaid').value) || 0,
-    clearedDue: parseFloat(document.getElementById('edit_clearedDue').value) || 0,
-    balanceDue: parseFloat(document.getElementById('edit_balanceDue').value) || 0
-  };
-
-      // 2. Ensure Google Sheet Web App URL is defined
-      const GOOGLE_SHEET_URL = localStorage.getItem('googleSheetUrl') || "https://script.google.com/macros/s/AKfycbwdntzxByvN73YUv3WPj1B3owXWT1y61b_dKFF9z2GEVYjG237-bUQPvqNUY67CruM/exec";
-
-      if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
-        alert("Please configure your Google Sheet Web App URL first!");
-        return;
-      }
-
-      // Show visual feedback / loading state
-      const saveBtn = document.getElementById('saveEditBtn');
-      if (saveBtn) saveBtn.innerText = "Saving to Google Sheet...";
-
-      try {
-        // 3. Post updated data directly to Google Apps Script
-        await fetch(GOOGLE_SHEET_URL, {
-          method: "POST",
-          mode: "no-cors", // Bypass CORS for Google Apps Script Web Apps
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            action: "updateBooking",
-            data: bookingData
-          })
-        });
-
-        alert("Booking updated successfully in Google Sheet!");
-
-        // 4. Update in-memory state & UI (without saving to localStorage)
-        if (typeof bookings !== 'undefined') {
-          const index = bookings.findIndex(b => b.id === bookingData.id);
-          if (index !== -1) {
-            bookings[index] = bookingData; // Update live UI view
-          }
-        }
-
-        // Render updated table / UI
-        if (typeof renderBookings === 'function') renderBookings();
-        if (typeof closeEditModal === 'function') closeEditModal();
-
-      } catch (error) {
-        console.error("Error saving booking to Google Sheet:", error);
-        alert("Failed to save changes to Google Sheet. Please check connection.");
-      } finally {
-        if (saveBtn) saveBtn.innerText = "Save Changes";
-      }
+      
+      const extraTotalInput = document.getElementById('cust-extra-total');
+      if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
+      
+      const cabTotalInput = document.getElementById('cust-cab-total');
+      if (cabTotalInput) cabTotalInput.value = cabFare;
     }
 
     function handleSaveBooking(e) {
@@ -3051,7 +3020,13 @@
       }
 
       const id = bookingModalId;
-      const roomNo = parseInt(document.getElementById('cust-room').value);
+      
+      const roomSelect = document.getElementById('cust-room');
+      const selectedRooms = Array.from(roomSelect.selectedOptions).map(opt => opt.value);
+      if (selectedRooms.length === 0) {
+        alert("⚠️ Please select at least one Room No.");
+        return;
+      }
 
       const inTime = document.getElementById('cust-checkin-time').value || '00:00';
       const outTime = document.getElementById('cust-checkout-time').value || '00:00';
@@ -3167,7 +3142,10 @@
       const conflict = state.bookings.find(b => {
         if (b.inactive) return false;
         if (id && b.id === id) return false;
-        if (parseInt(b.roomNo) !== roomNo) return false;
+        
+        const bRooms = Array.isArray(b.roomNo) ? b.roomNo.map(String) : String(b.roomNo).split(',').map(s => s.trim());
+        const hasRoomOverlap = selectedRooms.some(r => bRooms.includes(String(r)));
+        if (!hasRoomOverlap) return false;
 
         const existingIn = new Date(b.checkIn).getTime();
         const existingOutCheckout = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
@@ -3179,7 +3157,8 @@
       if (conflict) {
         const confOutVal = (conflict.hasExtendedCheckout && conflict.extendedCheckOut) ? conflict.extendedCheckOut : conflict.checkOut;
         const confOutFormatted = formatDateTime(confOutVal);
-        alert(`❌ Booking Conflict Alert!\n\nRoom ${roomNo} is already occupied by ${conflict.name} until ${confOutFormatted}.\n\nPlease select a check-in time after ${confOutFormatted} or assign a different room.`);
+        const conflictRooms = Array.isArray(conflict.roomNo) ? conflict.roomNo.join(', ') : conflict.roomNo;
+        alert(`❌ Booking Conflict Alert!\n\nRoom(s) ${conflictRooms} is already occupied by ${conflict.name} until ${confOutFormatted}.\n\nPlease select a check-in time after ${confOutFormatted} or assign different rooms.`);
         return;
       }
 
@@ -3203,6 +3182,8 @@
       const totalAmt = parseFloat(document.getElementById('cust-total').value) || 0;
       const initialAdvAmt = parseFloat(document.getElementById('cust-advance').getAttribute('data-initial-adv')) || parseFloat(document.getElementById('cust-advance').value) || 0;
       const clearedDueAmt = parseFloat(document.getElementById('cust-clear-bill').value) || 0;
+      const cabFareVal = parseFloat(document.getElementById('cust-cab-fare').value) || 0;
+      const cabRemarkVal = document.getElementById('cust-cab-remark').value.trim();
 
       const totalPaid = initialAdvAmt + clearedDueAmt;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
@@ -3222,7 +3203,7 @@
         contactNo: contactNoVal,
         idProofBase64: document.getElementById('cust-id-file-base64').value,
         idProofFileName: document.getElementById('cust-id-file-name').value,
-        roomNo: roomNo,
+        roomNo: selectedRooms,
         agentInfo: document.getElementById('cust-agent').value,
         capacity: parseInt(document.getElementById('cust-capacity').value) || 1,
         extraPersons: extraPersons,
@@ -3237,6 +3218,8 @@
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         foodOrders: foodOrdersList,
+        cabFare: cabFareVal,
+        cabRemark: cabRemarkVal,
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
         clearedDue: clearedDueAmt,
@@ -3329,6 +3312,7 @@
 
         const isClosed = now > checkOutTime;
         const isInactive = b.inactive;
+        const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
 
         let statusBgClass = "hover:bg-slate-50";
         let statusDotHtml = "";
@@ -3356,6 +3340,11 @@
           if (totalFoodCharge > 0) {
             foodSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-amber-800 font-semibold'}"><i class="fa-solid fa-utensils text-[8px] mr-0.5"></i>Food (${b.foodOrders.length}): +₹${totalFoodCharge}</div>`;
           }
+        }
+        
+        let cabSummaryHtml = '';
+        if (b.cabFare && b.cabFare > 0) {
+          cabSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-indigo-800 font-semibold'}"><i class="fa-solid fa-taxi text-[8px] mr-0.5"></i>Cab: +₹${b.cabFare}</div>`;
         }
 
         const printOnClick = `printInvoice('${b.id}')`;
@@ -3399,7 +3388,7 @@
           <td class="py-2.5 px-3 font-medium whitespace-nowrap">${contactDisplay}</td>
           <td class="py-2.5 px-3 font-mono text-[10px]">${b.idNo || '-'}</td>
           <td class="py-2.5 px-3">${idProofCellHtml}</td>
-          <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full text-[10px]">Room ${b.roomNo}</span></td>
+          <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full text-[10px] break-all">Room ${roomsDisplay}</span></td>
           <td class="py-2.5 px-3 font-bold text-slate-700">${tableCap} ${tableCapLabel} ${extraPersonsText}</td>
           <td class="py-2.5 px-3 ${!isMasterValid ? 'text-rose-900' : 'text-slate-600'} text-[10px]">${b.agentInfo || '-'}</td>
           <td class="py-2.5 px-3 text-[10px]">
@@ -3409,6 +3398,7 @@
           <td class="py-2.5 px-3">
             <div class="font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">₹${b.perDayPrice}/day (${b.noOfDays}d)</div>
             ${foodSummaryHtml}
+            ${cabSummaryHtml}
           </td>
           <td class="py-2.5 px-3 font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">
             ₹${b.totalAmount}
@@ -3630,6 +3620,7 @@
         const cInMs = new Date(b.checkIn).getTime();
         const cOutMs = getEffectiveCheckoutTime(b);
         const effectiveCheckout = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
+        const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
 
         let statusText = "Upcoming";
         let statusColorClass = "text-blue-400 font-bold";
@@ -3645,7 +3636,7 @@
         item.innerHTML = `
           <div class="flex justify-between items-center">
             <span class="font-bold text-blue-400 text-[11px]">${b.name}</span>
-            <span class="bg-blue-900/60 text-blue-200 px-2 py-0.5 rounded-full text-[9px] font-mono">Room ${b.roomNo}</span>
+            <span class="bg-blue-900/60 text-blue-200 px-2 py-0.5 rounded-full text-[9px] font-mono">Room ${roomsDisplay}</span>
           </div>
           <div class="text-[9px] text-slate-300">
             Check-In: ${formatDateTime(b.checkIn)}<br>
@@ -3684,8 +3675,6 @@
   </script>
 </body>
 </html>
-
-
       
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
