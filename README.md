@@ -543,5 +543,37 @@
       listContainer.innerHTML = `
         <div class="font-semibold text-slate-200">${b.guestName || 'N/A'}</div>
         <div class="text-slate-400 text-[10px]"><i class="fa-solid fa-phone text-slate-500 mr-1"></i>${b.guestPhone || 'No Phone'}</div>
-        <div class="text-slate-400 text-[10px]"><i class="fa-regular fa-calendar mr-1"></i>${b.checkIn} →${b.checkOut}</div>
+        <div class="text-slate-400 text-[10px]"><i class="fa-regular fa-calendar mr-1"></i>${b.checkIn} → ${b.checkOut}</div>
         <div class="pt-1">
+          Status: <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${statusColorClass}">${b.status}</span>
+        </div>
+        <div class="flex justify-between items-center text-[10px] pt-1.5 border-t border-slate-800 mt-1">
+          <span class="text-emerald-400 font-semibold">Total: ₹${b.totalAmount || 0}</span>
+          <span class="${(b.totalDue || 0) > 0 ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}">
+            ${(b.totalDue || 0) > 0 ? `Due: ₹${b.totalDue}` : 'Paid'}
+          </span>
+        </div>
+      `;
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      const scrollY = window.scrollY || window.pageYOffset;
+      const scrollX = window.scrollX || window.pageXOffset;
+
+      box.style.top = `${rect.bottom + scrollY + 5}px`;
+      
+      let leftPos = rect.left + scrollX - 20;
+      if (leftPos + 260 > window.innerWidth) {
+        leftPos = window.innerWidth - 270;
+      }
+      box.style.left = `${Math.max(10, leftPos)}px`;
+
+      box.classList.remove('hidden');
+    }
+
+    function closeCommentBox() {
+      const box = document.getElementById('excel-comment-box');
+      if (box) box.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
