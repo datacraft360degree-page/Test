@@ -2912,6 +2912,72 @@ function loadLocalStorageFallback() {
       document.getElementById('cust-due').value = due;
     }
 
+// Replace/Update your edit & save booking handler with this:
+
+async function saveEditedBooking(event) {
+  if (event) event.preventDefault();
+
+  // 1. Collect form data
+  const bookingData = {
+    id: document.getElementById('editBookingId').value, // Unique Booking ID
+    guestName: document.getElementById('editGuestName').value,
+    phone: document.getElementById('editPhone').value,
+    roomNo: document.getElementById('editRoomNo').value,
+    checkIn: document.getElementById('editCheckIn').value,
+    checkOut: document.getElementById('editCheckOut').value,
+    amount: document.getElementById('editAmount').value,
+    status: document.getElementById('editStatus').value,
+    paymentMode: document.getElementById('editPaymentMode').value
+  };
+
+  // 2. Ensure Google Sheet Web App URL is defined
+  const GOOGLE_SHEET_URL = localStorage.getItem('googleSheetUrl') || "https://script.google.com/macros/s/AKfycbwdntzxByvN73YUv3WPj1B3owXWT1y61b_dKFF9z2GEVYjG237-bUQPvqNUY67CruM/exec";
+
+  if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
+    alert("Please configure your Google Sheet Web App URL first!");
+    return;
+  }
+
+  // Show visual feedback / loading state
+  const saveBtn = document.getElementById('saveEditBtn');
+  if (saveBtn) saveBtn.innerText = "Saving to Google Sheet...";
+
+  try {
+    // 3. Post updated data directly to Google Apps Script
+    await fetch(GOOGLE_SHEET_URL, {
+      method: "POST",
+      mode: "no-cors", // Bypass CORS for Google Apps Script Web Apps
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action: "updateBooking",
+        data: bookingData
+      })
+    });
+
+    alert("Booking updated successfully in Google Sheet!");
+
+    // 4. Update in-memory state & UI (without saving to localStorage)
+    if (typeof bookings !== 'undefined') {
+      const index = bookings.findIndex(b => b.id === bookingData.id);
+      if (index !== -1) {
+        bookings[index] = bookingData; // Update live UI view
+      }
+    }
+
+    // Render updated table / UI
+    if (typeof renderBookings === 'function') renderBookings();
+    if (typeof closeEditModal === 'function') closeEditModal();
+
+  } catch (error) {
+    console.error("Error saving booking to Google Sheet:", error);
+    alert("Failed to save changes to Google Sheet. Please check connection.");
+  } finally {
+    if (saveBtn) saveBtn.innerText = "Save Changes";
+  }
+}
+
     function handleSaveBooking(e) {
       e.preventDefault();
 
