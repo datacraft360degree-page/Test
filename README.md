@@ -1,3 +1,5 @@
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -11,11 +13,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Google API Client Libraries -->
-  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
-
   <style>
     /* Samsung One UI Smooth Styling & Compact Scrollbar */
     body {
@@ -267,9 +264,6 @@
         </button>
         <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
-        </button>
-        <button onclick="handleAuthClick()" id="btn-google-sync" class="bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-brands fa-google text-[10px]"></i> Sync Sheet
         </button>
         <button onclick="openExportModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-solid fa-file-excel text-[10px]"></i> Export
@@ -921,104 +915,9 @@
   </div>
 
   <script>
-    // --- GOOGLE SHEETS API CONFIGURATION ---
-    const CLIENT_ID = '279874048891-0djgo0gjnlcnr3j59vh8jk6611vsrcu9.apps.googleusercontent.com';
-    const API_KEY = 'API key 1';
-    const SPREADSHEET_ID = 'https://docs.google.com/spreadsheets/d/1d21x3jicl-ukU6nUEbWtVpu7xNij70xToaYbCjM3VUk/edit?gid';
-    const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
-    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
-    let tokenClient;
-    let gapiInited = false;
-    let gisInited = false;
-
-    function gapiLoaded() {
-      gapi.load('client', intializeGapiClient);
-    }
-
-    async function intializeGapiClient() {
-      await gapi.client.init({
-        apiKey: API_KEY,
-        discoveryDocs: [DISCOVERY_DOC],
-      });
-      gapiInited = true;
-    }
-
-    function gisLoaded() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: '', // defined at request time
-      });
-      gisInited = true;
-    }
-
-    function handleAuthClick() {
-      if (!gapiInited || !gisInited) {
-        alert("Google API scripts are still loading. Please try again in a moment.");
-        return;
-      }
-      
-      tokenClient.callback = async (resp) => {
-        if (resp.error !== undefined) {
-          throw (resp);
-        }
-        await syncToGoogleSheet();
-      };
-
-      if (gapi.client.getToken() === null) {
-        tokenClient.requestAccessToken({prompt: 'consent'});
-      } else {
-        tokenClient.requestAccessToken({prompt: ''});
-      }
-    }
-
-    async function syncToGoogleSheet() {
-      if (!state.bookings || state.bookings.length === 0) {
-        alert("No booking records available to sync!");
-        return;
-      }
-
-      try {
-        const exportData = state.bookings.map(b => [
-          b.bookingCode || "-",
-          b.name || "-",
-          b.contactNo || "-",
-          b.roomNo || "-",
-          b.checkIn ? formatDateTime(b.checkIn) : "-",
-          b.checkOut ? formatDateTime(b.checkOut) : "-",
-          b.perDayPrice || 0,
-          b.noOfDays || 0,
-          b.totalAmount || 0,
-          b.advanced || 0,
-          b.totalDue || 0,
-          b.inactive ? "Inactive" : "Active"
-        ]);
-
-        const headers = ["Booking ID", "Guest Name", "Contact", "Room No", "Check-In", "Check-Out", "Price/Day", "Days", "Total Amount", "Advance Paid", "Balance Due", "Status"];
-        const values = [headers, ...exportData];
-
-        const body = { values: values };
-        
-        await gapi.client.sheets.spreadsheets.values.update({
-          spreadsheetId: SPREADSHEET_ID,
-          range: 'Sheet1!A1',
-          valueInputOption: 'USER_ENTERED',
-          resource: body
-        });
-        
-        const toast = document.getElementById('toast');
-        const msg = document.getElementById('toast-message');
-        msg.innerText = 'Successfully synced to Google Sheets!';
-        toast.classList.remove('hidden');
-        setTimeout(() => toast.classList.add('hidden'), 3000);
-        
-      } catch (err) {
-        console.error("Google Sheets Sync Error:", err);
-        alert("Error syncing to Google Sheets. Check console for details.");
-      }
-    }
-    // ----------------------------------------
+    // Replace this with your actual Google Apps Script Web App URL
+const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwdntzxByvN73YUv3WPj1B3owXWT1y61b_dKFF9z2GEVYjG237-bUQPvqNUY67CruM/exec";
 
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000; // 1 Hour Buffer in Milliseconds
     let activeModalBooking = null; // Currently opened invoice booking reference
@@ -1661,41 +1560,80 @@
       };
     }
 
-    function loadSavedData() {
-      const saved = localStorage.getItem('webapp_data');
-      if (saved) {
-        try { 
-          const parsed = JSON.parse(saved);
-          if (parsed.bookings) {
-            state = parsed;
-            if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
-              state.roomsCapacity = [
-                { roomNo: 1, capacity: 4 },
-                { roomNo: 2, capacity: 2 },
-                { roomNo: 3, capacity: 4 },
-                { roomNo: 4, capacity: 4 },
-                { roomNo: 5, capacity: 5 }
-              ];
-            }
-            if (!state.masterAgents) {
-              state.masterAgents = [
-                { agentName: "Self", phone: "Direct", roomNo: "All Rooms" },
-                { agentName: "A1", phone: "1234567890", roomNo: "All Rooms" },
-                { agentName: "A2", phone: "1234567890", roomNo: "All Rooms" },
-                { agentName: "A3", phone: "1234567890", roomNo: "All Rooms" },
-                { agentName: "A4", phone: "1234567890", roomNo: "All Rooms" }
-              ];
-            }
-            state.dashSelectedYear = defaultAppYear;
-            state.selectedYear = defaultAppYear;
-            if (!state.yearlyCounters) {
-              state.yearlyCounters = { [defaultAppYear]: state.bookings.length || 0 };
-            }
-          }
-        } catch(e){}
+    async function loadSavedData() {
+  const toast = document.getElementById('toast');
+  const msg = document.getElementById('toast-message');
+  
+  if (msg) msg.innerText = 'Syncing data from Google Sheets...';
+  if (toast) toast.classList.remove('hidden');
+
+  try {
+    const response = await fetch(GOOGLE_SHEET_API_URL);
+    const result = await response.json();
+
+    if (result.status === 'success' && result.data) {
+      const parsed = result.data;
+      if (parsed.bookings) {
+        state = parsed;
+        if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
+          state.roomsCapacity = [
+            { roomNo: 1, capacity: 4 },
+            { roomNo: 2, capacity: 2 },
+            { roomNo: 3, capacity: 4 },
+            { roomNo: 4, capacity: 4 },
+            { roomNo: 5, capacity: 5 }
+          ];
+        }
+        if (!state.masterAgents) {
+          state.masterAgents = [
+            { agentName: "Self", phone: "Direct", roomNo: "All Rooms" },
+            { agentName: "A1", phone: "1234567890", roomNo: "All Rooms" },
+            { agentName: "A2", phone: "1234567890", roomNo: "All Rooms" },
+            { agentName: "A3", phone: "1234567890", roomNo: "All Rooms" },
+            { agentName: "A4", phone: "1234567890", roomNo: "All Rooms" }
+          ];
+        }
+        state.dashSelectedYear = defaultAppYear;
+        state.selectedYear = defaultAppYear;
+        if (!state.yearlyCounters) {
+          state.yearlyCounters = { [defaultAppYear]: state.bookings.length || 0 };
+        }
       }
-      state.selectedYear = defaultAppYear;
+      // Keep local storage synced as fallback
+      localStorage.setItem('webapp_data', JSON.stringify(state));
+      if (msg) msg.innerText = 'Data synced from Google Sheets!';
+    } else {
+      // Fallback to localStorage if Google Sheet is empty or fails
+      loadLocalStorageFallback();
     }
+  } catch (err) {
+    console.warn("Could not connect to Google Sheets, using local storage backup:", err);
+    loadLocalStorageFallback();
+  } finally {
+    if (toast) setTimeout(() => toast.classList.add('hidden'), 2500);
+    
+    // Refresh all UI elements after data fetch completes
+    initDashboard();
+    populateRoomDropdown();
+    populateAgentDropdown();
+    searchMasterBookingById();
+    renderBookingsTable();
+    renderRoomCapacityTable();
+    renderMasterAgentTable();
+    renderCalendar(defaultAppYear);
+    checkUpcomingCheckoutsWithDue();
+  }
+}
+
+function loadLocalStorageFallback() {
+  const saved = localStorage.getItem('webapp_data');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed.bookings) state = parsed;
+    } catch(e){}
+  }
+}
 
     function setMinBookingDates() {
       const checkInInput = document.getElementById('cust-checkin-date');
@@ -1718,40 +1656,58 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      checkAuthStatus();
-      loadSavedData();
-      setMinBookingDates();
-      populateDashboardYearDropdown();
-      initDashboard();
-      populateRoomDropdown();
-      populateAgentDropdown();
-      populateCalendarYearDropdown();
-      searchMasterBookingById();
-      renderBookingsTable();
-      renderRoomCapacityTable();
-      renderMasterAgentTable();
-      renderCalendar(defaultAppYear);
+    document.addEventListener("DOMContentLoaded", async () => {
+  checkAuthStatus();
+  setMinBookingDates();
+  populateDashboardYearDropdown();
+  populateCalendarYearDropdown();
 
-      checkUpcomingCheckoutsWithDue();
-      setInterval(checkUpcomingCheckoutsWithDue, 60000);
-      setInterval(triggerPeriodicAutoSave, 300000);
-    });
+  // Load data asynchronously from Google Sheets
+  await loadSavedData();
+
+  setInterval(checkUpcomingCheckoutsWithDue, 60000);
+  setInterval(triggerPeriodicAutoSave, 300000); // Auto-save every 5 minutes
+});
 
     function triggerPeriodicAutoSave() {
       saveChanges(true, true);
     }
 
-    function saveChanges(isAutoSave = false, quiet = false) {
-      localStorage.setItem('webapp_data', JSON.stringify(state));
-      if (!quiet) {
-        const toast = document.getElementById('toast');
-        const msg = document.getElementById('toast-message');
-        msg.innerText = isAutoSave ? 'Changes Auto save successfully!' : 'Data saved successfully!';
-        toast.classList.remove('hidden');
-        setTimeout(() => toast.classList.add('hidden'), 3000);
-      }
+    async function saveChanges(isAutoSave = false, quiet = false) {
+  // Always update local storage immediately for fast UI responsiveness
+  localStorage.setItem('webapp_data', JSON.stringify(state));
+
+  const toast = document.getElementById('toast');
+  const msg = document.getElementById('toast-message');
+
+  if (!quiet && toast && msg) {
+    msg.innerText = 'Saving to Google Sheets...';
+    toast.classList.remove('hidden');
+  }
+
+  try {
+    // Send updated state to Google Sheets via Apps Script POST
+    await fetch(GOOGLE_SHEET_API_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Standard cross-origin setting for Google Apps Script
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(state)
+    });
+
+    if (!quiet && toast && msg) {
+      msg.innerText = isAutoSave ? 'Changes auto-saved to Google Sheets!' : 'Saved to Google Sheets successfully!';
+      setTimeout(() => toast.classList.add('hidden'), 3000);
     }
+  } catch (err) {
+    console.error("Failed to save to Google Sheets:", err);
+    if (!quiet && toast && msg) {
+      msg.innerText = 'Saved locally (Cloud sync pending)';
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+  }
+}
 
     function populateDashboardYearDropdown() {
       const yearSelect = document.getElementById('dash-year-select');
@@ -3523,4 +3479,3 @@
   </script>
 </body>
 </html>
-
