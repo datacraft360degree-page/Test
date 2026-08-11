@@ -1,4 +1,3 @@
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -258,24 +257,24 @@
       <!-- Action Buttons -->
   <div class="flex flex-wrap items-center justify-center sm:justify-end gap-1.5">
   <button onclick="openAlertModal()" title="View Alerts" class="relative bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-    <i class="fa-solid fa-bell text-[10px]"></i> Alerts
+    <i class="fa-solid fa-bell text-[8px]"></i> Alerts
     <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
   </button>
 
   <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-    <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+    <i class="fa-solid fa-floppy-disk text-[8px]"></i> Save
   </button>
 
   <button onclick="openExportModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-    <i class="fa-solid fa-file-excel text-[10px]"></i> Export
+    <i class="fa-solid fa-file-excel text-[8px]"></i> Export
   </button>
 
   <button onclick="promptWipeOutData()" title="Clear All Data & Reset" class="bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition shadow-xs">
-    <i class="fa-solid fa-trash-arrow-up text-[10px]"></i> Wipe Out Data
+    <i class="fa-solid fa-trash-arrow-up text-[8px]"></i> Wipe Out Data
   </button>
 
   <button onclick="logoutUser()" title="Logout" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-    <i class="fa-solid fa-right-from-bracket text-[10px]"></i> Logout
+    <i class="fa-solid fa-right-from-bracket text-[8px]"></i> Logout
   </button>
 </div>
 </header>
