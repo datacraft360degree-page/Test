@@ -36,8 +36,6 @@
       
       <h1><a href="https://datacraft360degree-page.github.io/Test/">Test</a></h1>
       
-
-      <p>&lt;!DOCTYPE html&gt;</p>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
