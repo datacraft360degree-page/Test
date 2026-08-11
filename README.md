@@ -216,7 +216,6 @@
       </div>
     </div>
   </div>
-
   <!-- Excel Comment Box Popout -->
   <div id="excel-comment-box" onclick="event.stopPropagation()" class="excel-comment-box hidden absolute z-50 bg-slate-900 text-white text-[11px] rounded-2xl p-3 shadow-2xl border border-slate-800 space-y-2 w-64 transition-all duration-150">
     <div class="font-bold text-blue-400 border-b border-slate-800 pb-1.5 flex justify-between items-center text-[10px]">
@@ -230,7 +229,6 @@
     </div>
     <div id="comm-booking-list" class="space-y-1.5 max-h-56 overflow-y-auto pr-0.5"></div>
   </div>
-
   <!-- Compact One UI Header Navigation -->
   <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/60 text-slate-900 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col md:flex-row justify-between items-center gap-2.5">
@@ -260,25 +258,20 @@
     <i class="fa-solid fa-bell text-[8px]"></i> Alerts
     <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
   </button>
-
   <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
     <i class="fa-solid fa-floppy-disk text-[8px]"></i> Save
   </button>
-
   <button onclick="openExportModal()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
     <i class="fa-solid fa-file-excel text-[8px]"></i> Export
   </button>
-
   <button onclick="promptWipeOutData()" title="Clear All Data & Reset" class="bg-rose-600 hover:bg-rose-700 text-white border border-rose-700 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition shadow-xs">
     <i class="fa-solid fa-trash-arrow-up text-[8px]"></i> Wipe Out Data
   </button>
-
   <button onclick="logoutUser()" title="Logout" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
     <i class="fa-solid fa-right-from-bracket text-[8px]"></i> Logout
   </button>
 </div>
 </header>
-
   <!-- Notification Toast -->
   <div id="toast" class="hidden fixed bottom-6 right-6 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl shadow-xl z-50 flex items-center gap-2.5 no-print border border-slate-800 text-[11px]">
     <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
@@ -3587,6 +3580,5 @@ function loadLocalStorageFallback() {
     </div>
   </div>
 </div>
-
 </body>
 </html>
