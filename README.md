@@ -1052,9 +1052,15 @@
           body: JSON.stringify(payload)
         });
 
-        // Reset local state
+        // Reset local state (Default Room Capacity Room 1 to 5: 4,2,4,4,4 & Agent Directory to Self/Direct)
         state.bookings = [];
-        state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }];
+        state.roomsCapacity = [
+          { roomNo: 1, capacity: 4 },
+          { roomNo: 2, capacity: 2 },
+          { roomNo: 3, capacity: 4 },
+          { roomNo: 4, capacity: 4 },
+          { roomNo: 5, capacity: 4 }
+        ];
         state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
         
         refreshAllUI();
@@ -1069,7 +1075,7 @@
       }
     }
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvFdRB-rD_eZW-yl2gitJ3BZK0RjrPl1xmc79Q6ISE01k9lZNgp3itWRnuAviK1de74Q/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
@@ -1340,7 +1346,12 @@
       }
     }
 
-    function logoutUser() {
+    function logoutUser(skipSavePrompt = false) {
+      if (isLoggedIn && !skipSavePrompt) {
+        if (confirm("Please save your data before logout! Do you want to save changes now?")) {
+          saveChanges();
+        }
+      }
       isLoggedIn = false;
       isMasterUnlocked = false;
       sessionStorage.removeItem('app_authenticated');
@@ -1405,7 +1416,7 @@
       document.getElementById('logout-warning-modal').classList.add('hidden');
 
       warningTimer = setTimeout(showInactivityWarning, INACTIVITY_LIMIT_MS - WARNING_BUFFER_MS);
-      inactivityTimer = setTimeout(logoutUser, INACTIVITY_LIMIT_MS);
+      inactivityTimer = setTimeout(() => logoutUser(true), INACTIVITY_LIMIT_MS);
     }
 
     function showInactivityWarning() {
@@ -1467,14 +1478,10 @@
         { roomNo: 2, capacity: 2 },
         { roomNo: 3, capacity: 4 },
         { roomNo: 4, capacity: 4 },
-        { roomNo: 5, capacity: 5 }
+        { roomNo: 5, capacity: 4 }
       ],
       masterAgents: [
-        { agentName: "Self", phone: "Direct", roomNo: "All Rooms" },
-        { agentName: "A1", phone: "1234567890", roomNo: "All Rooms" },
-        { agentName: "A2", phone: "1234567890", roomNo: "All Rooms" },
-        { agentName: "A3", phone: "1234567890", roomNo: "All Rooms" },
-        { agentName: "A4", phone: "1234567890", roomNo: "All Rooms" }
+        { agentName: "Self", phone: "Direct", roomNo: "All Rooms" }
       ],
       selectedYear: defaultAppYear,
       dashSelectedYear: defaultAppYear
@@ -1692,7 +1699,13 @@
     
     function refreshAllUI() {
       if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
-        state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }, { roomNo: 3, capacity: 4 }, { roomNo: 4, capacity: 4 }, { roomNo: 5, capacity: 5 }];
+        state.roomsCapacity = [
+          { roomNo: 1, capacity: 4 },
+          { roomNo: 2, capacity: 2 },
+          { roomNo: 3, capacity: 4 },
+          { roomNo: 4, capacity: 4 },
+          { roomNo: 5, capacity: 4 }
+        ];
       }
       if (!state.masterAgents || state.masterAgents.length === 0) {
         state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
@@ -3881,4 +3894,3 @@
   </script>
 </body>
 </html>
-
