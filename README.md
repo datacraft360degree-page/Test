@@ -1,3 +1,6 @@
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1056,7 +1059,7 @@
     }
     
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwFD7ASOkJ1XnRUrH9pEiTz4Lolm8zwaKOCr2nkLN__dvR1_51zWGxIJ1ZlV82X2r2O/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000; // 1 Hour Buffer in Milliseconds
     let activeModalBooking = null; // Currently opened invoice booking reference
@@ -1854,7 +1857,7 @@
       if (!quiet) {
         const toast = document.getElementById('toast');
         const msg = document.getElementById('toast-message');
-       	msg.innerText = isAutoSave ? 'Auto-saving to cloud...' : 'Saving to cloud storage...';
+        msg.innerText = isAutoSave ? 'Auto-saving to cloud...' : 'Saving to cloud storage...';
         toast.classList.remove('hidden');
       }
 
@@ -2111,7 +2114,7 @@
         const allChk = document.getElementById('room-all');
         if(allChk) allChk.checked = true;
       } else {
-        textSpan.innerText = checkedVals.map(r => `Room ${r}`).join(', ');
+        textSpan.innerText = checkedVals.map(r => `Rm ${r}`).join(', ');
       }
     }
     
