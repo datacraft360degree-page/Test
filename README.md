@@ -1,5 +1,3 @@
-
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -3346,4 +3344,6 @@
         const confOutVal = (isTrue(conflict.hasExtendedCheckout) && conflict.extendedCheckOut) ? conflict.extendedCheckOut : conflict.checkOut;
         const confOutFormatted = formatDateTime(confOutVal);
         const conflictRooms = getBookingRooms(conflict).join(',I'm having a hard time fulfilling your request. Can I help you with something else instead?
-
+  </script>
+</body>
+</html>
