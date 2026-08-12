@@ -1,3 +1,5 @@
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1571,8 +1573,10 @@
           includeMeals: b.includeMeals !== false,
           noOfDays: b.noOfDays || 0,
           perDayPrice: b.perDayPrice || 0,
-          foodOrders: b.foodOrders ? JSON.stringify(b.foodOrders) : "",
-          cabTrips: b.cabTrips ? JSON.stringify(b.cabTrips) : "",
+          foodOrders: b.foodOrders ? (typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(b.foodOrders)) : "",
+          cabFare: b.cabFare || 0,
+          cabRemark: b.cabRemark || "",
+          cabTrips: b.cabTrips ? (typeof b.cabTrips === 'string' ? b.cabTrips : JSON.stringify(b.cabTrips)) : "",
           totalAmount: b.totalAmount || 0,
           initialAdv: b.initialAdv || 0,
           clearedDue: b.clearedDue || 0,
@@ -2827,8 +2831,17 @@
           mealsChkBox.checked = b.includeMeals !== undefined ? !!b.includeMeals : true;
         }
 
-        if (b.foodOrders && b.foodOrders.length > 0) {
-          b.foodOrders.forEach(fo => {
+        // --- SAFE FALLBACKS FOR JSON ARRAYS FROM GOOGLE SHEETS --- //
+        
+        if (b.foodOrders) {
+           let foList = [];
+           if (Array.isArray(b.foodOrders)) {
+              foList = b.foodOrders;
+           } else if (typeof b.foodOrders === 'string' && b.foodOrders.length > 5) {
+              try { foList = JSON.parse(b.foodOrders); } catch(e) {}
+           }
+           
+           foList.forEach(fo => {
             let fDate = '', fTime = '';
             if (fo.foodDateTime) {
               const parts = fo.foodDateTime.split('T');
@@ -2839,11 +2852,22 @@
           });
         }
         
-        // Cab Trips Processing
-        if (b.cabTrips && b.cabTrips.length > 0) {
-          b.cabTrips.forEach(trip => {
-            addCabTripRow(trip.rate || 0, trip.dateStr || '', trip.timeStr || '', trip.remark || '', isClosedAndWithin3Days);
-          });
+        // Cab Trips Processing with parsed fallbacks and direct mappings
+        if (b.cabTrips) {
+           let tripsList = [];
+           if (Array.isArray(b.cabTrips)) {
+              tripsList = b.cabTrips;
+           } else if (typeof b.cabTrips === 'string' && b.cabTrips.length > 5) {
+              try { tripsList = JSON.parse(b.cabTrips); } catch(e) {}
+           }
+           
+           if (tripsList.length > 0) {
+             tripsList.forEach(trip => {
+                addCabTripRow(trip.rate || 0, trip.dateStr || '', trip.timeStr || '', trip.remark || '', isClosedAndWithin3Days);
+             });
+           } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
+             addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedAndWithin3Days);
+           }
         } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
           addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedAndWithin3Days);
         }
@@ -3281,8 +3305,11 @@
         return;
       }
       
-      // Save Cab Trips Mapping
+      // Save Cab Trips Mapping and compile flat variables
       const cabTripsList = [];
+      let totalCabFareToSave = 0;
+      let cabRemarksList = [];
+      
       document.querySelectorAll('.cab-trip-row').forEach((row, index) => {
         const rate = parseFloat(row.querySelector('.cust-cab-rate').value) || 0;
         const dateVal = row.querySelector('.cust-cab-date').value || '';
@@ -3291,6 +3318,10 @@
         const dt = (dateVal && timeVal) ? `${dateVal}T${timeVal}` : '';
 
         if (rate > 0 || remark) {
+          totalCabFareToSave += rate;
+          if (remark) {
+             cabRemarksList.push(remark);
+          }
           cabTripsList.push({
             tripName: `Trip ${index + 1}`,
             dateStr: dateVal,
@@ -3389,6 +3420,8 @@
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
+        cabFare: totalCabFareToSave,
+        cabRemark: cabRemarksList.join(' | '),
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
         clearedDue: clearedDueAmt,
@@ -3511,19 +3544,29 @@
           statusDotHtml = `<span class="w-2.5 h-2.5 bg-blue-500 rounded-full inline-block flex-shrink-0" title="Upcoming Booking"></span>`;
         }
 
+        // Dynamic Parsing Fallbacks for Tables
         let foodSummaryHtml = '';
-        if (b.foodOrders && b.foodOrders.length > 0) {
-          const totalFoodCharge = b.foodOrders.reduce((acc, fo) => acc + (fo.foodCharge || 0), 0);
+        let parseFood = b.foodOrders || [];
+        if (typeof parseFood === 'string' && parseFood.length > 5) {
+          try { parseFood = JSON.parse(parseFood); } catch(e){}
+        }
+        if (Array.isArray(parseFood) && parseFood.length > 0) {
+          const totalFoodCharge = parseFood.reduce((acc, fo) => acc + (fo.foodCharge || 0), 0);
           if (totalFoodCharge > 0) {
-            foodSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-amber-800 font-semibold'}"><i class="fa-solid fa-utensils text-[8px] mr-0.5"></i>Food (${b.foodOrders.length}): +₹${totalFoodCharge}</div>`;
+            foodSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-amber-800 font-semibold'}"><i class="fa-solid fa-utensils text-[8px] mr-0.5"></i>Food (${parseFood.length}): +₹${totalFoodCharge}</div>`;
           }
         }
         
-        // Dynamic Cab rendering based on Array length
+        // Cab Trips Processing
         let cabSummaryHtml = '';
         let totalCab = 0;
-        if (b.cabTrips && b.cabTrips.length > 0) {
-            totalCab = b.cabTrips.reduce((acc, t) => acc + (t.rate || 0), 0);
+        let parseCab = b.cabTrips || [];
+        if (typeof parseCab === 'string' && parseCab.length > 5) {
+          try { parseCab = JSON.parse(parseCab); } catch(e){}
+        }
+        
+        if (Array.isArray(parseCab) && parseCab.length > 0) {
+            totalCab = parseCab.reduce((acc, t) => acc + (t.rate || 0), 0);
         } else if (b.cabFare > 0) {
             totalCab = b.cabFare; 
         }
