@@ -1,29 +1,4 @@
-<html lang="en-US">
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<meta name="generator" content="Jekyll v3.10.0" />
-<!-- <meta property="og:title" content="Aniruddha-Business-Portal" /> -->
-<meta property="og:locale" content="en_US" />
-<link rel="canonical" href="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/" />
-<meta property="og:url" content="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/" />
-<meta property="og:site_name" content="Aniruddha-Business-Portal" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Aniruddha-Business-Portal" />
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","headline":"Aniruddha-Business-Portal","name":"Aniruddha-Business-Portal","url":"https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/"}</script>
-
-    <link rel="stylesheet" href="/Aniruddha-Business-Portal/assets/css/style.css?v=7e4491ec774c1bfaa552164c4c7f9ea896c9e28e">
-  </head>
-  <body>
-    <div class="container-lg px-3 my-5 markdown-body">
-      
-      <h1><a href="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/"></a></h1>
-
-      <html lang="en">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -714,8 +689,16 @@
           </h4>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Room No(s) (Ctrl+Click)</label>
-              <select id="cust-room" multiple onchange="autoCaptureRoomDetails()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600" style="height: 5.5rem;"></select>
+              <label class="block font-semibold text-slate-600 mb-0.5">Room No(s)</label>
+              <div class="relative" id="room-dropdown-container">
+                <button type="button" onclick="toggleRoomDropdown()" id="room-dropdown-btn" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
+                  <span id="room-dropdown-text" class="truncate pr-2">Select Rooms...</span>
+                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                </button>
+                <div id="room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
+                  <!-- Generated Checkboxes Go Here -->
+                </div>
+              </div>
             </div>
             
             <div class="flex flex-col gap-2">
@@ -1019,62 +1002,58 @@
     }
 
     // --- DOUBLE LAYER DATA WIPE OUT LOGIC ---
-function requestDataWipe() {
-  if (!isMasterUnlocked) {
-    alert("You must unlock Master Data access first to perform a data wipe.");
-    openMasterAuthModal();
-    return;
-  }
-  document.getElementById('wipe-layer-1-modal').classList.remove('hidden');
-}
+    function requestDataWipe() {
+      if (!isMasterUnlocked) {
+        alert("You must unlock Master Data access first to perform a data wipe.");
+        openMasterAuthModal();
+        return;
+      }
+      document.getElementById('wipe-layer-1-modal').classList.remove('hidden');
+    }
 
-function proceedToWipeLayer2() {
-  document.getElementById('wipe-layer-1-modal').classList.add('hidden');
-  document.getElementById('wipe-layer-2-modal').classList.remove('hidden');
-}
+    function proceedToWipeLayer2() {
+      document.getElementById('wipe-layer-1-modal').classList.add('hidden');
+      document.getElementById('wipe-layer-2-modal').classList.remove('hidden');
+    }
 
-function closeWipeModals() {
-  document.getElementById('wipe-layer-1-modal').classList.add('hidden');
-  document.getElementById('wipe-layer-2-modal').classList.add('hidden');
-}
+    function closeWipeModals() {
+      document.getElementById('wipe-layer-1-modal').classList.add('hidden');
+      document.getElementById('wipe-layer-2-modal').classList.add('hidden');
+    }
 
-async function executeGoogleSheetWipe() {
-  const btn = document.getElementById('btn-final-wipe');
-  btn.innerText = "WIPING DATA...";
-  btn.disabled = true;
+    async function executeGoogleSheetWipe() {
+      const btn = document.getElementById('btn-final-wipe');
+      btn.innerText = "WIPING DATA...";
+      btn.disabled = true;
 
-  try {
-    const payload = { action: "wipeData" };
-    await fetch(GAS_API_URL, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
+      try {
+        const payload = { action: "wipeData" };
+        await fetch(GAS_API_URL, {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
 
-    // Reset local state
-    state.bookings = [];
-    state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }];
-    state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
-    
-    // Refresh UI
-    populateRoomDropdown();
-    populateAgentDropdown();
-    searchMasterBookingById();
-    renderBookingsTable();
-    renderRoomCapacityTable();
-    renderMasterAgentTable();
-    updateDashboardCards();
-    renderCalendar(defaultAppYear);
+        // Reset local state
+        state.bookings = [];
+        state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }];
+        state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
+        
+        // Wipe local storage
+        localStorage.removeItem('businessPortal_data');
+        
+        // Refresh UI
+        refreshAllUI();
 
-    closeWipeModals();
-    alert("Database has been completely wiped.");
-  } catch (error) {
-    console.error("Wipe error:", error);
-    alert("Failed to wipe database. Please check your connection.");
-  } finally {
-    btn.innerText = "ERASE ALL DATA";
-    btn.disabled = false;
-  }
-}
+        closeWipeModals();
+        alert("Database has been completely wiped.");
+      } catch (error) {
+        console.error("Wipe error:", error);
+        alert("Failed to wipe database. Please check your connection.");
+      } finally {
+        btn.innerText = "ERASE ALL DATA";
+        btn.disabled = false;
+      }
+    }
     
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwFD7ASOkJ1XnRUrH9pEiTz4Lolm8zwaKOCr2nkLN__dvR1_51zWGxIJ1ZlV82X2r2O/exec"; 
@@ -1741,53 +1720,86 @@ async function executeGoogleSheetWipe() {
         invoiceNo: `INV-${targetYear}-${paddedSeq}`
       };
     }
+    
+    // Core Refresh Function for consistent state updates across UI
+    function refreshAllUI() {
+      // Default Fallbacks
+      if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
+        state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }, { roomNo: 3, capacity: 4 }, { roomNo: 4, capacity: 4 }, { roomNo: 5, capacity: 5 }];
+      }
+      if (!state.masterAgents || state.masterAgents.length === 0) {
+        state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
+      }
+      
+      state.selectedYear = defaultAppYear;
+      state.dashSelectedYear = defaultAppYear;
+      if (!state.yearlyCounters) {
+        state.yearlyCounters = { [defaultAppYear]: state.bookings.length || 0 };
+      }
+
+      populateRoomDropdown();
+      populateAgentDropdown();
+      searchMasterBookingById();
+      renderBookingsTable();
+      renderRoomCapacityTable();
+      renderMasterAgentTable();
+      renderCalendar(defaultAppYear);
+      updateDashboardCards();
+    }
 
     async function loadSavedData() {
-  try {
-    const toast = document.getElementById('toast');
-    const msg = document.getElementById('toast-message');
-    msg.innerText = 'Syncing database...';
-    toast.classList.remove('hidden');
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-message');
+      
+      // 1. Immediately Load From Local Storage for fast UI rendering
+      const localDataStr = localStorage.getItem('businessPortal_data');
+      let hasLocalData = false;
+      
+      if (localDataStr) {
+        try {
+          const localData = JSON.parse(localDataStr);
+          if (localData && localData.bookings) {
+            state = localData;
+            hasLocalData = true;
+            refreshAllUI();
+          }
+        } catch(e) {
+          console.error("Local storage parsing error", e);
+        }
+      }
 
-    const response = await fetch(GAS_API_URL + "?action=fetchData");
-    const data = await response.json();
-    
-    if (data && data.bookings) {
-      state = data;
-    }
-    
-    // Default Fallbacks
-    if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
-      state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }, { roomNo: 3, capacity: 4 }, { roomNo: 4, capacity: 4 }, { roomNo: 5, capacity: 5 }];
-    }
-    if (!state.masterAgents || state.masterAgents.length === 0) {
-      state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
-    }
-    
-    state.selectedYear = defaultAppYear;
-    state.dashSelectedYear = defaultAppYear;
-    if (!state.yearlyCounters) {
-      state.yearlyCounters = { [defaultAppYear]: state.bookings.length || 0 };
-    }
+      msg.innerText = hasLocalData ? 'Checking for cloud updates...' : 'Syncing database...';
+      toast.classList.remove('hidden');
 
-    // Refresh UI
-    populateRoomDropdown();
-    populateAgentDropdown();
-    searchMasterBookingById();
-    renderBookingsTable();
-    renderRoomCapacityTable();
-    renderMasterAgentTable();
-    renderCalendar(defaultAppYear);
-    updateDashboardCards();
-    
-    checkSheetRowLimits(); // Initial limit check
+      // 2. Fetch Master Record asynchronously
+      try {
+        const response = await fetch(GAS_API_URL + "?action=fetchData");
+        const sheetData = await response.json();
+        
+        if (sheetData && sheetData.bookings) {
+          
+          const localDataStrToCompare = JSON.stringify(state);
+          const sheetDataStr = JSON.stringify(sheetData);
 
-    msg.innerText = 'Database synced successfully!';
-    setTimeout(() => toast.classList.add('hidden'), 2000);
-  } catch (error) {
-    console.error("Error loading data from Google Sheets:", error);
-  }
-}
+          // 3. Match & Auto-Update Condition
+          if (localDataStrToCompare !== sheetDataStr) {
+            state = sheetData;
+            // Unmatched details detected, update LocalStorage & UI to master sheet sync
+            localStorage.setItem('businessPortal_data', sheetDataStr);
+            refreshAllUI(); 
+            msg.innerText = hasLocalData ? 'Database synced with new cloud updates!' : 'Database synced successfully!';
+          } else {
+            msg.innerText = 'Database is up to date!';
+          }
+        }
+      } catch (error) {
+        console.error("Error loading data from Google Sheets:", error);
+        msg.innerText = hasLocalData ? 'Offline mode: Loaded from local history.' : 'Failed to connect to Database.';
+      }
+      
+      checkSheetRowLimits(); // Initial limit check
+      setTimeout(() => toast.classList.add('hidden'), 2000);
+    }
     
     function setMinBookingDates() {
       const checkInInput = document.getElementById('cust-checkin-date');
@@ -1816,14 +1828,16 @@ async function executeGoogleSheetWipe() {
       setMinBookingDates();
       populateDashboardYearDropdown();
       initDashboard();
-      populateRoomDropdown();
-      populateAgentDropdown();
       populateCalendarYearDropdown();
-      searchMasterBookingById();
-      renderBookingsTable();
-      renderRoomCapacityTable();
-      renderMasterAgentTable();
-      renderCalendar(defaultAppYear);
+      
+      // Dropdown interaction listener (Clicks outside close dropdown)
+      document.addEventListener('click', function(e) {
+        const container = document.getElementById('room-dropdown-container');
+        if (container && !container.contains(e.target)) {
+          const boxes = document.getElementById('room-checkboxes');
+          if (boxes) boxes.classList.add('hidden');
+        }
+      });
 
       checkUpcomingCheckoutsWithDue();
       setInterval(checkUpcomingCheckoutsWithDue, 60000);
@@ -1834,50 +1848,54 @@ async function executeGoogleSheetWipe() {
       saveChanges(true, true);
     }
 
-   async function saveChanges(isAutoSave = false, quiet = false) {
-  if (!checkSheetRowLimits()) return;
-  
-  if (!quiet) {
-    const toast = document.getElementById('toast');
-    const msg = document.getElementById('toast-message');
-    msg.innerText = isAutoSave ? 'Auto-saving to cloud...' : 'Saving to cloud storage...';
-    toast.classList.remove('hidden');
-  }
-
-  try {
-    const payload = {
-      action: "saveData",
-      state: state
-    };
-
-    // text/plain;charset=utf-8 prevents CORS Preflight OPTIONS blocking
-    const response = await fetch(GAS_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-
-    if (result.status === "success") {
+    async function saveChanges(isAutoSave = false, quiet = false) {
+      if (!checkSheetRowLimits()) return;
+      
       if (!quiet) {
+        const toast = document.getElementById('toast');
         const msg = document.getElementById('toast-message');
-        msg.innerText = isAutoSave ? 'Changes Auto saved successfully!' : 'Data synced with Cloud Storage!';
-        setTimeout(() => document.getElementById('toast').classList.add('hidden'), 3000);
+       	msg.innerText = isAutoSave ? 'Auto-saving to cloud...' : 'Saving to cloud storage...';
+        toast.classList.remove('hidden');
       }
-    } else {
-      throw new Error(result.message || "Server Error");
+
+      try {
+        // Save simultaneously to Browser History (Local Storage)
+        localStorage.setItem('businessPortal_data', JSON.stringify(state));
+
+        const payload = {
+          action: "saveData",
+          state: state
+        };
+
+        // text/plain;charset=utf-8 prevents CORS Preflight OPTIONS blocking
+        const response = await fetch(GAS_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.status === "success") {
+          if (!quiet) {
+            const msg = document.getElementById('toast-message');
+            msg.innerText = isAutoSave ? 'Changes Auto saved successfully!' : 'Data synced with Cloud Storage!';
+            setTimeout(() => document.getElementById('toast').classList.add('hidden'), 3000);
+          }
+        } else {
+          throw new Error(result.message || "Server Error");
+        }
+      } catch (error) {
+        console.error("Error saving to Google Sheets:", error);
+        if (!quiet) {
+          alert("Saving Error: " + error.message + "\n\nChecks:\n1. Ensure 'Who has access' is set to 'Anyone' in Web App deployment.\n2. Ensure URL in GAS_API_URL is correct.");
+          document.getElementById('toast').classList.add('hidden');
+        }
+      }
     }
-  } catch (error) {
-    console.error("Error saving to Google Sheets:", error);
-    if (!quiet) {
-      alert("Saving Error: " + error.message + "\n\nChecks:\n1. Ensure 'Who has access' is set to 'Anyone' in Web App deployment.\n2. Ensure URL in GAS_API_URL is correct.");
-      document.getElementById('toast').classList.add('hidden');
-    }
-  }
-}
+
     function populateDashboardYearDropdown() {
       const yearSelect = document.getElementById('dash-year-select');
       if (!yearSelect) return;
@@ -2027,30 +2045,82 @@ async function executeGoogleSheetWipe() {
       }
     }
 
+    // --- CHECKBOX DROPDOWN LOGIC ---
+    function toggleRoomDropdown() {
+      document.getElementById('room-checkboxes').classList.toggle('hidden');
+    }
+
     function populateRoomDropdown(selectedRoomNos = []) {
-      const roomSelect = document.getElementById('cust-room');
-      if (!roomSelect) return;
-      roomSelect.innerHTML = '';
+      const container = document.getElementById('room-checkboxes');
+      if (!container) return;
+      container.innerHTML = '';
 
       let selArr = [];
       if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
       else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
 
-      const optAll = document.createElement('option');
-      optAll.value = "ALL";
-      optAll.text = "Select all rooms";
-      roomSelect.appendChild(optAll);
+      // Select All option
+      const allDiv = document.createElement('div');
+      allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";
+      allDiv.innerHTML = `
+        <input type="checkbox" id="room-all" value="ALL" onchange="handleRoomSelection(this)" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer room-chk">
+        <label for="room-all" class="text-[11px] font-bold text-slate-700 cursor-pointer flex-1">Select all rooms</label>
+      `;
+      container.appendChild(allDiv);
 
+      // Generating rooms dynamically
       state.roomsCapacity.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.roomNo;
-        opt.text = `Room ${m.roomNo}`;
-        if (selArr.includes(String(m.roomNo))) {
-          opt.selected = true;
-        }
-        roomSelect.appendChild(opt);
+        const isChecked = selArr.includes(String(m.roomNo)) ? 'checked' : '';
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-2 py-1";
+        div.innerHTML = `
+          <input type="checkbox" id="room-${m.roomNo}" value="${m.roomNo}" ${isChecked} onchange="handleRoomSelection(this)" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer room-chk item-chk">
+          <label for="room-${m.roomNo}" class="text-[11px] font-bold text-slate-700 cursor-pointer flex-1">Room ${m.roomNo}</label>
+        `;
+        container.appendChild(div);
       });
+
+      updateRoomDropdownText();
       autoCaptureRoomDetails();
+    }
+
+    function handleRoomSelection(chk) {
+      const allChk = document.getElementById('room-all');
+      const itemChks = document.querySelectorAll('.item-chk');
+
+      if (chk.value === 'ALL') {
+        itemChks.forEach(c => c.checked = chk.checked);
+      } else {
+        const allSelected = Array.from(itemChks).every(c => c.checked);
+        if (allChk) allChk.checked = allSelected;
+      }
+      
+      updateRoomDropdownText();
+      autoCaptureRoomDetails();
+    }
+
+    function updateRoomDropdownText() {
+      const itemChks = document.querySelectorAll('.item-chk');
+      const checkedVals = Array.from(itemChks).filter(c => c.checked).map(c => c.value);
+      const textSpan = document.getElementById('room-dropdown-text');
+      
+      if (checkedVals.length === 0) {
+        textSpan.innerText = "Select Rooms...";
+      } else if (checkedVals.length === itemChks.length) {
+        textSpan.innerText = "All Rooms Selected";
+        const allChk = document.getElementById('room-all');
+        if(allChk) allChk.checked = true;
+      } else {
+        textSpan.innerText = checkedVals.map(r => `Room ${r}`).join(', ');
+      }
+    }
+    
+    function getSelectedRooms() {
+      const itemChks = document.querySelectorAll('.item-chk');
+      if(!itemChks.length) return [];
+      const checkedVals = Array.from(itemChks).filter(c => c.checked).map(c => c.value);
+      if (checkedVals.length === itemChks.length) return ["ALL"];
+      return checkedVals;
     }
 
     function populateAgentDropdown(selectedAgentName = "") {
@@ -2070,26 +2140,24 @@ async function executeGoogleSheetWipe() {
     }
 
     function autoCaptureRoomDetails() {
-      const roomSelect = document.getElementById('cust-room');
       let totalCap = 0;
       let allSelected = false;
 
-      for (let opt of roomSelect.options) {
-        if (opt.selected && opt.value === "ALL") {
-           allSelected = true;
-           break;
-        }
+      const allChk = document.getElementById('room-all');
+      if (allChk && allChk.checked) {
+         allSelected = true;
       }
 
       if (allSelected) {
          totalCap = state.roomsCapacity.reduce((sum, m) => sum + (m.capacity || 1), 0);
       } else {
-         for (let opt of roomSelect.options) {
-           if (opt.selected) {
-             const matched = state.roomsCapacity.find(m => String(m.roomNo) === opt.value);
+         const itemChks = document.querySelectorAll('.item-chk');
+         itemChks.forEach(chk => {
+           if (chk.checked) {
+             const matched = state.roomsCapacity.find(m => String(m.roomNo) === chk.value);
              if (matched) totalCap += (matched.capacity || 1);
            }
-         }
+         });
       }
       
       document.getElementById('cust-capacity').value = totalCap > 0 ? totalCap : 1;
@@ -3170,8 +3238,7 @@ async function executeGoogleSheetWipe() {
 
       const id = bookingModalId;
       
-      const roomSelect = document.getElementById('cust-room');
-      let selectedRooms = Array.from(roomSelect.selectedOptions).map(opt => opt.value);
+      let selectedRooms = getSelectedRooms();
       if (selectedRooms.includes("ALL")) {
         selectedRooms = state.roomsCapacity.map(m => String(m.roomNo));
       }
@@ -3858,3 +3925,4 @@ async function executeGoogleSheetWipe() {
   </script>
 </body>
 </html>
+
