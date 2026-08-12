@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="generator" content="Jekyll v3.10.0" />
-<meta property="og:title" content="Aniruddha-Business-Portal" />
+<!-- <meta property="og:title" content="Aniruddha-Business-Portal" /> -->
 <meta property="og:locale" content="en_US" />
 <link rel="canonical" href="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/" />
 <meta property="og:url" content="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/" />
@@ -21,7 +21,7 @@
   <body>
     <div class="container-lg px-3 my-5 markdown-body">
       
-      <h1><a href="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/">Aniruddha-Business-Portal</a></h1>
+      <h1><a href="https://datacraft360degree-page.github.io/Aniruddha-Business-Portal/"></a></h1>
 
       <html lang="en">
 <head>
@@ -283,8 +283,9 @@
           <i class="fa-solid fa-bell text-[10px]"></i> Alerts
           <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
         </button>
+        <!-- Modified Save Button (Save) -->
         <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save
+          <i class="fa-brands fa-google text-[10px]"></i> Save
         </button>
         
         <div id="wipe-layer-1-modal" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print">
@@ -387,7 +388,7 @@
         </div>
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
           <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Advance Received</p>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
             <p id="dash-advanced" class="text-xl font-black text-emerald-600 mt-0.5">₹0</p>
           </div>
           <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-wallet text-base"></i></div>
@@ -725,7 +726,7 @@
 
               <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Total Capacity</label>
-                <!-- Removed readonly here for editability[cite: 1] -->
+                <!-- Removed readonly here for editability -->
                 <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
               </div>
             </div>
@@ -826,7 +827,7 @@
           <div id="food-orders-container" class="space-y-2 max-h-40 overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- CAB FARE SECTION[cite: 1] -->
+        <!-- CAB FARE SECTION -->
         <div id="sec-cab-fare" class="bg-indigo-50/40 p-3 rounded-2xl border border-indigo-200/80 space-y-2.5 transition-all">
           <div class="flex justify-between items-center">
             <h4 class="text-[9px] font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
@@ -1001,6 +1002,21 @@
   </div>
 
   <script>
+    // System Constants
+    const MAX_SHEET_ROWS = 10000000;
+    
+    function checkSheetRowLimits() {
+      // Assuming 1 booking mapping to 1 row. Update this if you have real dynamic DB row returns
+      const currentRowCount = state.bookings.length; 
+      
+      if (currentRowCount >= (MAX_SHEET_ROWS - 20)) {
+        alert("CRITICAL NOTIFICATION: Google Sheet has reached its row limit (less than 20 rows left). Saving has been stopped. Please generate a new sheet and link it to continue.");
+        return false;
+      } else if (currentRowCount >= (MAX_SHEET_ROWS - 100)) {
+        alert("WARNING: Google Sheet is approaching its 10 million row limit (less than 100 rows left). Please prepare a new sheet soon.");
+      }
+      return true;
+    }
 
     // --- DOUBLE LAYER DATA WIPE OUT LOGIC ---
 function requestDataWipe() {
@@ -1575,7 +1591,7 @@ async function executeGoogleSheetWipe() {
           }).join(", ");
         }
         
-        // Cab Trips Processing[cite: 1]
+        // Cab Trips Processing
         let cabSummary = "";
         let totalCabFare = 0;
         if (b.cabTrips && b.cabTrips.length > 0) {
@@ -1589,10 +1605,11 @@ async function executeGoogleSheetWipe() {
         const fullContactNo = `${b.countryCode || '+91'} ${b.contactNo || ''}`.trim();
 
         return {
-          "Booking ID": b.BookingID || "-",
-          "Invoice ID": b.InvoiceID || "-",
+          "Booking ID": b.id || "-",
+          "Booking Code": b.bookingCode || "-",
+          "Invoice ID": b.invoiceNo || "-",
           "Status": statusStr,
-          "Guest Name": b.GuestName || "-",
+          "Guest Name": b.name || "-",
           "Contact No": fullContactNo || "-",
           "ID Number": b.idNo || "-",
           "Attached ID": b.idProofBase64 ? "Yes" : "No",
@@ -1606,19 +1623,24 @@ async function executeGoogleSheetWipe() {
           "Extra Persons": b.extraPersons || 0,
           "Extra Person Joined": b.extraPersonJoined ? formatDateTime(b.extraPersonJoined) : "N/A",
           "Extra Person Check-Out": b.extraPersonOut ? formatDateTime(b.extraPersonOut) : "N/A",
+          "Extra Person Days": b.extraPersonDays || 0,
           "Agent Info": b.agentInfo || "-",
           "Check-In": formatDateTime(b.checkIn),
           "Check-Out": formatDateTime(b.checkOut),
+          "Has Extended Checkout": b.hasExtendedCheckout ? "Yes" : "No",
           "Extended Check-Out": (b.hasExtendedCheckout && b.extendedCheckOut) ? formatDateTime(b.extendedCheckOut) : "N/A",
           "Stay Days": b.noOfDays || 0,
           "Price / Day": b.perDayPrice || 0,
+          "Include Meals": b.includeMeals ? "Yes" : "No",
           "Food Orders": foodSummary || "None",
           "Cab Fare Details": cabSummary || "-",
           "Total Cab Fare": totalCabFare || 0,
           "Total Amount": b.totalAmount || 0,
-          "Advance Paid": b.advanced || 0,
+          "Initial Advance": b.initialAdv || 0,
           "Cleared Due": b.clearedDue || 0,
-          "Balance Due": b.totalDue || 0
+          "Advance Paid": b.advanced || 0,
+          "Balance Due": b.totalDue || 0,
+          "Inactive": b.inactive ? "Yes" : "No"
         };
       });
 
@@ -1757,6 +1779,8 @@ async function executeGoogleSheetWipe() {
     renderMasterAgentTable();
     renderCalendar(defaultAppYear);
     updateDashboardCards();
+    
+    checkSheetRowLimits(); // Initial limit check
 
     msg.innerText = 'Database synced successfully!';
     setTimeout(() => toast.classList.add('hidden'), 2000);
@@ -1811,10 +1835,12 @@ async function executeGoogleSheetWipe() {
     }
 
    async function saveChanges(isAutoSave = false, quiet = false) {
+  if (!checkSheetRowLimits()) return;
+  
   if (!quiet) {
     const toast = document.getElementById('toast');
     const msg = document.getElementById('toast-message');
-    msg.innerText = isAutoSave ? 'Auto-saving to cloud...' : 'Saving to Google Sheets...';
+    msg.innerText = isAutoSave ? 'Auto-saving to cloud...' : 'Saving to cloud storage...';
     toast.classList.remove('hidden');
   }
 
@@ -1838,7 +1864,7 @@ async function executeGoogleSheetWipe() {
     if (result.status === "success") {
       if (!quiet) {
         const msg = document.getElementById('toast-message');
-        msg.innerText = isAutoSave ? 'Changes Auto saved successfully!' : 'Data synced with Google Sheets!';
+        msg.innerText = isAutoSave ? 'Changes Auto saved successfully!' : 'Data synced with Cloud Storage!';
         setTimeout(() => document.getElementById('toast').classList.add('hidden'), 3000);
       }
     } else {
@@ -2010,6 +2036,11 @@ async function executeGoogleSheetWipe() {
       if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
       else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
 
+      const optAll = document.createElement('option');
+      optAll.value = "ALL";
+      optAll.text = "Select all rooms";
+      roomSelect.appendChild(optAll);
+
       state.roomsCapacity.forEach(m => {
         const opt = document.createElement('option');
         opt.value = m.roomNo;
@@ -2041,11 +2072,24 @@ async function executeGoogleSheetWipe() {
     function autoCaptureRoomDetails() {
       const roomSelect = document.getElementById('cust-room');
       let totalCap = 0;
+      let allSelected = false;
+
       for (let opt of roomSelect.options) {
-        if (opt.selected) {
-          const matched = state.roomsCapacity.find(m => String(m.roomNo) === opt.value);
-          if (matched) totalCap += (matched.capacity || 1);
+        if (opt.selected && opt.value === "ALL") {
+           allSelected = true;
+           break;
         }
+      }
+
+      if (allSelected) {
+         totalCap = state.roomsCapacity.reduce((sum, m) => sum + (m.capacity || 1), 0);
+      } else {
+         for (let opt of roomSelect.options) {
+           if (opt.selected) {
+             const matched = state.roomsCapacity.find(m => String(m.roomNo) === opt.value);
+             if (matched) totalCap += (matched.capacity || 1);
+           }
+         }
       }
       
       document.getElementById('cust-capacity').value = totalCap > 0 ? totalCap : 1;
@@ -2355,7 +2399,7 @@ async function executeGoogleSheetWipe() {
         });
       }
       
-      // Cab Trips Processing in Invoice[cite: 1]
+      // Cab Trips Processing in Invoice
       if (b.cabTrips && b.cabTrips.length > 0) {
         b.cabTrips.forEach(trip => {
           if (trip.rate > 0) {
@@ -2496,7 +2540,7 @@ async function executeGoogleSheetWipe() {
       }
     }
 
-    // Cab Fare Dynamics[cite: 1]
+    // Cab Fare Dynamics
     function addCabTripRow(rate = 0, dateStr = '', timeStr = '', remark = '', disabled = false) {
       const container = document.getElementById('cab-trips-container');
       const tripCount = container.children.length + 1;
@@ -2800,7 +2844,7 @@ async function executeGoogleSheetWipe() {
           });
         }
         
-        // Cab Trips Processing[cite: 1]
+        // Cab Trips Processing
         if (b.cabTrips && b.cabTrips.length > 0) {
           b.cabTrips.forEach(trip => {
             addCabTripRow(trip.rate || 0, trip.dateStr || '', trip.timeStr || '', trip.remark || '', isClosedAndWithin3Days);
@@ -2891,7 +2935,7 @@ async function executeGoogleSheetWipe() {
       document.getElementById('booking-modal').classList.add('hidden');
     }
 
-    // Extra Person Date Validations[cite: 1]
+    // Extra Person Date Validations
     function handleExtraPersonDatesChange() {
       const mainInDate = document.getElementById('cust-checkin-date')?.value;
       const mainInTime = document.getElementById('cust-checkin-time')?.value || '12:00';
@@ -3062,7 +3106,7 @@ async function executeGoogleSheetWipe() {
         foodTotalCharge += parseFloat(input.value) || 0;
       });
       
-      // Calculate Cab Trips Total[cite: 1]
+      // Calculate Cab Trips Total
       let cabFare = 0;
       document.querySelectorAll('.cust-cab-rate').forEach(input => {
         cabFare += parseFloat(input.value) || 0;
@@ -3127,7 +3171,11 @@ async function executeGoogleSheetWipe() {
       const id = bookingModalId;
       
       const roomSelect = document.getElementById('cust-room');
-      const selectedRooms = Array.from(roomSelect.selectedOptions).map(opt => opt.value);
+      let selectedRooms = Array.from(roomSelect.selectedOptions).map(opt => opt.value);
+      if (selectedRooms.includes("ALL")) {
+        selectedRooms = state.roomsCapacity.map(m => String(m.roomNo));
+      }
+
       if (selectedRooms.length === 0) {
         alert("⚠️ Please select at least one Room No.");
         return;
@@ -3184,7 +3232,7 @@ async function executeGoogleSheetWipe() {
         const epInDt = new Date(extraPersonJoined);
         let epOutDt = new Date(extraPersonOut);
         
-        // Strict Extra Person Constraints[cite: 1]
+        // Strict Extra Person Constraints
         if (epInDt < mainCheckInDt) {
            alert(`⚠️ Additional Person Check-In date & time cannot be earlier than the main Check-In date & time (${formatDateTime(checkIn)}).`);
            return;
@@ -3239,7 +3287,7 @@ async function executeGoogleSheetWipe() {
         return;
       }
       
-      // Save Cab Trips Mapping[cite: 1]
+      // Save Cab Trips Mapping
       const cabTripsList = [];
       document.querySelectorAll('.cab-trip-row').forEach((row, index) => {
         const rate = parseFloat(row.querySelector('.cust-cab-rate').value) || 0;
@@ -3469,7 +3517,7 @@ async function executeGoogleSheetWipe() {
           }
         }
         
-        // Dynamic Cab rendering based on Array length[cite: 1]
+        // Dynamic Cab rendering based on Array length
         let cabSummaryHtml = '';
         let totalCab = 0;
         if (b.cabTrips && b.cabTrips.length > 0) {
@@ -3809,10 +3857,4 @@ async function executeGoogleSheetWipe() {
     }
   </script>
 </body>
-</html>
-      
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
-    <script>anchors.add();</script>
-  </body>
 </html>
