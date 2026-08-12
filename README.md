@@ -1,3 +1,5 @@
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -258,7 +260,7 @@
           <i class="fa-solid fa-bell text-[10px]"></i> Alerts
           <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
         </button>
-        <!-- Modified Save Button (Save) -->
+        <!-- Save Button -->
         <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-brands fa-google text-[10px]"></i> Save
         </button>
@@ -659,7 +661,7 @@
               <label class="block font-semibold text-slate-600 mb-0.5">ID Number</label>
               <input type="text" id="cust-id" maxlength="16" pattern="[A-Za-z0-9\s]*" oninput="this.value = this.value.replace(/[^A-Za-z0-9\s]/g, '')" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500" />
             </div>
-            <!-- EDITABLE COUNTRY CODE & GUEST CONTACT NUMBER (OPTIONAL) -->
+            <!-- EDITABLE COUNTRY CODE & GUEST CONTACT NUMBER -->
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Contact No</label>
               <div class="flex gap-1">
@@ -709,7 +711,6 @@
 
               <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Total Capacity</label>
-                <!-- Removed readonly here for editability -->
                 <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
               </div>
             </div>
@@ -880,7 +881,7 @@
   <div id="invoice-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-xl w-full p-5 sm:p-6 space-y-4 relative my-auto max-h-[92vh] overflow-y-auto" id="printable-invoice">
       
-      <!-- Read-Only Notice Bar (Shown for Closed/Inactive Bookings) -->
+      <!-- Read-Only Notice Bar -->
       <div id="inv-readonly-notice" class="hidden bg-slate-900 text-amber-300 text-[10px] font-bold px-3.5 py-2 rounded-2xl flex items-center justify-between border border-slate-800 no-print">
         <span class="flex items-center gap-1.5">
           <i class="fa-solid fa-lock text-amber-400"></i> Read-Only View Mode (Editing Disabled)
@@ -895,7 +896,7 @@
           <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: info@businessportal.com</p>
         </div>
         <div class="text-right">
-          <!-- E-INVOICE NUMBER & BADGE CONTAINER (HIDDEN IF DUE NOT CLEAR) -->
+          <!-- E-INVOICE NUMBER & BADGE CONTAINER -->
           <div id="e-invoice-section">
             <span id="inv-badge" class="inline-block bg-blue-50 text-blue-700 text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase mb-1 border border-blue-100">e-Invoice</span>
             <p id="inv-id-container" class="text-[10px] text-slate-500">Invoice ID: <strong id="inv-id" class="text-slate-800 font-mono">INV-2026-0000001</strong></p>
@@ -952,7 +953,6 @@
             <span>Balance Due:</span>
             <span id="inv-sum-due">₹0</span>
           </div>
-          <!-- DYNAMICALLY DISPLAYED CLEAR DUE ROW -->
           <div id="inv-clear-due-row" class="hidden flex justify-between text-emerald-700 font-bold border-t border-slate-100 pt-1">
             <span>Clear Due:</span>
             <strong id="inv-sum-clear-due">₹0</strong>
@@ -972,11 +972,9 @@
 
       <div class="flex flex-wrap justify-end space-x-2 gap-y-2 pt-2 no-print border-t border-slate-100">
         <button type="button" onclick="closeInvoiceModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Close</button>
-        <!-- SEND VIA WHATSAPP BUTTON (ONLY AVAILABLE IN UPCOMING & LIVE) -->
         <button type="button" id="inv-whatsapp-btn" onclick="sendReceiptViaWhatsApp()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1.5 transition cursor-pointer">
           <i class="fa-brands fa-whatsapp text-sm"></i> Send receipt via WhatsApp
         </button>
-        <!-- STATIC PRINT BUTTON -->
         <button type="button" onclick="window.print()" id="inv-print-btn" class="px-4 py-1.5 bg-blue-600 text-white rounded-xl font-semibold shadow-sm flex items-center gap-1 transition hover:bg-blue-700 cursor-pointer">
           <i class="fa-solid fa-print"></i> Print Invoice
         </button>
@@ -985,11 +983,35 @@
   </div>
 
   <script>
-    // System Constants
+    // System Constants & Robust Helpers
     const MAX_SHEET_ROWS = 10000000;
+
+    function isTrue(val) {
+      return val === true || val === 'true' || val === 'TRUE' || val === 1 || val === '1';
+    }
+
+    function isInactiveBooking(b) {
+      return isTrue(b && b.inactive);
+    }
+
+    function getBookingRooms(b) {
+      if (!b || b.roomNo === undefined || b.roomNo === null) return [];
+      if (Array.isArray(b.roomNo)) return b.roomNo.map(r => String(r).trim());
+      return String(b.roomNo).split(',').map(s => s.trim());
+    }
+
+    function parseDateMs(dtStr) {
+      if (!dtStr) return NaN;
+      if (typeof dtStr === 'number') return dtStr;
+      let sanitized = String(dtStr).trim().replace(' ', 'T');
+      let d = new Date(sanitized);
+      if (isNaN(d.getTime())) {
+        d = new Date(dtStr);
+      }
+      return d.getTime();
+    }
     
     function checkSheetRowLimits() {
-      // Assuming 1 booking mapping to 1 row. Update this if you have real dynamic DB row returns
       const currentRowCount = state.bookings.length; 
       
       if (currentRowCount >= (MAX_SHEET_ROWS - 20)) {
@@ -1004,7 +1026,7 @@
     // --- DOUBLE LAYER DATA WIPE OUT LOGIC ---
     function requestDataWipe() {
       if (!isMasterUnlocked) {
-        alert("You must unlock Master Data access first to perform a data wipe.");
+        alert(" You must unlock Master Data access first to perform a data wipe.");
         openMasterAuthModal();
         return;
       }
@@ -1038,9 +1060,7 @@
         state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }];
         state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
         
-        // Refresh UI
         refreshAllUI();
-
         closeWipeModals();
         alert("Database has been completely wiped.");
       } catch (error) {
@@ -1055,8 +1075,8 @@
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec"; 
     
-    const ONE_HOUR_MS = 1 * 60 * 60 * 1000; // 1 Hour Buffer in Milliseconds
-    let activeModalBooking = null; // Currently opened invoice booking reference
+    const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
+    let activeModalBooking = null;
 
     window.addEventListener('beforeunload', function (e) {
       if (isLoggedIn) {
@@ -1082,13 +1102,12 @@
 
     function getEffectiveCheckoutTime(b) {
       if (!b) return 0;
-      if (b.hasExtendedCheckout && b.extendedCheckOut) {
-        return new Date(b.extendedCheckOut).getTime();
+      if (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) {
+        return parseDateMs(b.extendedCheckOut);
       }
-      return new Date(b.checkOut).getTime();
+      return parseDateMs(b.checkOut);
     }
 
-    /* HELPER: CALCULATE EXTRA FOOD VALID TIME WINDOW (15 MIN POST CHECK-IN TO 30 MIN PRE CHECK-OUT / EXT CHECK-OUT) */
     function getModalFoodWindow() {
       const inDate = document.getElementById('cust-checkin-date')?.value;
       const inTime = document.getElementById('cust-checkin-time')?.value || '12:00';
@@ -1111,8 +1130,8 @@
 
       if (isNaN(checkInDt.getTime()) || isNaN(checkOutDt.getTime())) return null;
 
-      const minFoodDt = new Date(checkInDt.getTime() + 15 * 60 * 1000);  // 15 Minutes after Check-In
-      const maxFoodDt = new Date(checkOutDt.getTime() - 30 * 60 * 1000); // 30 Minutes before Check-Out / Extended Check-Out
+      const minFoodDt = new Date(checkInDt.getTime() + 15 * 60 * 1000);  
+      const maxFoodDt = new Date(checkOutDt.getTime() - 30 * 60 * 1000); 
 
       return { checkInDt, checkOutDt, minFoodDt, maxFoodDt };
     }
@@ -1136,7 +1155,6 @@
         const maxStr = formatDateTime(foodWin.maxFoodDt.toISOString());
         alert(`⚠️ Extra Food Order time must be after 15 mins of Check-In (${minStr}) and at least 30 mins before Check-Out (${maxStr})!`);
         
-        // Adjust back to nearest valid window boundary
         const targetDt = selectedDt < foodWin.minFoodDt ? foodWin.minFoodDt : foodWin.maxFoodDt;
         const yyyy = targetDt.getFullYear();
         const mm = String(targetDt.getMonth() + 1).padStart(2, '0');
@@ -1217,7 +1235,7 @@
       if (checked) {
         container.classList.remove('hidden');
         if (extOutDate) {
-          extOutDate.min = normalOutDate; // Extended check-out cannot be selected backward of first check-out date
+          extOutDate.min = normalOutDate;
           if (!extOutDate.value || extOutDate.value < normalOutDate) {
             extOutDate.value = normalOutDate;
           }
@@ -1228,7 +1246,6 @@
       }
       
       calculateModalBilling();
-      handleExtraPersonDatesChange();
     }
 
     let isLoggedIn = false;
@@ -1251,7 +1268,7 @@
 
       const msgElem = document.getElementById('master-delete-modal-msg');
       if (type === 'booking') {
-        const b = state.bookings.find(item => item.id === target);
+        const b = state.bookings.find(item => String(item.id) === String(target));
         const bCode = b ? b.bookingCode : 'this booking';
         msgElem.innerText = `Are you sure you want to permanently delete booking ${bCode} from the Master Tab? This action cannot be undone.`;
       } else if (type === 'room') {
@@ -1272,7 +1289,7 @@
     function confirmMasterDeletion() {
       if (pendingMasterDeleteType === 'booking') {
         const id = pendingMasterDeleteTarget;
-        const idx = state.bookings.findIndex(b => b.id === id);
+        const idx = state.bookings.findIndex(b => String(b.id) === String(id));
         if (idx !== -1) {
           state.bookings[idx].inactive = true;
         }
@@ -1320,7 +1337,7 @@
         isLoggedIn = true;
         sessionStorage.setItem('app_authenticated', 'true');
         document.getElementById('login-overlay').classList.add('hidden');
-        document.getElementById('login-error').classList.remove('hidden');
+        document.getElementById('login-error').classList.add('hidden');
         startInactivityMonitoring();
       } else {
         document.getElementById('login-error').classList.remove('hidden');
@@ -1356,7 +1373,7 @@
         closeMasterAuthModal();
         performSwitchTab('master');
       } else {
-        document.getElementById('master-auth-error').classList.add('hidden');
+        document.getElementById('master-auth-error').classList.remove('hidden');
       }
     }
 
@@ -1414,16 +1431,16 @@
 
     function formatDateTime(dtStr) {
       if (!dtStr) return '-';
-      const d = new Date(dtStr);
+      const d = new Date(typeof dtStr === 'string' ? dtStr.replace(' ', 'T') : dtStr);
       if (isNaN(d.getTime())) {
-        const parts = dtStr.split('T');
+        const parts = String(dtStr).split('T');
         if (parts.length === 2) {
           const dateParts = parts[0].split('-');
           if (dateParts.length === 3) {
             return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]} ${parts[1]}`;
           }
         }
-        return dtStr.replace('T', ' ');
+        return String(dtStr).replace('T', ' ');
       }
       const day = String(d.getDate()).padStart(2, '0');
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -1435,7 +1452,7 @@
 
     function formatDate(d) {
       if (!d) return '-';
-      const dateObj = typeof d === 'string' ? new Date(d) : d;
+      const dateObj = typeof d === 'string' ? new Date(d.replace(' ', 'T')) : d;
       if (isNaN(dateObj.getTime())) return d;
       const day = String(dateObj.getDate()).padStart(2, '0');
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -1469,11 +1486,10 @@
 
     function isRoomInMaster(roomNo) {
       if (!state.roomsCapacity) return true;
-      let rooms = Array.isArray(roomNo) ? roomNo : String(roomNo).split(',').map(s => s.trim());
+      let rooms = getBookingRooms({ roomNo });
       return rooms.every(r => state.roomsCapacity.some(m => String(m.roomNo) === String(r)));
     }
 
-    /* EXPORT TO EXCEL DATE MODAL FUNCTIONS */
     function openExportModal() {
       if (!state.bookings || state.bookings.length === 0) {
         alert("No booking records available to export!");
@@ -1530,8 +1546,6 @@
         if(!b.checkIn) return false;
         
         const bIn = b.checkIn.split('T')[0];
-
-        // Ensure that the booking's Check-In date falls strictly between or on the selected Start and End dates
         return (bIn >= startDateStr) && (bIn <= endDateStr);
       });
 
@@ -1540,7 +1554,6 @@
         return;
       }
 
-      // Generate accurate variable headers matched EXACTLY to Google Sheet data parameters
       const exportData = filteredBookings.map(b => {
         return {
           id: b.id || "",
@@ -1557,7 +1570,7 @@
           contactNo: b.contactNo || "",
           idProofBase64: b.idProofBase64 ? "Attached" : "",
           idProofFileName: b.idProofFileName || "",
-          roomNo: Array.isArray(b.roomNo) ? b.roomNo.join(", ") : (b.roomNo || ""),
+          roomNo: getBookingRooms(b).join(", "),
           agentInfo: b.agentInfo || "",
           capacity: b.capacity || 1,
           extraPersons: b.extraPersons || 0,
@@ -1566,9 +1579,9 @@
           extraPersonDays: b.extraPersonDays || 0,
           checkIn: b.checkIn || "",
           checkOut: b.checkOut || "",
-          hasExtendedCheckout: b.hasExtendedCheckout || false,
+          hasExtendedCheckout: isTrue(b.hasExtendedCheckout),
           extendedCheckOut: b.extendedCheckOut || "",
-          includeMeals: b.includeMeals !== false,
+          includeMeals: b.includeMeals !== false && b.includeMeals !== 'false',
           noOfDays: b.noOfDays || 0,
           perDayPrice: b.perDayPrice || 0,
           foodOrders: b.foodOrders ? (typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(b.foodOrders)) : "",
@@ -1580,7 +1593,7 @@
           clearedDue: b.clearedDue || 0,
           advanced: b.advanced || 0,
           totalDue: b.totalDue || 0,
-          inactive: b.inactive || false
+          inactive: isInactiveBooking(b)
         };
       });
 
@@ -1619,7 +1632,7 @@
       }
 
       const matchedBookings = state.bookings.filter(item => 
-        !item.inactive && (item.bookingCode || '').toUpperCase().includes(query)
+        !isInactiveBooking(item) && (item.bookingCode || '').toUpperCase().includes(query)
       );
 
       if (matchedBookings.length === 0) {
@@ -1628,11 +1641,10 @@
       }
 
       matchedBookings.forEach(b => {
-        const effectiveOutTime = getEffectiveCheckoutTime(b);
-        const effectiveOutStr = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
+        const effectiveOutStr = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
         const tr = document.createElement('tr');
         tr.className = "bg-white hover:bg-slate-50 transition border-b border-slate-100";
-        const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
+        const roomsDisplay = getBookingRooms(b).join(', ');
         
         tr.innerHTML = `
           <td class="py-2.5 px-3 font-mono font-bold text-blue-600">${b.bookingCode}</td>
@@ -1660,14 +1672,14 @@
     function generateIDsForYear(checkInDateStr) {
       let targetYear = defaultAppYear;
       if (checkInDateStr) {
-        targetYear = new Date(checkInDateStr).getFullYear() || defaultAppYear;
+        targetYear = new Date(checkInDateStr.replace(' ', 'T')).getFullYear() || defaultAppYear;
       }
 
       if (!state.yearlyCounters) state.yearlyCounters = {};
 
       if (!state.yearlyCounters[targetYear]) {
         const countForYear = state.bookings.filter(b => {
-          return b.checkIn && new Date(b.checkIn).getFullYear() === targetYear;
+          return b.checkIn && new Date(b.checkIn.replace(' ', 'T')).getFullYear() === targetYear;
         }).length;
         state.yearlyCounters[targetYear] = countForYear;
       }
@@ -1682,9 +1694,7 @@
       };
     }
     
-    // Core Refresh Function for consistent state updates across UI
     function refreshAllUI() {
-      // Default Fallbacks
       if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
         state.roomsCapacity = [{ roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 }, { roomNo: 3, capacity: 4 }, { roomNo: 4, capacity: 4 }, { roomNo: 5, capacity: 5 }];
       }
@@ -1729,7 +1739,7 @@
         msg.innerText = 'Failed to connect to Database.';
       }
       
-      checkSheetRowLimits(); // Initial limit check
+      checkSheetRowLimits();
       setTimeout(() => toast.classList.add('hidden'), 2000);
     }
     
@@ -1739,7 +1749,6 @@
       const extDateInput = document.getElementById('cust-ext-checkout-date');
       const bookingModalId = document.getElementById('modal-booking-id')?.value;
       
-      // Do not apply minimum date constraint for existing editing sessions
       if (!bookingModalId) {
         const today = new Date().toISOString().split('T')[0];
         if (checkInInput) checkInInput.min = today;
@@ -1762,7 +1771,6 @@
       initDashboard();
       populateCalendarYearDropdown();
       
-      // Dropdown interaction listener (Clicks outside close dropdown)
       document.addEventListener('click', function(e) {
         const container = document.getElementById('room-dropdown-container');
         if (container && !container.contains(e.target)) {
@@ -1796,7 +1804,6 @@
           state: state
         };
 
-        // text/plain;charset=utf-8 prevents CORS Preflight OPTIONS blocking
         const response = await fetch(GAS_API_URL, {
           method: "POST",
           headers: {
@@ -1865,7 +1872,7 @@
 
     function checkUpcomingCheckoutsWithDue() {
       const alertBookings = state.bookings.filter(b => {
-        if (!isRoomInMaster(b.roomNo) || b.inactive) return false;
+        if (!isRoomInMaster(b.roomNo) || isInactiveBooking(b)) return false;
         
         const hasDue = (b.totalDue || 0) > 0;
         return hasDue;
@@ -1903,9 +1910,9 @@
       }
 
       alertList.forEach((b, i) => {
-        const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
+        const effectiveOut = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
         const timeFormatted = formatDateTime(effectiveOut);
-        const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
+        const roomsDisplay = getBookingRooms(b).join(', ');
 
         const card = document.createElement('div');
         card.className = "bg-amber-50/60 border border-amber-200/80 rounded-2xl overflow-hidden shadow-xs";
@@ -1974,7 +1981,6 @@
       }
     }
 
-    // --- CHECKBOX DROPDOWN LOGIC ---
     function toggleRoomDropdown() {
       document.getElementById('room-checkboxes').classList.toggle('hidden');
     }
@@ -1988,7 +1994,6 @@
       if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
       else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
 
-      // Select All option
       const allDiv = document.createElement('div');
       allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";
       allDiv.innerHTML = `
@@ -1997,7 +2002,6 @@
       `;
       container.appendChild(allDiv);
 
-      // Generating rooms dynamically
       state.roomsCapacity.forEach(m => {
         const isChecked = selArr.includes(String(m.roomNo)) ? 'checked' : '';
         const div = document.createElement('div');
@@ -2158,13 +2162,13 @@
       let filteredBookings = [];
 
       if (selectedFilter === 'ALL' || !selectedFilter) {
-        filteredBookings = state.bookings.filter(b => !b.inactive);
+        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
         if (label) label.innerText = "Consolidated Summary (All Years)";
       } else {
         const targetYear = parseInt(selectedFilter);
         filteredBookings = state.bookings.filter(b => {
-          if (b.inactive || !b.checkIn) return false;
-          const yr = new Date(b.checkIn).getFullYear();
+          if (isInactiveBooking(b) || !b.checkIn) return false;
+          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
           return yr === targetYear;
         });
 
@@ -2186,7 +2190,6 @@
       document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
 
-    /* WHATSAPP RECEIPT SENDER WITH VALIDATION & ERROR POPUP */
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");
@@ -2213,8 +2216,8 @@
       const fullPhoneNumber = rawCountryCode + phone;
       const upiId = "kapil98.ram@okaxis";
 
-      const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
-      const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
+      const effectiveOut = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
+      const roomsDisplay = getBookingRooms(b).join(', ');
 
       const messageText = `*Aniruddha Homestay - Booking Receipt*\n\n` +
         `Dear *${b.name}*,\n` +
@@ -2238,16 +2241,15 @@
       window.open(whatsappUrl, '_blank');
     }
 
-    /* PRINT INVOICE & MANAGE WHATSAPP AVAILABILITY AND E-INVOICE VISIBILITY */
     function printInvoice(bookingId) {
-      const bIndex = state.bookings.findIndex(item => item.id === bookingId);
+      const bIndex = state.bookings.findIndex(item => String(item.id) === String(bookingId));
       if (bIndex === -1) {
         alert("Booking details not found!");
         return;
       }
 
       const b = state.bookings[bIndex];
-      activeModalBooking = b; // Store global reference for WhatsApp sharing
+      activeModalBooking = b;
       
       const today = formatDate(new Date());
 
@@ -2258,14 +2260,13 @@
       const invIdContainer = document.getElementById('inv-id-container');
 
       const now = new Date().getTime();
-      const cIn = new Date(b.checkIn).getTime();
+      const cIn = parseDateMs(b.checkIn);
       const cOut = getEffectiveCheckoutTime(b);
       const isClosed = now > cOut;
-      const isInactive = b.inactive;
+      const isInactive = isInactiveBooking(b);
       const isLive = now >= cIn && now <= cOut;
       const isUpcoming = now < cIn;
 
-      // RULE 1: Send via WhatsApp button ONLY available in upcoming & live not for closed or inactive
       if (waBtn) {
         if (isClosed || isInactive) {
           waBtn.classList.add('hidden');
@@ -2285,7 +2286,6 @@
         }
       }
 
-      // RULE 2: If due not clear then hide E-invoice number from receipt/invoice only show booking id details, If due clear then unhide E-invoice number.
       const hasDue = (b.totalDue || 0) > 0;
       if (eInvoiceSection) {
         if (hasDue) {
@@ -2299,7 +2299,6 @@
         invIdContainer.querySelector('strong').innerText = b.invoiceNo || 'INV-2026-0000001';
       }
 
-      // Static Print Option in Invoice Modal
       if (invPrintBtn) {
         invPrintBtn.classList.remove('hidden');
         invPrintBtn.disabled = false;
@@ -2318,13 +2317,13 @@
       document.getElementById('inv-guest-contact').innerText = `Contact: ${fullGuestPhone}`;
       document.getElementById('inv-guest-id').innerText = `ID No: ${b.idNo || 'N/A'}`;
 
-      const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
+      const roomsDisplay = getBookingRooms(b).join(', ');
       document.getElementById('inv-room').innerText = `Room No: ${roomsDisplay}`;
       document.getElementById('inv-checkin').innerText = `Check-in: ${formatDateTime(b.checkIn)}`;
       document.getElementById('inv-checkout').innerText = `Check-out: ${formatDateTime(b.checkOut)}`;
 
       const extCheckoutElem = document.getElementById('inv-ext-checkout');
-      if (b.hasExtendedCheckout && b.extendedCheckOut) {
+      if (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) {
         extCheckoutElem.innerHTML = `Extended Check-out: ${formatDateTime(b.extendedCheckOut)} <span class="text-[9px] text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.2 rounded-full font-bold ml-1">Extended</span>`;
         extCheckoutElem.classList.remove('hidden');
       } else {
@@ -2336,7 +2335,7 @@
       tbody.innerHTML = '';
 
       const roomTotal = (b.noOfDays || 0) * (b.perDayPrice || 0) * (b.capacity || 1);
-      const showMealsNote = b.includeMeals !== false;
+      const showMealsNote = b.includeMeals !== false && b.includeMeals !== 'false';
       const mealNotesStr = showMealsNote ? '<span class="text-[9px] text-slate-500 block font-normal">(*Include Breakfast,Lunch,Evening snack & Dinner)</span>' : '';
 
       const stayDaysCount = parseInt(b.noOfDays) || 0;
@@ -2348,7 +2347,7 @@
       const roomTr = document.createElement('tr');
       roomTr.innerHTML = `
         <td class="p-2.5 font-semibold text-slate-800">
-          Room ${roomsDisplay} Accommodation (${roomCapacityCount} ${roomCapacityLabel}) ${b.hasExtendedCheckout ? '<span class="text-[9px] text-blue-600 block font-normal">(Includes extended stay duration)</span>' : ''}
+          Room ${roomsDisplay} Accommodation (${roomCapacityCount} ${roomCapacityLabel}) ${isTrue(b.hasExtendedCheckout) ? '<span class="text-[9px] text-blue-600 block font-normal">(Includes extended stay duration)</span>' : ''}
           ${mealNotesStr}
         </td>
         <td class="p-2.5 text-center">${daysFormattedStr}</td>
@@ -2396,7 +2395,6 @@
         });
       }
       
-      // Cab Trips Processing in Invoice
       if (b.cabTrips && b.cabTrips.length > 0) {
         b.cabTrips.forEach(trip => {
           if (trip.rate > 0) {
@@ -2537,7 +2535,6 @@
       }
     }
 
-    // Cab Fare Dynamics
     function addCabTripRow(rate = 0, dateStr = '', timeStr = '', remark = '', disabled = false) {
       const container = document.getElementById('cab-trips-container');
       const tripCount = container.children.length + 1;
@@ -2611,9 +2608,9 @@
 
       let b = null;
       if (bookingId) {
-        b = state.bookings.find(item => item.id === bookingId);
+        b = state.bookings.find(item => String(item.id) === String(bookingId));
         if (b) {
-          if (b.inactive) {
+          if (isInactiveBooking(b)) {
             alert("This booking details are inactive and cannot be edited.");
             return;
           }
@@ -2624,7 +2621,7 @@
           }
 
           const effectiveOutTime = getEffectiveCheckoutTime(b);
-          const checkInTime = new Date(b.checkIn).getTime();
+          const checkInTime = parseDateMs(b.checkIn);
           const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
 
           if (now >= checkInTime && now <= effectiveOutTime) {
@@ -2657,7 +2654,7 @@
       if (clearBillInput) clearBillInput.value = 0;
 
       document.getElementById('food-orders-container').innerHTML = '';
-      document.getElementById('cab-trips-container').innerHTML = ''; // Cab dynamics reset
+      document.getElementById('cab-trips-container').innerHTML = '';
       populateAgentDropdown();
 
       setSectionEditability('sec-guest-info', !isClosedAndWithin3Days);
@@ -2681,7 +2678,7 @@
 
       let canToggleExtendedCheckout = false;
       if (b) {
-        const initialCheckOutTime = new Date(b.checkOut).getTime();
+        const initialCheckOutTime = parseDateMs(b.checkOut);
         const isWithin1HrPastCheckout = now > initialCheckOutTime && now <= (initialCheckOutTime + ONE_HOUR_MS);
 
         if (isLiveBooking || isWithin1HrPastCheckout) {
@@ -2817,20 +2814,18 @@
           if (extDateInput) extDateInput.min = outDate || '';
         }
 
-        extChkBox.checked = !!b.hasExtendedCheckout;
+        extChkBox.checked = isTrue(b.hasExtendedCheckout);
         toggleExtendedCheckoutFields(extChkBox.checked);
-        if (b.hasExtendedCheckout && b.extendedCheckOut) {
+        if (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) {
           const [eDate, eTime] = b.extendedCheckOut.split('T');
           extDateInput.value = eDate || '';
           extTimeInput.value = eTime || '';
         }
 
         if (mealsChkBox) {
-          mealsChkBox.checked = b.includeMeals !== undefined ? !!b.includeMeals : true;
+          mealsChkBox.checked = b.includeMeals !== undefined ? (b.includeMeals !== false && b.includeMeals !== 'false') : true;
         }
 
-        // --- SAFE FALLBACKS FOR JSON ARRAYS FROM GOOGLE SHEETS --- //
-        
         if (b.foodOrders) {
            let foList = [];
            if (Array.isArray(b.foodOrders)) {
@@ -2850,7 +2845,6 @@
           });
         }
         
-        // Cab Trips Processing with parsed fallbacks and direct mappings
         if (b.cabTrips) {
            let tripsList = [];
            if (Array.isArray(b.cabTrips)) {
@@ -2952,7 +2946,6 @@
       document.getElementById('booking-modal').classList.add('hidden');
     }
 
-    // Extra Person Date Validations
     function handleExtraPersonDatesChange() {
       const mainInDate = document.getElementById('cust-checkin-date')?.value;
       const mainInTime = document.getElementById('cust-checkin-time')?.value || '12:00';
@@ -3096,10 +3089,6 @@
           let epOutDt = new Date(`${epOutDate}T${epOutTime}`);
 
           if (epOutDt > latestMainCheckoutDt) {
-            epOutDate = outDate;
-            epOutTime = outTime;
-            document.getElementById('cust-extra-person-out-date').value = outDate;
-            document.getElementById('cust-extra-person-out-time').value = outTime;
             epOutDt = new Date(latestMainCheckoutDt.getTime());
           }
 
@@ -3107,7 +3096,6 @@
             const epDiff = epOutDt - epInDt;
             extraPersonDays = Math.max(1, Math.ceil(epDiff / (1000 * 60 * 60 * 24)));
           } else {
-            alert("⚠️ Additional Person Check-In date & time cannot be after their Check-Out date & time!");
             extraPersonDays = 0;
           }
         } else {
@@ -3123,7 +3111,6 @@
         foodTotalCharge += parseFloat(input.value) || 0;
       });
       
-      // Calculate Cab Trips Total
       let cabFare = 0;
       document.querySelectorAll('.cust-cab-rate').forEach(input => {
         cabFare += parseFloat(input.value) || 0;
@@ -3248,7 +3235,6 @@
         const epInDt = new Date(extraPersonJoined);
         let epOutDt = new Date(extraPersonOut);
         
-        // Strict Extra Person Constraints
         if (epInDt < mainCheckInDt) {
            alert(`⚠️ Additional Person Check-In date & time cannot be earlier than the main Check-In date & time (${formatDateTime(checkIn)}).`);
            return;
@@ -3303,7 +3289,6 @@
         return;
       }
       
-      // Save Cab Trips Mapping and compile flat variables
       const cabTripsList = [];
       let totalCabFareToSave = 0;
       let cabRemarksList = [];
@@ -3332,573 +3317,33 @@
       });
 
       const effectiveCheckout = (hasExtendedCheckout && extendedCheckOut) ? extendedCheckOut : checkOut;
-      const newIn = new Date(checkIn).getTime();
-      const newOut = new Date(effectiveCheckout).getTime();
+      const newIn = parseDateMs(checkIn);
+      const newOut = parseDateMs(effectiveCheckout);
 
-      if (newIn >= newOut) {
+      if (isNaN(newIn) || isNaN(newOut) || newIn >= newOut) {
         alert("Check-Out date & time must be strictly after Check-In date & time.");
         return;
       }
 
       const conflict = state.bookings.find(b => {
-        if (b.inactive) return false;
-        if (id && b.id === id) return false;
+        if (isInactiveBooking(b)) return false;
+        if (id && String(b.id) === String(id)) return false;
         
-        const bRooms = Array.isArray(b.roomNo) ? b.roomNo.map(String) : String(b.roomNo).split(',').map(s => s.trim());
+        const bRooms = getBookingRooms(b);
         const hasRoomOverlap = selectedRooms.some(r => bRooms.includes(String(r)));
         if (!hasRoomOverlap) return false;
 
-        const existingIn = new Date(b.checkIn).getTime();
-        const existingOutCheckout = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
-        const existingOut = new Date(existingOutCheckout).getTime();
+        const existingIn = parseDateMs(b.checkIn);
+        const existingOutVal = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
+        const existingOut = parseDateMs(existingOutVal);
+
+        if (isNaN(existingIn) || isNaN(existingOut)) return false;
 
         return (newIn < existingOut && newOut > existingIn);
       });
 
       if (conflict) {
-        const confOutVal = (conflict.hasExtendedCheckout && conflict.extendedCheckOut) ? conflict.extendedCheckOut : conflict.checkOut;
+        const confOutVal = (isTrue(conflict.hasExtendedCheckout) && conflict.extendedCheckOut) ? conflict.extendedCheckOut : conflict.checkOut;
         const confOutFormatted = formatDateTime(confOutVal);
-        const conflictRooms = Array.isArray(conflict.roomNo) ? conflict.roomNo.join(', ') : conflict.roomNo;
-        alert(`❌ Booking Conflict Alert!\n\nRoom(s) ${conflictRooms} is already occupied by ${conflict.name} until ${confOutFormatted}.\n\nPlease select a check-in time after ${confOutFormatted} or assign different rooms.`);
-        return;
-      }
-
-      let existingCode = null;
-      let existingInv = null;
-
-      if (id) {
-        const existing = state.bookings.find(b => b.id === id);
-        if (existing) {
-          existingCode = existing.bookingCode;
-          existingInv = existing.invoiceNo;
-        }
-      }
-
-      if (!existingCode) {
-        const generated = generateIDsForYear(checkIn);
-        existingCode = generated.bookingCode;
-        existingInv = generated.invoiceNo;
-      }
-
-      const totalAmt = parseFloat(document.getElementById('cust-total').value) || 0;
-      const initialAdvAmt = parseFloat(document.getElementById('cust-advance').getAttribute('data-initial-adv')) || parseFloat(document.getElementById('cust-advance').value) || 0;
-      const clearedDueAmt = parseFloat(document.getElementById('cust-clear-bill').value) || 0;
-
-      const totalPaid = initialAdvAmt + clearedDueAmt;
-      const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
-
-      const newBooking = {
-        id: id || `bk_${Date.now()}`,
-        bookingCode: existingCode,
-        invoiceNo: existingInv,
-        name: guestName,
-        address: formatTitleCase(document.getElementById('cust-address').value.trim()),
-        city: formatTitleCase(document.getElementById('cust-city').value.trim()),
-        state: formatTitleCase(document.getElementById('cust-state').value.trim()),
-        country: formatTitleCase(document.getElementById('cust-country').value.trim()),
-        zipCode: document.getElementById('cust-zip').value.trim(),
-        idNo: document.getElementById('cust-id').value.trim(),
-        countryCode: countryCodeVal,
-        contactNo: contactNoVal,
-        idProofBase64: document.getElementById('cust-id-file-base64').value,
-        idProofFileName: document.getElementById('cust-id-file-name').value,
-        roomNo: selectedRooms,
-        agentInfo: document.getElementById('cust-agent').value,
-        capacity: parseInt(document.getElementById('cust-capacity').value) || 1,
-        extraPersons: extraPersons,
-        extraPersonJoined: extraPersonJoined,
-        extraPersonOut: extraPersonOut,
-        extraPersonDays: extraPersonDays,
-        checkIn: checkIn,
-        checkOut: checkOut,
-        hasExtendedCheckout: hasExtendedCheckout,
-        extendedCheckOut: extendedCheckOut,
-        includeMeals: includeMeals,
-        noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
-        perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
-        foodOrders: foodOrdersList,
-        cabTrips: cabTripsList,
-        cabFare: totalCabFareToSave,
-        cabRemark: cabRemarksList.join(' | '),
-        totalAmount: totalAmt,
-        initialAdv: initialAdvAmt,
-        clearedDue: clearedDueAmt,
-        advanced: totalPaid,
-        totalDue: Math.max(0, totalAmt - totalPaid),
-        inactive: false
-      };
-
-      if (id) {
-        const idx = state.bookings.findIndex(b => b.id === id);
-        if (idx !== -1) state.bookings[idx] = newBooking;
-      } else {
-        state.bookings.push(newBooking);
-      }
-
-      closeBookingModal();
-      searchMasterBookingById();
-      renderBookingsTable();
-      updateDashboardCards();
-      renderCalendar(defaultAppYear);
-      checkUpcomingCheckoutsWithDue();
-      saveChanges(false, false);
-
-      // RESET CHECK-IN / OUT DATES TO EMPTY (ZERO) DIRECTLY AFTER SAVING TO DB
-      document.getElementById('cust-checkin-date').value = "";
-      document.getElementById('cust-checkin-time').value = "";
-      document.getElementById('cust-checkout-date').value = "";
-      document.getElementById('cust-checkout-time').value = "";
-      document.getElementById('cust-ext-checkout-date').value = "";
-      document.getElementById('cust-ext-checkout-time').value = "";
-    }
-
-    function deleteBooking(id) {
-      openMasterDeleteModal('booking', id);
-    }
-
-    function renderBookingsTable(dateFilter = "") {
-      const tbody = document.getElementById('bookings-tbody');
-      tbody.innerHTML = '';
-
-      let listToRender = [...state.bookings];
-
-      if (dateFilter) {
-        listToRender = listToRender.filter(b => {
-          if (!b.checkIn || !b.checkOut) return false;
-          const bIn = b.checkIn.split('T')[0];
-          const bOutVal = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
-          const bOut = bOutVal.split('T')[0];
-          return (dateFilter >= bIn && dateFilter <= bOut);
-        });
-      }
-
-      const now = new Date().getTime();
-
-      const getStatusPriority = (b) => {
-        const isMasterValid = isRoomInMaster(b.roomNo);
-        if (!isMasterValid || b.inactive) {
-          return 4; 
-        }
-
-        const cIn = new Date(b.checkIn).getTime();
-        const cOut = getEffectiveCheckoutTime(b);
-
-        if (now > cOut) {
-          return 3; 
-        } else if (now >= cIn && now <= cOut) {
-          return 1; 
-        } else {
-          return 2; 
-        }
-      };
-
-      listToRender.sort((a, b) => {
-        const priorityA = getStatusPriority(a);
-        const priorityB = getStatusPriority(b);
-
-        if (priorityA !== priorityB) {
-          return priorityA - priorityB;
-        }
-
-        return (b.bookingCode || '').localeCompare(a.bookingCode || '');
-      });
-
-      if (listToRender.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="13" class="text-center py-6 text-slate-400">No bookings found for the selected date.</td></tr>`;
-        return;
-      }
-
-      listToRender.forEach((b) => {
-        const isMasterValid = isRoomInMaster(b.roomNo);
-        const checkInFmt = formatDateTime(b.checkIn);
-        
-        const effectiveOut = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
-        const checkOutFmt = formatDateTime(effectiveOut);
-
-        const checkInTime = new Date(b.checkIn).getTime();
-        const checkOutTime = getEffectiveCheckoutTime(b);
-
-        const isClosed = now > checkOutTime;
-        const isInactive = b.inactive;
-        const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
-
-        let statusBgClass = "hover:bg-slate-50";
-        let statusDotHtml = "";
-
-        if (!isMasterValid) {
-          statusBgClass = "bg-rose-100/70 hover:bg-rose-200/60 text-rose-900";
-        } else if (isInactive) {
-          statusBgClass = "bg-slate-100 hover:bg-slate-200 text-slate-500 opacity-75";
-        } else if (isClosed) {
-          statusDotHtml = `<span class="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block flex-shrink-0" title="Closed Booking"></span>`;
-        } else if (now >= checkInTime && now <= checkOutTime) {
-          statusDotHtml = `
-            <span class="relative flex h-2.5 w-2.5 flex-shrink-0" title="Live Booking">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-            </span>
-          `;
-        } else if (now < checkInTime) {
-          statusDotHtml = `<span class="w-2.5 h-2.5 bg-blue-500 rounded-full inline-block flex-shrink-0" title="Upcoming Booking"></span>`;
-        }
-
-        // Dynamic Parsing Fallbacks for Tables
-        let foodSummaryHtml = '';
-        let parseFood = b.foodOrders || [];
-        if (typeof parseFood === 'string' && parseFood.length > 5) {
-          try { parseFood = JSON.parse(parseFood); } catch(e){}
-        }
-        if (Array.isArray(parseFood) && parseFood.length > 0) {
-          const totalFoodCharge = parseFood.reduce((acc, fo) => acc + (fo.foodCharge || 0), 0);
-          if (totalFoodCharge > 0) {
-            foodSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-amber-800 font-semibold'}"><i class="fa-solid fa-utensils text-[8px] mr-0.5"></i>Food (${parseFood.length}): +₹${totalFoodCharge}</div>`;
-          }
-        }
-        
-        // Cab Trips Processing
-        let cabSummaryHtml = '';
-        let totalCab = 0;
-        let parseCab = b.cabTrips || [];
-        if (typeof parseCab === 'string' && parseCab.length > 5) {
-          try { parseCab = JSON.parse(parseCab); } catch(e){}
-        }
-        
-        if (Array.isArray(parseCab) && parseCab.length > 0) {
-            totalCab = parseCab.reduce((acc, t) => acc + (t.rate || 0), 0);
-        } else if (b.cabFare > 0) {
-            totalCab = b.cabFare; 
-        }
-        
-        if (totalCab > 0) {
-          cabSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-indigo-800 font-semibold'}"><i class="fa-solid fa-taxi text-[8px] mr-0.5"></i>Cab: +₹${totalCab}</div>`;
-        }
-
-        const printOnClick = `printInvoice('${b.id}')`;
-        
-        // STATIC PRINT ACTION BUTTONS (ALWAYS SHOWS "Print")
-        let actionButtonsHtml = `
-          <div class="flex items-center justify-center space-x-1">
-            <button onclick="openBookingModal('${b.id}')" class="text-blue-600 hover:text-blue-800 p-1 text-sm" title="Edit Booking Details">
-              <i class="fa-solid fa-pen-to-square"></i>
-            </button>              
-            <button onclick="${printOnClick}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-full text-[11px] font-bold transition shadow-xs">Print</button>
-          </div>
-        `;
-
-        let idProofCellHtml = `<span class="text-slate-400 italic text-[10px]">None</span>`;
-        if (b.idProofBase64) {
-          idProofCellHtml = `
-            <button onclick="openPdfAttachment('${b.idProofBase64}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1 transition">
-              <i class="fa-solid fa-file-pdf text-rose-600"></i> View PDF
-            </button>
-          `;
-        }
-
-        const tableCap = parseInt(b.capacity) || 1;
-        const tableCapLabel = tableCap === 1 ? 'Person' : 'Persons';
-        const extraPersonsText = (b.extraPersons && b.extraPersons > 0) ? `<span class="text-amber-700 font-bold block text-[9px]">(+${b.extraPersons} Extra)</span>` : '';
-        const contactDisplay = b.contactNo ? `${b.countryCode || '+91'} ${b.contactNo}`.trim() : '-';
-
-        const tr = document.createElement('tr');
-        tr.className = `${statusBgClass} transition border-b border-slate-100`;
-        tr.innerHTML = `
-          <td class="py-2.5 px-3">
-            <div class="flex items-center gap-1.5">
-              ${statusDotHtml}
-              ${b.inactive ? '<span class="w-2.5 h-2.5 bg-rose-600 rounded-full inline-block flex-shrink-0" title="Inactive Booking"></span>' : ''}
-              <span class="bg-blue-50 border border-blue-200 text-blue-700 font-mono font-bold px-2 py-0.5 rounded-full text-[9px] block w-max">${b.bookingCode}</span>
-            </div>
-            ${b.inactive ? '<span class="bg-slate-600 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Inactive</span>' : (!isMasterValid ? '<span class="bg-rose-700 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Master Removed</span>' : '')}
-          </td>
-          <td class="py-2.5 px-3 font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">${b.name}</td>
-          <td class="py-2.5 px-3 font-medium whitespace-nowrap">${contactDisplay}</td>
-          <td class="py-2.5 px-3 font-mono text-[10px]">${b.idNo || '-'}</td>
-          <td class="py-2.5 px-3">${idProofCellHtml}</td>
-          <td class="py-2.5 px-3"><span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full text-[10px] break-all">Room ${roomsDisplay}</span></td>
-          <td class="py-2.5 px-3 font-bold text-slate-700">${tableCap} ${tableCapLabel} ${extraPersonsText}</td>
-          <td class="py-2.5 px-3 ${!isMasterValid ? 'text-rose-900' : 'text-slate-600'} text-[10px]">${b.agentInfo || '-'}</td>
-          <td class="py-2.5 px-3 text-[10px]">
-            <div class="font-semibold ${!isMasterValid ? 'text-rose-950' : 'text-slate-700'}">${checkInFmt}</div>
-            <div class="${!isMasterValid ? 'text-rose-900' : 'text-slate-500'} text-[9px]">to ${checkOutFmt} ${b.hasExtendedCheckout ? '<span class="text-blue-600 font-bold">(Ext)</span>' : ''}</div>
-          </td>
-          <td class="py-2.5 px-3">
-            <div class="font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">₹${b.perDayPrice}/day (${b.noOfDays}d)</div>
-            ${foodSummaryHtml}
-            ${cabSummaryHtml}
-          </td>
-          <td class="py-2.5 px-3 font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">
-            ₹${b.totalAmount}
-            <span class="block text-[9px] text-emerald-600 font-medium">Adv: ₹${b.advanced}</span>
-          </td>
-          <td class="py-2.5 px-3 font-bold ${b.totalDue > 0 ? 'text-rose-600' : 'text-emerald-600'}">₹${b.totalDue}</td>
-          <td class="py-2.5 px-3 text-center">
-            ${actionButtonsHtml}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderRoomCapacityTable() {
-      const tbody = document.getElementById('room-capacity-tbody');
-      tbody.innerHTML = '';
-
-      if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-400">No room capacity data available.</td></tr>`;
-        return;
-      }
-
-      state.roomsCapacity.forEach((r, idx) => {
-        const tr = document.createElement('tr');
-        tr.className = "bg-white hover:bg-slate-50 transition border-b border-slate-100";
-        tr.innerHTML = `
-          <td class="py-2.5 px-3">
-            <input type="number" value="${r.roomNo}" min="1" oninput="state.roomsCapacity[${idx}].roomNo = parseInt(this.value) || 1" onchange="populateRoomDropdown(); renderBookingsTable(); saveChanges(false, true)" class="w-24 bg-transparent font-bold text-blue-600 focus:bg-white focus:border focus:border-blue-300 rounded-xl px-2 py-1">
-          </td>
-          <td class="py-2.5 px-3">
-            <input type="number" value="${r.capacity}" min="1" oninput="state.roomsCapacity[${idx}].capacity = parseInt(this.value) || 1" onchange="saveChanges(false, true)" class="w-24 bg-transparent font-semibold text-slate-800 focus:bg-white focus:border focus:border-blue-300 rounded-xl px-2 py-1">
-          </td>
-          <td class="py-2.5 px-3 text-center">
-            <button type="button" onclick="removeRoomCapacityRow(${idx})" class="text-rose-500 hover:text-rose-700 p-1 text-xs" title="Delete Room Entry">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderMasterAgentTable() {
-      const tbody = document.getElementById('agent-tbody');
-      tbody.innerHTML = '';
-
-      if (!state.masterAgents || state.masterAgents.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-400">No agent data available.</td></tr>`;
-        return;
-      }
-
-      state.masterAgents.forEach((a, idx) => {
-        const tr = document.createElement('tr');
-        tr.className = "bg-white hover:bg-slate-50 transition border-b border-slate-100";
-        tr.innerHTML = `
-          <td class="py-2.5 px-3">
-            <input type="text" value="${a.agentName}" oninput="state.masterAgents[${idx}].agentName = formatTitleCase(this.value)" onchange="populateAgentDropdown(); saveChanges(false, true)" class="w-full bg-transparent font-semibold text-slate-800 focus:bg-white focus:border focus:border-blue-300 rounded-xl px-2 py-1">
-          </td>
-          <td class="py-2.5 px-3">
-            <input type="text" value="${a.phone}" oninput="state.masterAgents[${idx}].phone = this.value" onchange="populateAgentDropdown(); saveChanges(false, true)" class="w-full bg-transparent text-slate-600 focus:bg-white focus:border focus:border-blue-300 rounded-xl px-2 py-1">
-          </td>
-          <td class="py-2.5 px-3 font-bold text-blue-600">
-            ${a.roomNo || 'All Rooms'}
-          </td>
-          <td class="py-2.5 px-3 text-center">
-            <button type="button" onclick="removeAgentRow(${idx})" class="text-rose-500 hover:text-rose-700 p-1 text-xs" title="Delete Agent Entry">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function addRoomCapacityRow() {
-      if (!state.roomsCapacity) state.roomsCapacity = [];
-      const existingRoomNos = state.roomsCapacity.map(r => parseInt(r.roomNo) || 0);
-      let nextRoom = 1;
-      if (existingRoomNos.length > 0) {
-        nextRoom = Math.max(...existingRoomNos) + 1;
-      }
-
-      state.roomsCapacity.push({
-        roomNo: nextRoom,
-        capacity: 4
-      });
-
-      renderRoomCapacityTable();
-      populateRoomDropdown();
-      saveChanges(false, false);
-    }
-
-    function removeRoomCapacityRow(index) {
-      openMasterDeleteModal('room', index);
-    }
-
-    function addAgentRow() {
-      if (!state.masterAgents) state.masterAgents = [];
-      const nextNum = state.masterAgents.length;
-      state.masterAgents.push({
-        agentName: `Agent ${nextNum + 1}`,
-        phone: "1234567890",
-        roomNo: "All Rooms"
-      });
-
-      renderMasterAgentTable();
-      populateAgentDropdown();
-      saveChanges(false, false);
-    }
-
-    function removeAgentRow(index) {
-      openMasterDeleteModal('agent', index);
-    }
-
-    function renderCalendar(year) {
-      state.selectedYear = year;
-      const calSelect = document.getElementById('cal-year-select');
-      if (calSelect) calSelect.value = year;
-
-      const container = document.getElementById('calendar-container');
-      container.innerHTML = '';
-
-      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-      months.forEach((monthName, monthIndex) => {
-        const monthBox = document.createElement('div');
-        monthBox.className = "bg-slate-50/80 rounded-3xl p-3 border border-slate-200/60 shadow-xs flex flex-col justify-between";
-
-        const title = document.createElement('h4');
-        title.className = "font-bold text-slate-800 text-[11px] mb-2 pb-1 border-b border-slate-200/60 flex justify-between items-center px-1";
-        title.innerHTML = `<span>${monthName}</span> <span class="text-[9px] text-blue-600 font-mono font-normal">${year}</span>`;
-        monthBox.appendChild(title);
-
-        const grid = document.createElement('div');
-        grid.className = "grid grid-cols-7 gap-1 text-center text-[9px] font-medium text-slate-500 mb-1";
-        
-        ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => {
-          const dh = document.createElement('div');
-          dh.innerText = d;
-          dh.className = "font-bold text-slate-400";
-          grid.appendChild(dh);
-        });
-
-        const firstDay = new Date(year, monthIndex, 1).getDay();
-        const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-
-        for (let i = 0; i < firstDay; i++) {
-          const empty = document.createElement('div');
-          grid.appendChild(empty);
-        }
-
-        const todayObj = new Date();
-        const isCurrentYearAndMonth = todayObj.getFullYear() === year && todayObj.getMonth() === monthIndex;
-
-        for (let day = 1; day <= daysInMonth; day++) {
-          const cell = document.createElement('div');
-          const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          
-          const matchingBookings = state.bookings.filter(b => {
-            if (b.inactive || !b.checkIn || !b.checkOut) return false;
-            if (!isRoomInMaster(b.roomNo)) return false;
-
-            const bIn = b.checkIn.split('T')[0];
-            const bOutVal = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
-            const bOut = bOutVal.split('T')[0];
-
-            return (dateStr >= bIn && dateStr <= bOut);
-          });
-
-          const isBooked = matchingBookings.length > 0;
-          const isToday = isCurrentYearAndMonth && todayObj.getDate() === day;
-
-          cell.className = `py-1 rounded-xl text-[10px] font-bold cursor-pointer transition relative flex items-center justify-center ${
-            isToday 
-              ? 'ring-2 ring-blue-600 ring-offset-1 z-10' 
-              : ''
-          } ${
-            isBooked 
-              ? 'bg-amber-400 text-slate-900 hover:bg-amber-500 shadow-xs' 
-              : 'bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border border-slate-100'
-          }`;
-
-          cell.innerText = day;
-
-          if (isBooked) {
-            cell.onclick = (e) => {
-              e.stopPropagation();
-              showExcelCommentBox(e, dateStr, matchingBookings);
-            };
-          }
-
-          grid.appendChild(cell);
-        }
-
-        monthBox.appendChild(grid);
-        container.appendChild(monthBox);
-      });
-    }
-
-    function showExcelCommentBox(e, dateStr, bookings) {
-      const box = document.getElementById('excel-comment-box');
-      const dateHeader = document.getElementById('comm-date-header');
-      const listContainer = document.getElementById('comm-booking-list');
-
-      dateHeader.innerText = formatDate(dateStr);
-      listContainer.innerHTML = '';
-
-      const now = new Date().getTime();
-
-      bookings.forEach(b => {
-        const item = document.createElement('div');
-        item.className = "bg-slate-800 p-2.5 rounded-2xl border border-slate-700 space-y-1 hover:border-blue-400 transition cursor-pointer";
-        item.onclick = () => {
-          closeCommentBox();
-          openBookingModal(b.id);
-        };
-
-        const cInMs = new Date(b.checkIn).getTime();
-        const cOutMs = getEffectiveCheckoutTime(b);
-        const effectiveCheckout = (b.hasExtendedCheckout && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
-        const roomsDisplay = Array.isArray(b.roomNo) ? b.roomNo.join(', ') : b.roomNo;
-
-        let statusText = "Upcoming";
-        let statusColorClass = "text-blue-400 font-bold";
-
-        if (now > cOutMs) {
-          statusText = "Closed";
-          statusColorClass = "text-emerald-400 font-bold";
-        } else if (now >= cInMs && now <= cOutMs) {
-          statusText = "Live";
-          statusColorClass = "text-amber-400 font-bold";
-        }
-
-        item.innerHTML = `
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-blue-400 text-[11px]">${b.name}</span>
-            <span class="bg-blue-900/60 text-blue-200 px-2 py-0.5 rounded-full text-[9px] font-mono">Room ${roomsDisplay}</span>
-          </div>
-          <div class="text-[9px] text-slate-300">
-            Check-In: ${formatDateTime(b.checkIn)}<br>
-            Check-Out: ${formatDateTime(effectiveCheckout)}<br>
-            Status: <span class="${statusColorClass}">${statusText}</span>
-          </div>
-          <div class="flex justify-between items-center text-[9px] pt-1 border-t border-slate-700/60">
-            <span class="text-emerald-400 font-semibold">Total: ₹${b.totalAmount}</span>
-            <span class="${b.totalDue > 0 ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}">
-              ${b.totalDue > 0 ? `Due: ₹${b.totalDue}` : 'Paid'}
-            </span>
-          </div>
-        `;
-        listContainer.appendChild(item);
-      });
-
-      const rect = e.target.getBoundingClientRect();
-      const scrollY = window.scrollY || window.pageYOffset;
-      const scrollX = window.scrollX || window.pageXOffset;
-
-      box.style.top = `${rect.bottom + scrollY + 5}px`;
-      
-      let leftPos = rect.left + scrollX - 20;
-      if (leftPos + 260 > window.innerWidth) {
-        leftPos = window.innerWidth - 270;
-      }
-      box.style.left = `${Math.max(10, leftPos)}px`;
-
-      box.classList.remove('hidden');
-    }
-
-    function closeCommentBox() {
-      const box = document.getElementById('excel-comment-box');
-      if (box) box.classList.add('hidden');
-    }
-  </script>
-</body>
-</html>
+        const conflictRooms = getBookingRooms(conflict).join(',I'm having a hard time fulfilling your request. Can I help you with something else instead?
 
