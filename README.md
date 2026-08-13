@@ -110,6 +110,33 @@
     </div>
   </div>
 
+  <!-- POST-LOGIN INSTRUCTION MODAL -->
+  <div id="post-login-modal" class="hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl shadow-2xl border border-blue-100 max-w-md w-full p-6 space-y-4 text-left relative">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="text-sm font-black text-blue-600 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-blue-500"></i> Important Instructions
+        </h3>
+        <button onclick="closePostLoginModal()" class="text-slate-400 hover:text-rose-500 transition text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="text-[11px] text-slate-700 space-y-2">
+        <ol class="list-decimal pl-4 space-y-2 font-medium">
+          <li>Do not Wipe out data if you didn’t take backup.</li>
+          <li>If you are starting new then clean your browser history once.</li>
+          <li>Always save data before leaving the Portal.</li>
+          <li>Do not close window, tab or refresh if data is not saved.</li>
+          <li>Without logout do not close the browser or window or tab for data saving error.</li>
+          <li>Download data in excel once in a week for backup.</li>
+        </ol>
+      </div>
+      <div class="pt-3 border-t border-slate-100 flex justify-end">
+        <button onclick="closePostLoginModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-xl shadow-sm transition text-xs">
+          I Understand
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- MASTER DATA ACCESS PASSWORD MODAL -->
   <div id="master-auth-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-xs w-full p-5 space-y-3 text-left">
@@ -1079,7 +1106,11 @@
       try {
         const payload = { action: "wipeData" };
         await fetch(GAS_API_URL, {
+          redirect: "follow",
           method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
           body: JSON.stringify(payload)
         });
 
@@ -1107,7 +1138,7 @@
       }
     }
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzp0gvXrl3E_wk4GTbF1Y67GmIcvj59CgjvfgZZjqxFxXypEoIG2M6ZIfQHa2zS4F6K/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
@@ -1350,12 +1381,21 @@
       closeMasterDeleteModal();
     }
 
+    function openPostLoginModal() {
+      document.getElementById('post-login-modal').classList.remove('hidden');
+    }
+    
+    function closePostLoginModal() {
+      document.getElementById('post-login-modal').classList.add('hidden');
+    }
+
     function checkAuthStatus() {
       const sessionAuth = sessionStorage.getItem('app_authenticated');
       if (sessionAuth === 'true') {
         isLoggedIn = true;
         document.getElementById('login-overlay').classList.add('hidden');
         startInactivityMonitoring();
+        openPostLoginModal();
       } else {
         isLoggedIn = false;
         document.getElementById('login-overlay').classList.remove('hidden');
@@ -1373,6 +1413,7 @@
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('login-error').classList.add('hidden');
         startInactivityMonitoring();
+        openPostLoginModal();
       } else {
         document.getElementById('login-error').classList.remove('hidden');
       }
@@ -1798,7 +1839,9 @@
       toast.classList.remove('hidden');
 
       try {
-        const response = await fetch(GAS_API_URL + "?action=fetchData");
+        const response = await fetch(GAS_API_URL + "?action=fetchData", {
+          redirect: "follow"
+        });
         const sheetData = await response.json();
         
         if (sheetData && sheetData.bookings) {
@@ -1879,6 +1922,7 @@
         };
 
         const response = await fetch(GAS_API_URL, {
+          redirect: "follow",
           method: "POST",
           headers: {
             "Content-Type": "text/plain;charset=utf-8"
