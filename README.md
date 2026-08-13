@@ -2289,7 +2289,7 @@
       }
 
       const fullPhoneNumber = rawCountryCode + phone;
-      const upiId = "kapil98.ram@okaxis";
+      const upiId = "aniruddha.e@oksbi";
 
       const effectiveOut = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
       const roomsDisplay = getBookingRooms(b).join(', ');
