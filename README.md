@@ -169,15 +169,46 @@
     </div>
   </div>
 
+  <!-- MANUAL LOGOUT CONFIRM MODAL -->
+  <div id="logout-confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 max-w-xs w-full p-5 space-y-3 text-center">
+      <div class="bg-rose-50 text-rose-600 w-10 h-10 rounded-2xl flex items-center justify-center mx-auto text-lg">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </div>
+      <div>
+        <h3 class="text-xs font-bold text-slate-900">Confirm Logout</h3>
+        <p class="text-[10px] text-slate-500 mt-1">Are you sure you want to log out? All your latest changes will be saved securely before exiting.</p>
+      </div>
+      <div class="flex space-x-2 pt-2">
+        <button type="button" onclick="cancelLogout()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-[11px] transition">Cancel</button>
+        <button type="button" onclick="processLogoutWithSave()" class="w-1/2 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-xl shadow-sm transition text-[11px]">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVING LOCK MODAL (SAND TIMER) -->
+  <div id="saving-lock-modal" class="hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 no-print cursor-wait">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full p-6 text-center space-y-4">
+      <div class="text-blue-600 text-5xl animate-bounce">
+        ⏳
+      </div>
+      <div>
+        <h3 class="text-lg font-black text-slate-900">Saving & Logging Out...</h3>
+        <p class="text-xs text-rose-600 mt-2 font-bold uppercase">Do not close window or shutdown!</p>
+        <p class="text-[10px] text-slate-500 mt-1">Please wait while we secure your data.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- SESSION AUTO LOGOUT WARNING MODAL -->
-  <div id="logout-warning-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="logout-warning-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-xl border border-slate-100 max-w-xs w-full p-5 space-y-3 text-center">
       <div class="bg-amber-50 text-amber-600 w-10 h-10 rounded-2xl flex items-center justify-center mx-auto text-lg">
         <i class="fa-solid fa-hourglass-half"></i>
       </div>
       <div>
         <h3 class="text-xs font-bold text-slate-900">Inactivity Timeout Warning</h3>
-        <p class="text-[10px] text-slate-500 mt-1">You will be logged out automatically in <strong id="logout-countdown-seconds" class="text-rose-600">60</strong> seconds due to inactivity.</p>
+        <p class="text-[10px] text-slate-500 mt-1">You will be logged out automatically in <strong id="logout-countdown-seconds" class="text-rose-600">60</strong> seconds due to inactivity. Data will be saved securely.</p>
       </div>
       <button onclick="resetInactivityTimer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-xl text-[11px] transition shadow-sm">
         Stay Logged In
@@ -1052,8 +1083,9 @@
           body: JSON.stringify(payload)
         });
 
-        // Reset local state (Default Room Capacity Room 1 to 5: 4,2,4,4,4 & Agent Directory to Self/Direct)
+        // Reset local state
         state.bookings = [];
+        state.yearlyCounters = {}; // Clears the sequence counter to start fresh IDs from 01
         state.roomsCapacity = [
           { roomNo: 1, capacity: 4 },
           { roomNo: 2, capacity: 2 },
@@ -1075,7 +1107,7 @@
       }
     }
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvFdRB-rD_eZW-yl2gitJ3BZK0RjrPl1xmc79Q6ISE01k9lZNgp3itWRnuAviK1de74Q/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
@@ -1090,7 +1122,7 @@
 
     function formatTitleCase(text) {
       if (!text) return '';
-      return text.replace(/\w\S*/g, function(txt) {
+      return String(text).replace(/\w\S*/g, function(txt) {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
       });
     }
@@ -1346,19 +1378,38 @@
       }
     }
 
-    function logoutUser(skipSavePrompt = false) {
-      if (isLoggedIn && !skipSavePrompt) {
-        if (confirm("Please save your data before logout! Do you want to save changes now?")) {
-          saveChanges();
+    function logoutUser(isAuto = false) {
+      if (isAuto) {
+         processLogoutWithSave();
+      } else {
+         document.getElementById('logout-confirm-modal').classList.remove('hidden');
+      }
+    }
+    
+    function cancelLogout() {
+      document.getElementById('logout-confirm-modal').classList.add('hidden');
+      resetInactivityTimer();
+    }
+    
+    async function processLogoutWithSave() {
+      document.getElementById('logout-warning-modal').classList.add('hidden');
+      document.getElementById('logout-confirm-modal').classList.add('hidden');
+      
+      if (isLoggedIn) {
+        document.getElementById('saving-lock-modal').classList.remove('hidden');
+        try {
+          await saveChanges(true, true);
+        } catch (e) {
+          console.error("Save on logout error", e);
         }
       }
+      
       isLoggedIn = false;
       isMasterUnlocked = false;
       sessionStorage.removeItem('app_authenticated');
       stopInactivityMonitoring();
-      document.getElementById('logout-warning-modal').classList.add('hidden');
-      document.getElementById('login-password').value = '';
-      document.getElementById('login-overlay').classList.remove('hidden');
+      
+      window.location.reload();
     }
 
     function openMasterAuthModal() {
@@ -1557,46 +1608,57 @@
         return;
       }
 
+      const now = new Date().getTime();
+
       const exportData = filteredBookings.map(b => {
+        let bStatus = "Unknown";
+        if (isInactiveBooking(b)) {
+            bStatus = "Inactive";
+        } else {
+            const cIn = parseDateMs(b.checkIn);
+            const cOut = getEffectiveCheckoutTime(b);
+            if (now > cOut) bStatus = "Closed";
+            else if (now >= cIn && now <= cOut) bStatus = "Live";
+            else bStatus = "Upcoming";
+        }
+        
         return {
-          id: b.id || "",
-          bookingCode: b.bookingCode || "",
-          invoiceNo: b.invoiceNo || "",
-          name: b.name || "",
-          address: b.address || "",
-          city: b.city || "",
-          state: b.state || "",
-          country: b.country || "",
-          zipCode: b.zipCode || "",
-          idNo: b.idNo || "",
-          countryCode: b.countryCode || "",
-          contactNo: b.contactNo || "",
-          idProofBase64: b.idProofBase64 ? "Attached" : "",
-          idProofFileName: b.idProofFileName || "",
-          roomNo: getBookingRooms(b).join(", "),
-          agentInfo: b.agentInfo || "",
-          capacity: b.capacity || 1,
-          extraPersons: b.extraPersons || 0,
-          extraPersonJoined: b.extraPersonJoined || "",
-          extraPersonOut: b.extraPersonOut || "",
-          extraPersonDays: b.extraPersonDays || 0,
-          checkIn: b.checkIn || "",
-          checkOut: b.checkOut || "",
-          hasExtendedCheckout: isTrue(b.hasExtendedCheckout),
-          extendedCheckOut: b.extendedCheckOut || "",
-          includeMeals: b.includeMeals !== false && b.includeMeals !== 'false',
-          noOfDays: b.noOfDays || 0,
-          perDayPrice: b.perDayPrice || 0,
-          foodOrders: b.foodOrders ? (typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(b.foodOrders)) : "",
-          cabFare: b.cabFare || 0,
-          cabRemark: b.cabRemark || "",
-          cabTrips: b.cabTrips ? (typeof b.cabTrips === 'string' ? b.cabTrips : JSON.stringify(b.cabTrips)) : "",
-          totalAmount: b.totalAmount || 0,
-          initialAdv: b.initialAdv || 0,
-          clearedDue: b.clearedDue || 0,
-          advanced: b.advanced || 0,
-          totalDue: b.totalDue || 0,
-          inactive: isInactiveBooking(b)
+          "Booking ID (System)": b.id || "",
+          "Booking ID": b.bookingCode || "",
+          "Invoice ID": b.invoiceNo || "",
+          "Booking Status": bStatus,
+          "Guest Name": b.name || "",
+          "Contact No": b.contactNo || "",
+          "Country Code": b.countryCode || "",
+          "ID Number": b.idNo || "",
+          "Attached ID File Name": b.idProofFileName || "",
+          "Address": b.address || "",
+          "City": b.city || "",
+          "State": b.state || "",
+          "Country": b.country || "",
+          "Pin/Zip Code": b.zipCode || "",
+          "Room No(s)": getBookingRooms(b).join(", "),
+          "Capacity": b.capacity || 1,
+          "Extra Persons": b.extraPersons || 0,
+          "Extra Person Joined": b.extraPersonJoined || "",
+          "Extra Person Check-Out": b.extraPersonOut || "",
+          "Extra Person Days": b.extraPersonDays || 0,
+          "Agent Info": b.agentInfo || "",
+          "Check-In": b.checkIn || "",
+          "Check-Out": b.checkOut || "",
+          "Has Extended Check-Out": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
+          "Extended Check-Out": b.extendedCheckOut || "",
+          "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
+          "Stay Days": b.noOfDays || 0,
+          "Price / Day": b.perDayPrice || 0,
+          "Food Orders (JSON)": b.foodOrders ? (typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(b.foodOrders)) : "",
+          "Cab Fare": b.cabFare || 0,
+          "Cab Remark": b.cabRemark || "",
+          "Total Amount": b.totalAmount || 0,
+          "Initial Advance": b.initialAdv || 0,
+          "Cleared Due": b.clearedDue || 0,
+          "Advance Paid": b.advanced || 0,
+          "Balance Due": b.totalDue || 0
         };
       });
 
@@ -1713,7 +1775,8 @@
       
       state.selectedYear = defaultAppYear;
       state.dashSelectedYear = defaultAppYear;
-      if (!state.yearlyCounters) {
+      
+      if (!state.yearlyCounters || Object.keys(state.yearlyCounters).length === 0) {
         state.yearlyCounters = { [defaultAppYear]: state.bookings.length || 0 };
       }
 
@@ -1756,16 +1819,9 @@
       const checkInInput = document.getElementById('cust-checkin-date');
       const checkOutInput = document.getElementById('cust-checkout-date');
       const extDateInput = document.getElementById('cust-ext-checkout-date');
-      const bookingModalId = document.getElementById('modal-booking-id')?.value;
       
-      if (!bookingModalId) {
-        const today = new Date().toISOString().split('T')[0];
-        if (checkInInput) checkInInput.min = today;
-        if (checkOutInput) checkOutInput.min = today;
-      } else {
-        if (checkInInput) checkInInput.removeAttribute('min');
-        if (checkOutInput) checkOutInput.removeAttribute('min');
-      }
+      if (checkInInput) checkInInput.removeAttribute('min');
+      if (checkOutInput) checkOutInput.removeAttribute('min');
 
       if (checkOutInput && extDateInput) {
         extDateInput.min = checkOutInput.value;
@@ -1792,6 +1848,15 @@
       setInterval(checkUpcomingCheckoutsWithDue, 60000);
       setInterval(triggerPeriodicAutoSave, 300000);
     });
+
+    function refreshDynamicUI() {
+      if (document.getElementById('tab-booking') && !document.getElementById('tab-booking').classList.contains('hidden')) {
+        renderBookingsTable(document.getElementById('booking-date-search').value);
+      }
+      if (document.getElementById('tab-dashboard') && !document.getElementById('tab-dashboard').classList.contains('hidden')) {
+        updateDashboardCards();
+      }
+    }
 
     function triggerPeriodicAutoSave() {
       saveChanges(true, true);
@@ -1896,6 +1961,7 @@
       }
 
       renderAlertModalList(alertBookings);
+      refreshDynamicUI();
     }
 
     function renderAlertModalList(alertList) {
@@ -2206,8 +2272,8 @@
       }
 
       const b = activeModalBooking;
-      let rawCountryCode = b.countryCode ? b.countryCode.replace(/\D/g, '') : '91';
-      let phone = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
+      let rawCountryCode = b.countryCode ? String(b.countryCode).replace(/\D/g, '') : '91';
+      let phone = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
       
       let validationErrors = [];
       if (!phone || phone.length !== 10) {
@@ -2281,7 +2347,7 @@
           waBtn.classList.add('hidden');
         } else {
           waBtn.classList.remove('hidden');
-          const contactDigits = b.contactNo ? b.contactNo.replace(/\D/g, '') : '';
+          const contactDigits = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
           const hasValidContact = contactDigits.length === 10;
           const hasAdvanced = (parseFloat(b.advanced) || 0) > 0;
 
@@ -2667,18 +2733,7 @@
       populateAgentDropdown();
 
       setSectionEditability('sec-guest-info', !isClosedAndWithin3Days);
-
-      if (isUpcomingBooking) {
-        setSectionEditability('sec-room-dates', true);
-      } else if (isLiveBooking) {
-        setSectionEditability('sec-room-dates', true);
-        setInputEnabled(document.getElementById('cust-checkin-date'), false);
-        setInputEnabled(document.getElementById('cust-checkin-time'), false);
-        setInputEnabled(document.getElementById('cust-checkout-date'), false);
-        setInputEnabled(document.getElementById('cust-checkout-time'), false);
-      } else if (isClosedAndWithin3Days) {
-        setSectionEditability('sec-room-dates', false);
-      }
+      setSectionEditability('sec-room-dates', !isClosedAndWithin3Days);
 
       const extChkBox = document.getElementById('cust-has-extended-checkout');
       const extDateInput = document.getElementById('cust-ext-checkout-date');
@@ -2746,15 +2801,15 @@
       const extraPersonOutDateInput = document.getElementById('cust-extra-person-out-date');
       const extraPersonOutTimeInput = document.getElementById('cust-extra-person-out-time');
 
-      if (extraPersonsInput) {
-        setInputEnabled(extraPersonsInput, isLiveBooking || isUpcomingBooking);
-      }
-      if (extraPersonDateInput) setInputEnabled(extraPersonDateInput, isLiveBooking || isUpcomingBooking);
-      if (extraPersonTimeInput) setInputEnabled(extraPersonTimeInput, isLiveBooking || isUpcomingBooking);
-      if (extraPersonOutDateInput) setInputEnabled(extraPersonOutDateInput, isLiveBooking || isUpcomingBooking);
-      if (extraPersonOutTimeInput) setInputEnabled(extraPersonOutTimeInput, isLiveBooking || isUpcomingBooking);
+      // Extra person inputs remain fully editable for any saved booking (unless > 3 days closed)
+      const canEditExtras = !isClosedAndWithin3Days;
+      if (extraPersonsInput) setInputEnabled(extraPersonsInput, canEditExtras);
+      if (extraPersonDateInput) setInputEnabled(extraPersonDateInput, canEditExtras);
+      if (extraPersonTimeInput) setInputEnabled(extraPersonTimeInput, canEditExtras);
+      if (extraPersonOutDateInput) setInputEnabled(extraPersonOutDateInput, canEditExtras);
+      if (extraPersonOutTimeInput) setInputEnabled(extraPersonOutTimeInput, canEditExtras);
 
-      if (isLiveBooking || isUpcomingBooking) {
+      if (canEditExtras) {
         if (extraPersonTimeWrapper) extraPersonTimeWrapper.classList.remove('hidden');
       } else {
         if (extraPersonTimeWrapper && (!b || !b.extraPersons || b.extraPersons <= 0)) {
@@ -2768,6 +2823,12 @@
         document.getElementById('modal-title').innerText = isClosedAndWithin3Days 
           ? 'Closed Booking (Billing Active)' 
           : 'Edit Booking Details';
+        
+        // ** LOCK MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS ALREADY CREATED **
+        setInputEnabled(document.getElementById('cust-checkin-date'), false);
+        setInputEnabled(document.getElementById('cust-checkin-time'), false);
+        setInputEnabled(document.getElementById('cust-checkout-date'), false);
+        setInputEnabled(document.getElementById('cust-checkout-time'), false);
         
         document.getElementById('modal-booking-id').value = b.id;
         document.getElementById('cust-name').value = formatTitleCase(b.name);
@@ -2889,18 +2950,50 @@
         document.getElementById('modal-title').innerText = 'Add New Booking';
         document.getElementById('modal-booking-id').value = '';
         
+        // DO NOT lock the fields if adding a new booking
+        setInputEnabled(document.getElementById('cust-checkin-date'), true);
+        setInputEnabled(document.getElementById('cust-checkin-time'), true);
+        setInputEnabled(document.getElementById('cust-checkout-date'), true);
+        setInputEnabled(document.getElementById('cust-checkout-time'), true);
+
+        // Calculate and set today's date as min for new bookings
+        const todayDt = new Date();
+        const yyyy = todayDt.getFullYear();
+        const mm = String(todayDt.getMonth() + 1).padStart(2, '0');
+        const dd = String(todayDt.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+
+        const tomorrowDt = new Date(todayDt);
+        tomorrowDt.setDate(tomorrowDt.getDate() + 1);
+        const t_yyyy = tomorrowDt.getFullYear();
+        const t_mm = String(tomorrowDt.getMonth() + 1).padStart(2, '0');
+        const t_dd = String(tomorrowDt.getDate()).padStart(2, '0');
+        const tomorrowStr = `${t_yyyy}-${t_mm}-${t_dd}`;
+
+        const checkInElem = document.getElementById('cust-checkin-date');
+        checkInElem.min = todayStr;
+        checkInElem.value = todayStr;
+
+        const checkOutElem = document.getElementById('cust-checkout-date');
+        checkOutElem.min = todayStr;
+        checkOutElem.value = tomorrowStr;
+
         populateRoomDropdown(state.roomsCapacity.length > 0 ? [state.roomsCapacity[0].roomNo] : []);
 
         document.getElementById('cust-country-code').value = "+91";
-        document.getElementById('cust-checkin-time').value = "";
-        document.getElementById('cust-checkout-time').value = "";
+
+        // SET DEFAULT CHECK-IN AND CHECK-OUT TIME TO 11:00 AM FOR NEW BOOKING
+        document.getElementById('cust-checkin-time').value = "11:00";
+        document.getElementById('cust-checkout-time').value = "11:00";
 
         if (extraPersonsInput) extraPersonsInput.value = 0;
         
         if (extraPersonDateInput) extraPersonDateInput.value = "";
-        if (extraPersonTimeInput) extraPersonTimeInput.value = "";
+        
+        // SET EXTRA PERSON DEFAULT TIMES TO 11:00 AM FOR NEW BOOKING
+        if (extraPersonTimeInput) extraPersonTimeInput.value = "11:00";
         if (extraPersonOutDateInput) extraPersonOutDateInput.value = "";
-        if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = "";
+        if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = "11:00";
 
         extChkBox.checked = false;
         extChkBox.disabled = true;
@@ -2984,9 +3077,7 @@
         const mainInFull = new Date(`${mainInDate}T${mainInTime}`);
 
         if (epInFull < mainInFull) {
-          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(mainInFull.toISOString())}).`);
-          epInDateElem.value = mainInDate;
-          epInTimeElem.value = mainInTime;
+          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(mainInFull.toISOString())}). Please correct it.`);
         }
       }
 
@@ -2995,9 +3086,7 @@
         const mainOutFull = new Date(`${latestOutD}T${latestOutT}`);
 
         if (epOutFull > mainOutFull) {
-          alert(`⚠️ Additional person check-out date cannot be later than the main/extended check-out date (${formatDateTime(mainOutFull.toISOString())}).`);
-          epOutDateElem.value = latestOutD;
-          epOutTimeElem.value = latestOutT;
+          alert(`⚠️ Additional person check-out date cannot be later than the main/extended check-out date (${formatDateTime(mainOutFull.toISOString())}). Please correct it.`);
         }
       }
       
@@ -3005,29 +3094,22 @@
     }
 
     function handleStayDatesChange() {
-      const bookingModalId = document.getElementById('modal-booking-id')?.value;
+      const inDateInput = document.getElementById('cust-checkin-date');
       const outDateInput = document.getElementById('cust-checkout-date');
       const extDateInput = document.getElementById('cust-ext-checkout-date');
+
+      if (inDateInput && outDateInput) {
+        outDateInput.min = inDateInput.value;
+        if (outDateInput.value && outDateInput.value < inDateInput.value) {
+          outDateInput.value = inDateInput.value;
+        }
+      }
 
       if (outDateInput && extDateInput) {
         extDateInput.min = outDateInput.value;
         if (extDateInput.value && extDateInput.value < outDateInput.value) {
           alert("⚠️ Extended Check-Out date cannot be prior to the initial Check-Out date!");
           extDateInput.value = outDateInput.value;
-        }
-      }
-
-      if (!bookingModalId) {
-        const today = new Date().toISOString().split('T')[0];
-        const inDateInput = document.getElementById('cust-checkin-date');
-
-        if (inDateInput.value && inDateInput.value < today) {
-          alert("⚠️ Check-In date cannot be prior to the current date!");
-          inDateInput.value = today;
-        }
-        if (outDateInput.value && outDateInput.value < today) {
-          alert("⚠️ Check-Out date cannot be prior to the current date!");
-          outDateInput.value = today;
         }
       }
 
@@ -3168,20 +3250,27 @@
         return;
       }
 
-      const today = new Date().toISOString().split('T')[0];
       const inDate = document.getElementById('cust-checkin-date').value;
       const outDate = document.getElementById('cust-checkout-date').value;
       const inTime = document.getElementById('cust-checkin-time').value || '00:00';
       const outTime = document.getElementById('cust-checkout-time').value || '00:00';
 
       const bookingModalId = document.getElementById('modal-booking-id').value;
-
-      if (!bookingModalId && inDate < today) {
-        alert("⚠️ Cannot book new entry before today’s date!");
-        return;
-      }
-
       const id = bookingModalId;
+
+      // Add strict check-in date validation for New Booking
+      if (!id) {
+        const todayDt = new Date();
+        const yyyy = todayDt.getFullYear();
+        const mm = String(todayDt.getMonth() + 1).padStart(2, '0');
+        const dd = String(todayDt.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        
+        if (inDate < todayStr) {
+          alert("⚠️ Main check-in date cannot be earlier than today!");
+          return;
+        }
+      }
       
       let selectedRooms = getSelectedRooms();
       if (selectedRooms.includes("ALL")) {
