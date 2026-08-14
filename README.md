@@ -69,7 +69,7 @@
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
   <!-- LOGIN MODAL OVERLAY -->
-  <div id="login-overlay" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="login-overlay" class="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full p-6 space-y-4 text-left">
       <div class="text-center space-y-1">
         <div class="bg-blue-50 text-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto text-xl shadow-sm">
@@ -107,6 +107,31 @@
           <i class="fa-solid fa-right-to-bracket"></i> Login
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- LOGIN ALERT MESSAGE MODAL (POPUP ON SUCCESSFUL LOGIN) -->
+  <div id="login-alert-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl shadow-2xl border border-blue-100 max-w-md w-full p-6 space-y-4 text-left">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+        <div class="bg-amber-50 text-amber-600 w-10 h-10 rounded-2xl flex items-center justify-center text-lg shadow-sm">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Important System Guidelines</h3>
+          <p class="text-[10px] text-slate-500">Please read these instructions before continuing</p>
+        </div>
+      </div>
+      <div class="space-y-2.5 text-[11px] text-slate-700 font-medium">
+        <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>1. Chrome/Microsoft edge is best view browser.</span></p>
+        <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>2. Take backup every day or every week.</span></p>
+        <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>3. Do not force close The Portal always close by Logout option.</span></p>
+        <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>4. Do not Login with different device at a time to avoid data merge.</span></p>
+        <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>5. Data save/Data fetch take little bit time so hold on ⏳.</span></p>
+      </div>
+      <button onclick="closeLoginAlertModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-2xl shadow-sm transition text-xs mt-2">
+        I Understand, Continue
+      </button>
     </div>
   </div>
 
@@ -1039,28 +1064,65 @@
       return d.getTime();
     }
     
-    // Convert a Date object to local ISO string to avoid UTC shifts
-    function toLocalISOString(date) {
-        if (!(date instanceof Date) || isNaN(date)) return '';
-        const yyyy = date.getFullYear();
-        const mm = String(date.getMonth() + 1).padStart(2, '0');
-        const dd = String(date.getDate()).padStart(2, '0');
-        const hh = String(date.getHours()).padStart(2, '0');
-        const min = String(date.getMinutes()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    // Extract IST local parts robustly for input fields ensuring UTC+05:30 offset
+    function extractISTDateParts(dtStr) {
+      if (!dtStr) return { date: '', time: '' };
+      let d = new Date(typeof dtStr === 'string' ? dtStr.replace(' ', 'T') : dtStr);
+      if (isNaN(d.getTime())) {
+        const parts = String(dtStr).replace(' ', 'T').split('T');
+        return { date: parts[0] || '', time: parts[1] ? parts[1].substring(0, 5) : '' };
+      }
+      const utcMs = d.getTime(); 
+      const istDate = new Date(utcMs + (330 * 60000));
+      
+      const yyyy = istDate.getUTCFullYear();
+      const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(istDate.getUTCDate()).padStart(2, '0');
+      const hh = String(istDate.getUTCHours()).padStart(2, '0');
+      const min = String(istDate.getUTCMinutes()).padStart(2, '0');
+      
+      return { date: `${yyyy}-${mm}-${dd}`, time: `${hh}:${min}` };
     }
 
-    // NEW helper logic to format dates strictly into 24-hour style "dd/mm/yy hh:mm" for Excel exports
+    // Convert a Date object to local ISO string adhering to IST (UTC+05:30)
+    function toLocalISOString(date) {
+        if (!(date instanceof Date) || isNaN(date)) return '';
+        const utcMs = date.getTime();
+        const istDate = new Date(utcMs + (330 * 60000));
+        
+        const yyyy = istDate.getUTCFullYear();
+        const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(istDate.getUTCDate()).padStart(2, '0');
+        const hh = String(istDate.getUTCHours()).padStart(2, '0');
+        const min = String(istDate.getUTCMinutes()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}T${hh}:${min}:00+05:30`;
+    }
+
+    // NEW helper logic to format dates strictly into 24-hour style "dd/mm/yy hh:mm" for Excel exports (Enforcing IST)
     function format24hDate(dtStr) {
       if (!dtStr) return '';
       const d = new Date(typeof dtStr === 'string' ? dtStr.replace(' ', 'T') : dtStr);
       if (isNaN(d.getTime())) return String(dtStr);
-      const dd = String(d.getDate()).padStart(2, '0');
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const yy = String(d.getFullYear()).slice(-2);
-      const hh = String(d.getHours()).padStart(2, '0');
-      const min = String(d.getMinutes()).padStart(2, '0');
+      
+      const utcMs = d.getTime();
+      const istDate = new Date(utcMs + (330 * 60000));
+      
+      const dd = String(istDate.getUTCDate()).padStart(2, '0');
+      const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+      const yy = String(istDate.getUTCFullYear()).slice(-2);
+      const hh = String(istDate.getUTCHours()).padStart(2, '0');
+      const min = String(istDate.getUTCMinutes()).padStart(2, '0');
       return `${dd}/${mm}/${yy} ${hh}:${min}`;
+    }
+    
+    // Robust parsing for generic JSON array fields (Food Orders, Cab Trips)
+    function parseJSONField(fieldData) {
+      if (!fieldData) return [];
+      if (Array.isArray(fieldData)) return fieldData;
+      if (typeof fieldData === 'string' && fieldData.length > 5) {
+        try { return JSON.parse(fieldData); } catch (e) {}
+      }
+      return [];
     }
     
     function checkSheetRowLimits() {
@@ -1139,7 +1201,7 @@
       }
     }
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvFdRB-rD_eZW-yl2gitJ3BZK0RjrPl1xmc79Q6ISE01k9lZNgp3itWRnuAviK1de74Q/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
@@ -1191,8 +1253,8 @@
 
       if (!inDate || !outDate) return null;
 
-      const checkInDt = new Date(`${inDate}T${inTime}`);
-      const checkOutDt = new Date(`${outDate}T${outTime}`);
+      const checkInDt = new Date(`${inDate}T${inTime}:00+05:30`);
+      const checkOutDt = new Date(`${outDate}T${outTime}:00+05:30`);
 
       if (isNaN(checkInDt.getTime()) || isNaN(checkOutDt.getTime())) return null;
 
@@ -1214,7 +1276,7 @@
       const foodWin = getModalFoodWindow();
       if (!foodWin) return;
 
-      const selectedDt = new Date(`${fDate}T${fTime}`);
+      const selectedDt = new Date(`${fDate}T${fTime}:00+05:30`);
 
       if (selectedDt < foodWin.minFoodDt || selectedDt > foodWin.maxFoodDt) {
         const minStr = formatDateTime(foodWin.minFoodDt);
@@ -1222,11 +1284,15 @@
         alert(`⚠️ Extra Food Order time must be after 15 mins of Check-In (${minStr}) and at least 30 mins before Check-Out (${maxStr})!`);
         
         const targetDt = selectedDt < foodWin.minFoodDt ? foodWin.minFoodDt : foodWin.maxFoodDt;
-        const yyyy = targetDt.getFullYear();
-        const mm = String(targetDt.getMonth() + 1).padStart(2, '0');
-        const dd = String(targetDt.getDate()).padStart(2, '0');
-        const hh = String(targetDt.getHours()).padStart(2, '0');
-        const min = String(targetDt.getMinutes()).padStart(2, '0');
+        
+        const utcMs = targetDt.getTime();
+        const istDate = new Date(utcMs + (330 * 60000));
+        
+        const yyyy = istDate.getUTCFullYear();
+        const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(istDate.getUTCDate()).padStart(2, '0');
+        const hh = String(istDate.getUTCHours()).padStart(2, '0');
+        const min = String(istDate.getUTCMinutes()).padStart(2, '0');
 
         row.querySelector('.cust-food-date').value = `${yyyy}-${mm}-${dd}`;
         row.querySelector('.cust-food-time').value = `${hh}:${min}`;
@@ -1382,6 +1448,10 @@
       closeMasterDeleteModal();
     }
 
+    function closeLoginAlertModal() {
+      document.getElementById('login-alert-modal').classList.add('hidden');
+    }
+
     function checkAuthStatus() {
       const sessionAuth = sessionStorage.getItem('app_authenticated');
       if (sessionAuth === 'true') {
@@ -1405,6 +1475,7 @@
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('login-error').classList.add('hidden');
         startInactivityMonitoring();
+        document.getElementById('login-alert-modal').classList.remove('hidden');
       } else {
         document.getElementById('login-error').classList.remove('hidden');
       }
@@ -1527,16 +1598,20 @@
         if (parts.length === 2) {
           const dateParts = parts[0].split('-');
           if (dateParts.length === 3) {
-            return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]} ${parts[1]}`;
+            return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]} ${parts[1].substring(0, 5)}`;
           }
         }
         return String(dtStr).replace('T', ' ');
       }
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
+      
+      const utcMs = d.getTime();
+      const istDate = new Date(utcMs + (330 * 60000));
+      
+      const day = String(istDate.getUTCDate()).padStart(2, '0');
+      const month = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+      const year = istDate.getUTCFullYear();
+      const hours = String(istDate.getUTCHours()).padStart(2, '0');
+      const minutes = String(istDate.getUTCMinutes()).padStart(2, '0');
       return `${day}-${month}-${year} ${hours}:${minutes}`;
     }
 
@@ -1653,6 +1728,9 @@
             else if (now >= cIn && now <= cOut) bStatus = "Live";
             else bStatus = "Upcoming";
         }
+
+        const foodList = parseJSONField(b.foodOrders);
+        const cabList = parseJSONField(b.cabTrips);
         
         return {
           "Booking ID (System)": b.id || "",
@@ -1683,8 +1761,8 @@
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
           "Stay Days": b.noOfDays || 0,
           "Price / Day": b.perDayPrice || 0,
-          "Food Orders Details": b.foodOrders ? (Array.isArray(b.foodOrders) ? b.foodOrders.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n') : "") : "",
-          "Cab Trips Details": b.cabTrips ? (Array.isArray(b.cabTrips) ? b.cabTrips.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n') : "") : "",
+          "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
+          "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
           "Total Cab Fare": b.cabFare || 0,
           "Total Amount": b.totalAmount || 0,
           "Initial Advance": b.initialAdv || 0,
@@ -2498,8 +2576,9 @@
         tbody.appendChild(extraTr);
       }
 
-      if (b.foodOrders && b.foodOrders.length > 0) {
-        b.foodOrders.forEach(fo => {
+      const foodList = parseJSONField(b.foodOrders);
+      if (foodList.length > 0) {
+        foodList.forEach(fo => {
           if (fo.foodCharge > 0) {
             const foodTr = document.createElement('tr');
             const foodDateTimeFmt = fo.foodDateTime ? ` (${formatDateTime(fo.foodDateTime)})` : '';
@@ -2517,8 +2596,9 @@
         });
       }
       
-      if (b.cabTrips && b.cabTrips.length > 0) {
-        b.cabTrips.forEach(trip => {
+      const cabList = parseJSONField(b.cabTrips);
+      if (cabList.length > 0) {
+        cabList.forEach(trip => {
           if (trip.rate > 0) {
              const cabTr = document.createElement('tr');
              const dtFormat = trip.dateTime ? ` (${formatDateTime(trip.dateTime)})` : '';
@@ -2579,11 +2659,15 @@
           if (now < foodWin.minFoodDt || now > foodWin.maxFoodDt) {
             defaultDt = foodWin.minFoodDt;
           }
-          const yyyy = defaultDt.getFullYear();
-          const mm = String(defaultDt.getMonth() + 1).padStart(2, '0');
-          const dd = String(defaultDt.getDate()).padStart(2, '0');
-          const hh = String(defaultDt.getHours()).padStart(2, '0');
-          const min = String(defaultDt.getMinutes()).padStart(2, '0');
+          
+          const utcMs = defaultDt.getTime();
+          const istDate = new Date(utcMs + (330 * 60000));
+          
+          const yyyy = istDate.getUTCFullYear();
+          const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+          const dd = String(istDate.getUTCDate()).padStart(2, '0');
+          const hh = String(istDate.getUTCHours()).padStart(2, '0');
+          const min = String(istDate.getUTCMinutes()).padStart(2, '0');
 
           if (!dateStr) dateStr = `${yyyy}-${mm}-${dd}`;
           if (!timeStr) timeStr = `${hh}:${min}`;
@@ -2726,6 +2810,7 @@
       let isLiveBooking = false;
       let isClosedBooking = false;
       let isUpcomingBooking = false;
+      let isPast3Days = false;
 
       let b = null;
       if (bookingId) {
@@ -2747,6 +2832,9 @@
 
           if (now > effectiveOutTime) {
             isClosedBooking = true;
+            if (now > effectiveOutTime + (3 * 24 * 60 * 60 * 1000)) {
+               isPast3Days = true;
+            }
           } else if (now >= checkInTime && now <= effectiveOutTime) {
             isLiveBooking = true;
           } else {
@@ -2831,7 +2919,20 @@
       }
 
       setSectionEditability('sec-cab-fare', !isClosedBooking);
-      setSectionEditability('sec-billing-summary', true);
+      setSectionEditability('sec-billing-summary', !isPast3Days);
+
+      const btnSave = document.getElementById('btn-save-booking');
+      if (btnSave) {
+         if (isPast3Days) {
+            btnSave.disabled = true;
+            btnSave.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
+            btnSave.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+         } else {
+            btnSave.disabled = false;
+            btnSave.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
+            btnSave.classList.add('bg-blue-600', 'hover:bg-blue-700');
+         }
+      }
 
       const extraPersonsInput = document.getElementById('cust-extra-persons');
       const extraPersonTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
@@ -2858,9 +2959,7 @@
       }
 
       if (b) {
-        document.getElementById('modal-title').innerText = isClosedBooking 
-          ? 'Closed Booking (Billing Active)' 
-          : 'Edit Booking Details';
+        document.getElementById('modal-title').innerText = isPast3Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
         
         // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
         setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);
@@ -2893,81 +2992,72 @@
         if (extraPersonsInput) extraPersonsInput.value = b.extraPersons || 0;
         
         if (b.extraPersonJoined) {
-          const [epDate, epTime] = String(b.extraPersonJoined).replace(' ', 'T').split('T');
-          if (extraPersonDateInput) extraPersonDateInput.value = epDate || '';
-          if (extraPersonTimeInput) extraPersonTimeInput.value = epTime ? epTime.substring(0, 5) : '';
+          const parts = extractISTDateParts(b.extraPersonJoined);
+          if (extraPersonDateInput) extraPersonDateInput.value = parts.date || '';
+          if (extraPersonTimeInput) extraPersonTimeInput.value = parts.time || '';
         } else {
           if (extraPersonDateInput) extraPersonDateInput.value = '';
           if (extraPersonTimeInput) extraPersonTimeInput.value = '';
         }
 
         if (b.extraPersonOut) {
-          const [epOutDate, epOutTime] = String(b.extraPersonOut).replace(' ', 'T').split('T');
-          if (extraPersonOutDateInput) extraPersonOutDateInput.value = epOutDate || '';
-          if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = epOutTime ? epOutTime.substring(0, 5) : '';
+          const parts = extractISTDateParts(b.extraPersonOut);
+          if (extraPersonOutDateInput) extraPersonOutDateInput.value = parts.date || '';
+          if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = parts.time || '';
         } else {
           if (extraPersonOutDateInput) extraPersonOutDateInput.value = '';
           if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = '';
         }
 
         if (b.checkIn) {
-          const [inDate, inTime] = String(b.checkIn).replace(' ', 'T').split('T');
-          document.getElementById('cust-checkin-date').value = inDate || '';
-          document.getElementById('cust-checkin-time').value = inTime ? inTime.substring(0, 5) : '';
+          const parts = extractISTDateParts(b.checkIn);
+          document.getElementById('cust-checkin-date').value = parts.date || '';
+          document.getElementById('cust-checkin-time').value = parts.time || '';
         }
         if (b.checkOut) {
-          const [outDate, outTime] = String(b.checkOut).replace(' ', 'T').split('T');
-          document.getElementById('cust-checkout-date').value = outDate || '';
-          document.getElementById('cust-checkout-time').value = outTime ? outTime.substring(0, 5) : '';
-          if (extDateInput) extDateInput.min = outDate || '';
+          const parts = extractISTDateParts(b.checkOut);
+          document.getElementById('cust-checkout-date').value = parts.date || '';
+          document.getElementById('cust-checkout-time').value = parts.time || '';
+          if (extDateInput) extDateInput.min = parts.date || '';
         }
 
         extChkBox.checked = isTrue(b.hasExtendedCheckout);
         toggleExtendedCheckoutFields(extChkBox.checked);
         if (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) {
-          const [eDate, eTime] = String(b.extendedCheckOut).replace(' ', 'T').split('T');
-          extDateInput.value = eDate || '';
-          extTimeInput.value = eTime ? eTime.substring(0, 5) : '';
+          const parts = extractISTDateParts(b.extendedCheckOut);
+          extDateInput.value = parts.date || '';
+          extTimeInput.value = parts.time || '';
         }
 
         if (mealsChkBox) {
           mealsChkBox.checked = b.includeMeals !== undefined ? (b.includeMeals !== false && b.includeMeals !== 'false') : true;
         }
 
-        if (b.foodOrders) {
-           let foList = [];
-           if (Array.isArray(b.foodOrders)) {
-              foList = b.foodOrders;
-           } else if (typeof b.foodOrders === 'string' && b.foodOrders.length > 5) {
-              try { foList = JSON.parse(b.foodOrders); } catch(e) {}
-           }
-           
-           foList.forEach(fo => {
-            let fDate = '', fTime = '';
-            if (fo.foodDateTime) {
-              const parts = String(fo.foodDateTime).replace(' ', 'T').split('T');
-              fDate = parts[0] || '';
-              fTime = parts[1] ? parts[1].substring(0, 5) : '';
-            }
-            addFoodOrderItem(fo.foodDesc || '', fo.plates || 1, fo.itemPrice || 0, fo.foodCharge || 0, fDate, fTime, isClosedBooking);
-          });
-        }
+        const foList = parseJSONField(b.foodOrders);
+        foList.forEach(fo => {
+          let fDate = '', fTime = '';
+          if (fo.foodDateTime) {
+            const parts = extractISTDateParts(fo.foodDateTime);
+            fDate = parts.date || '';
+            fTime = parts.time || '';
+          }
+          addFoodOrderItem(fo.foodDesc || '', fo.plates || 1, fo.itemPrice || 0, fo.foodCharge || 0, fDate, fTime, isClosedBooking);
+        });
         
-        if (b.cabTrips) {
-           let tripsList = [];
-           if (Array.isArray(b.cabTrips)) {
-              tripsList = b.cabTrips;
-           } else if (typeof b.cabTrips === 'string' && b.cabTrips.length > 5) {
-              try { tripsList = JSON.parse(b.cabTrips); } catch(e) {}
-           }
-           
-           if (tripsList.length > 0) {
-             tripsList.forEach(trip => {
-                addCabTripRow(trip.rate || 0, trip.dateStr || '', trip.timeStr || '', trip.remark || '', isClosedBooking);
-             });
-           } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
-             addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedBooking);
-           }
+        const tripsList = parseJSONField(b.cabTrips);
+        if (tripsList.length > 0) {
+          tripsList.forEach(trip => {
+            let cDate = '', cTime = '';
+            if (trip.dateTime) {
+               const parts = extractISTDateParts(trip.dateTime);
+               cDate = parts.date;
+               cTime = parts.time;
+            } else {
+               cDate = trip.dateStr || '';
+               cTime = trip.timeStr || '';
+            }
+            addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isClosedBooking);
+          });
         } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
           addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedBooking);
         }
@@ -2994,18 +3084,23 @@
         setInputEnabled(document.getElementById('cust-checkout-date'), true);
         setInputEnabled(document.getElementById('cust-checkout-time'), true);
 
-        // Calculate and set today's date as min for new bookings
+        // Calculate and set today's date as min for new bookings strictly using IST standard
         const todayDt = new Date();
-        const yyyy = todayDt.getFullYear();
-        const mm = String(todayDt.getMonth() + 1).padStart(2, '0');
-        const dd = String(todayDt.getDate()).padStart(2, '0');
+        const utcMs = todayDt.getTime();
+        const istDate = new Date(utcMs + (330 * 60000));
+        
+        const yyyy = istDate.getUTCFullYear();
+        const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(istDate.getUTCDate()).padStart(2, '0');
         const todayStr = `${yyyy}-${mm}-${dd}`;
 
         const tomorrowDt = new Date(todayDt);
         tomorrowDt.setDate(tomorrowDt.getDate() + 1);
-        const t_yyyy = tomorrowDt.getFullYear();
-        const t_mm = String(tomorrowDt.getMonth() + 1).padStart(2, '0');
-        const t_dd = String(tomorrowDt.getDate()).padStart(2, '0');
+        const t_utcMs = tomorrowDt.getTime();
+        const t_istDate = new Date(t_utcMs + (330 * 60000));
+        const t_yyyy = t_istDate.getUTCFullYear();
+        const t_mm = String(t_istDate.getUTCMonth() + 1).padStart(2, '0');
+        const t_dd = String(t_istDate.getUTCDate()).padStart(2, '0');
         const tomorrowStr = `${t_yyyy}-${t_mm}-${t_dd}`;
 
         const checkInElem = document.getElementById('cust-checkin-date');
@@ -3111,20 +3206,20 @@
       const epOutTimeElem = document.getElementById('cust-extra-person-out-time');
 
       if (epInDateElem && epInDateElem.value && mainInDate) {
-        const epInFull = new Date(`${epInDateElem.value}T${epInTimeElem.value || '12:00'}`);
-        const mainInFull = new Date(`${mainInDate}T${mainInTime}`);
+        const epInFull = new Date(`${epInDateElem.value}T${epInTimeElem.value || '12:00'}:00+05:30`);
+        const mainInFull = new Date(`${mainInDate}T${mainInTime}:00+05:30`);
 
         if (epInFull < mainInFull) {
-          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(mainInFull)}). Please correct it.`);
+          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(`${mainInDate}T${mainInTime}`)}). Please correct it.`);
         }
       }
 
       if (epOutDateElem && epOutDateElem.value && latestOutD) {
-        const epOutFull = new Date(`${epOutDateElem.value}T${epOutTimeElem.value || '11:00'}`);
-        const mainOutFull = new Date(`${latestOutD}T${latestOutT}`);
+        const epOutFull = new Date(`${epOutDateElem.value}T${epOutTimeElem.value || '11:00'}:00+05:30`);
+        const mainOutFull = new Date(`${latestOutD}T${latestOutT}:00+05:30`);
 
         if (epOutFull > mainOutFull) {
-          alert(`⚠️ Additional person check-out date cannot be later than the main/extended check-out date (${formatDateTime(mainOutFull)}). Please correct it.`);
+          alert(`⚠️ Additional person check-out date cannot be later than the main/extended check-out date (${formatDateTime(`${latestOutD}T${latestOutT}`)}). Please correct it.`);
         }
       }
       
@@ -3195,7 +3290,7 @@
       let latestMainCheckoutDt = null;
 
       if (inDate && outDate) {
-        latestMainCheckoutDt = new Date(`${outDate}T${outTime}`);
+        latestMainCheckoutDt = new Date(`${outDate}T${outTime}:00+05:30`);
         const inDateOnly = new Date(inDate);
         const outDateOnly = new Date(outDate);
         days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
@@ -3214,8 +3309,8 @@
         let epOutTime = document.getElementById('cust-extra-person-out-time')?.value;
 
         if (epInDate && epOutDate && epInTime && epOutTime) {
-          const epInDt = new Date(`${epInDate}T${epInTime}`);
-          let epOutDt = new Date(`${epOutDate}T${epOutTime}`);
+          const epInDt = new Date(`${epInDate}T${epInTime}:00+05:30`);
+          let epOutDt = new Date(`${epOutDate}T${epOutTime}:00+05:30`);
 
           if (epOutDt > latestMainCheckoutDt) {
             epOutDt = new Date(latestMainCheckoutDt.getTime());
@@ -3302,9 +3397,12 @@
       // Add strict check-in date validation for New Booking
       if (!id) {
         const todayDt = new Date();
-        const yyyy = todayDt.getFullYear();
-        const mm = String(todayDt.getMonth() + 1).padStart(2, '0');
-        const dd = String(todayDt.getDate()).padStart(2, '0');
+        const utcMs = todayDt.getTime();
+        const istDate = new Date(utcMs + (330 * 60000));
+        
+        const yyyy = istDate.getUTCFullYear();
+        const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(istDate.getUTCDate()).padStart(2, '0');
         const todayStr = `${yyyy}-${mm}-${dd}`;
         
         if (inDate < todayStr) {
@@ -3323,8 +3421,8 @@
         return;
       }
 
-      const checkIn = `${inDate}T${inTime}`;
-      const checkOut = `${outDate}T${outTime}`;
+      const checkIn = `${inDate}T${inTime}:00+05:30`;
+      const checkOut = `${outDate}T${outTime}:00+05:30`;
 
       const hasExtendedCheckout = document.getElementById('cust-has-extended-checkout')?.checked || false;
       let extendedCheckOut = null;
@@ -3333,7 +3431,7 @@
         const extDate = document.getElementById('cust-ext-checkout-date').value;
         const extTime = document.getElementById('cust-ext-checkout-time').value || '00:00';
         if (extDate) {
-          extendedCheckOut = `${extDate}T${extTime}`;
+          extendedCheckOut = `${extDate}T${extTime}:00+05:30`;
         }
       }
 
@@ -3368,8 +3466,8 @@
           return;
         }
 
-        extraPersonJoined = `${epDate}T${epTime}`;
-        extraPersonOut = `${epOutDate}T${epOutTime}`;
+        extraPersonJoined = `${epDate}T${epTime}:00+05:30`;
+        extraPersonOut = `${epOutDate}T${epOutTime}:00+05:30`;
 
         const epInDt = new Date(extraPersonJoined);
         let epOutDt = new Date(extraPersonOut);
@@ -3405,7 +3503,7 @@
         const fDate = row.querySelector('.cust-food-date').value || '';
         const fTime = row.querySelector('.cust-food-time').value || '';
 
-        const foodDateTime = (fDate && fTime) ? `${fDate}T${fTime}` : (fDate ? `${fDate}T00:00` : '');
+        const foodDateTime = (fDate && fTime) ? `${fDate}T${fTime}:00+05:30` : (fDate ? `${fDate}T00:00:00+05:30` : '');
 
         if (desc || charge > 0) {
           if (foodWin && foodDateTime) {
@@ -3440,7 +3538,7 @@
         const dateVal = row.querySelector('.cust-cab-date').value || '';
         const timeVal = row.querySelector('.cust-cab-time').value || '';
         const remark = row.querySelector('.cust-cab-remark').value || '';
-        const dt = (dateVal && timeVal) ? `${dateVal}T${timeVal}` : '';
+        const dt = (dateVal && timeVal) ? `${dateVal}T${timeVal}:00+05:30` : '';
 
         if (rate > 0 || remark) {
           totalCabFareToSave += rate;
@@ -3672,11 +3770,8 @@
         }
 
         let foodSummaryHtml = '';
-        let parseFood = b.foodOrders || [];
-        if (typeof parseFood === 'string' && parseFood.length > 5) {
-          try { parseFood = JSON.parse(parseFood); } catch(e){}
-        }
-        if (Array.isArray(parseFood) && parseFood.length > 0) {
+        const parseFood = parseJSONField(b.foodOrders);
+        if (parseFood.length > 0) {
           const totalFoodCharge = parseFood.reduce((acc, fo) => acc + (fo.foodCharge || 0), 0);
           if (totalFoodCharge > 0) {
             foodSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-amber-800 font-semibold'}"><i class="fa-solid fa-utensils text-[8px] mr-0.5"></i>Food (${parseFood.length}): +₹${totalFoodCharge}</div>`;
@@ -3685,12 +3780,9 @@
         
         let cabSummaryHtml = '';
         let totalCab = 0;
-        let parseCab = b.cabTrips || [];
-        if (typeof parseCab === 'string' && parseCab.length > 5) {
-          try { parseCab = JSON.parse(parseCab); } catch(e){}
-        }
+        const parseCab = parseJSONField(b.cabTrips);
         
-        if (Array.isArray(parseCab) && parseCab.length > 0) {
+        if (parseCab.length > 0) {
             totalCab = parseCab.reduce((acc, t) => acc + (t.rate || 0), 0);
         } else if (b.cabFare > 0) {
             totalCab = b.cabFare; 
