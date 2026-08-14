@@ -1,3 +1,5 @@
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -107,33 +109,6 @@
           <i class="fa-solid fa-right-to-bracket"></i> Login
         </button>
       </form>
-    </div>
-  </div>
-
-  <!-- POST-LOGIN INSTRUCTION MODAL -->
-  <div id="post-login-modal" class="hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-3xl shadow-2xl border border-blue-100 max-w-md w-full p-6 space-y-4 text-left relative">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <h3 class="text-sm font-black text-blue-600 flex items-center gap-2">
-          <i class="fa-solid fa-circle-info text-blue-500"></i> Important Instructions
-        </h3>
-        <button onclick="closePostLoginModal()" class="text-slate-400 hover:text-rose-500 transition text-lg"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="text-[11px] text-slate-700 space-y-2">
-        <ol class="list-decimal pl-4 space-y-2 font-medium">
-          <li>Do not Wipe out data if you didn’t take backup.</li>
-          <li>If you are starting new then clean your browser history once.</li>
-          <li>Always save data before leaving the Portal.</li>
-          <li>Do not close window, tab or refresh if data is not saved.</li>
-          <li>Without logout do not close the browser or window or tab for data saving error.</li>
-          <li>Download data in excel once in a week for backup.</li>
-        </ol>
-      </div>
-      <div class="pt-3 border-t border-slate-100 flex justify-end">
-        <button onclick="closePostLoginModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-5 rounded-xl shadow-sm transition text-xs">
-          I Understand
-        </button>
-      </div>
     </div>
   </div>
 
@@ -1066,6 +1041,30 @@
       return d.getTime();
     }
     
+    // Convert a Date object to local ISO string to avoid UTC shifts
+    function toLocalISOString(date) {
+        if (!(date instanceof Date) || isNaN(date)) return '';
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    }
+
+    // NEW helper logic to format dates strictly into 24-hour style "dd/mm/yy hh:mm" for Excel exports
+    function format24hDate(dtStr) {
+      if (!dtStr) return '';
+      const d = new Date(typeof dtStr === 'string' ? dtStr.replace(' ', 'T') : dtStr);
+      if (isNaN(d.getTime())) return String(dtStr);
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yy = String(d.getFullYear()).slice(-2);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dd}/${mm}/${yy} ${hh}:${min}`;
+    }
+    
     function checkSheetRowLimits() {
       const currentRowCount = state.bookings.length; 
       
@@ -1105,14 +1104,18 @@
 
       try {
         const payload = { action: "wipeData" };
-        await fetch(GAS_API_URL, {
-          redirect: "follow",
+        const response = await fetch(GAS_API_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
           body: JSON.stringify(payload)
         });
+
+        // Try reading error text first safely to avoid JSON parse errors
+        const textResult = await response.text();
+        try {
+            JSON.parse(textResult);
+        } catch(e) {
+            console.error("Wipe format warning:", textResult);
+        }
 
         // Reset local state
         state.bookings = [];
@@ -1138,7 +1141,7 @@
       }
     }
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvFdRB-rD_eZW-yl2gitJ3BZK0RjrPl1xmc79Q6ISE01k9lZNgp3itWRnuAviK1de74Q/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
@@ -1216,8 +1219,8 @@
       const selectedDt = new Date(`${fDate}T${fTime}`);
 
       if (selectedDt < foodWin.minFoodDt || selectedDt > foodWin.maxFoodDt) {
-        const minStr = formatDateTime(foodWin.minFoodDt.toISOString());
-        const maxStr = formatDateTime(foodWin.maxFoodDt.toISOString());
+        const minStr = formatDateTime(foodWin.minFoodDt);
+        const maxStr = formatDateTime(foodWin.maxFoodDt);
         alert(`⚠️ Extra Food Order time must be after 15 mins of Check-In (${minStr}) and at least 30 mins before Check-Out (${maxStr})!`);
         
         const targetDt = selectedDt < foodWin.minFoodDt ? foodWin.minFoodDt : foodWin.maxFoodDt;
@@ -1381,21 +1384,12 @@
       closeMasterDeleteModal();
     }
 
-    function openPostLoginModal() {
-      document.getElementById('post-login-modal').classList.remove('hidden');
-    }
-    
-    function closePostLoginModal() {
-      document.getElementById('post-login-modal').classList.add('hidden');
-    }
-
     function checkAuthStatus() {
       const sessionAuth = sessionStorage.getItem('app_authenticated');
       if (sessionAuth === 'true') {
         isLoggedIn = true;
         document.getElementById('login-overlay').classList.add('hidden');
         startInactivityMonitoring();
-        openPostLoginModal();
       } else {
         isLoggedIn = false;
         document.getElementById('login-overlay').classList.remove('hidden');
@@ -1413,7 +1407,6 @@
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('login-error').classList.add('hidden');
         startInactivityMonitoring();
-        openPostLoginModal();
       } else {
         document.getElementById('login-error').classList.remove('hidden');
       }
@@ -1640,7 +1633,7 @@
       const filteredBookings = state.bookings.filter(b => {
         if(!b.checkIn) return false;
         
-        const bIn = b.checkIn.split('T')[0];
+        const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
         return (bIn >= startDateStr) && (bIn <= endDateStr);
       });
 
@@ -1681,20 +1674,20 @@
           "Room No(s)": getBookingRooms(b).join(", "),
           "Capacity": b.capacity || 1,
           "Extra Persons": b.extraPersons || 0,
-          "Extra Person Joined": b.extraPersonJoined || "",
-          "Extra Person Check-Out": b.extraPersonOut || "",
+          "Extra Person Joined": format24hDate(b.extraPersonJoined),
+          "Extra Person Check-Out": format24hDate(b.extraPersonOut),
           "Extra Person Days": b.extraPersonDays || 0,
           "Agent Info": b.agentInfo || "",
-          "Check-In": b.checkIn || "",
-          "Check-Out": b.checkOut || "",
+          "Check-In": format24hDate(b.checkIn),
+          "Check-Out": format24hDate(b.checkOut),
           "Has Extended Check-Out": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
-          "Extended Check-Out": b.extendedCheckOut || "",
+          "Extended Check-Out": format24hDate(b.extendedCheckOut),
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
           "Stay Days": b.noOfDays || 0,
           "Price / Day": b.perDayPrice || 0,
-          "Food Orders (JSON)": b.foodOrders ? (typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(b.foodOrders)) : "",
-          "Cab Fare": b.cabFare || 0,
-          "Cab Remark": b.cabRemark || "",
+          "Food Orders Details": b.foodOrders ? (Array.isArray(b.foodOrders) ? b.foodOrders.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n') : "") : "",
+          "Cab Trips Details": b.cabTrips ? (Array.isArray(b.cabTrips) ? b.cabTrips.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n') : "") : "",
+          "Total Cab Fare": b.cabFare || 0,
           "Total Amount": b.totalAmount || 0,
           "Initial Advance": b.initialAdv || 0,
           "Cleared Due": b.clearedDue || 0,
@@ -1839,10 +1832,16 @@
       toast.classList.remove('hidden');
 
       try {
-        const response = await fetch(GAS_API_URL + "?action=fetchData", {
-          redirect: "follow"
-        });
-        const sheetData = await response.json();
+        const response = await fetch(GAS_API_URL + "?action=fetchData");
+        const textData = await response.text();
+        
+        let sheetData;
+        try {
+            sheetData = JSON.parse(textData);
+        } catch(err) {
+            console.error("JSON Error: Sync issue.", textData);
+            throw new Error("Invalid response format from server (Sync Failed).");
+        }
         
         if (sheetData && sheetData.bookings) {
           state = sheetData;
@@ -1922,7 +1921,6 @@
         };
 
         const response = await fetch(GAS_API_URL, {
-          redirect: "follow",
           method: "POST",
           headers: {
             "Content-Type": "text/plain;charset=utf-8"
@@ -1930,7 +1928,14 @@
           body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
+        const textResult = await response.text();
+        let result;
+        try {
+            result = JSON.parse(textResult);
+        } catch(e) {
+            console.error("Save JSON error", textResult);
+            throw new Error("Invalid response format received from server.");
+        }
 
         if (result.status === "success") {
           if (!quiet) {
@@ -2721,8 +2726,7 @@
     function openBookingModal(bookingId = null) {
       const now = new Date().getTime();
       let isLiveBooking = false;
-      let isClosedAndWithin3Days = false;
-      let isExpiredOver3Days = false;
+      let isClosedBooking = false;
       let isUpcomingBooking = false;
 
       let b = null;
@@ -2730,7 +2734,8 @@
         b = state.bookings.find(item => String(item.id) === String(bookingId));
         if (b) {
           if (isInactiveBooking(b)) {
-            alert("This booking details are inactive and cannot be edited.");
+            // "just receipt view will be enabled."
+            printInvoice(bookingId);
             return;
           }
 
@@ -2741,21 +2746,13 @@
 
           const effectiveOutTime = getEffectiveCheckoutTime(b);
           const checkInTime = parseDateMs(b.checkIn);
-          const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
 
-          if (now >= checkInTime && now <= effectiveOutTime) {
+          if (now > effectiveOutTime) {
+            isClosedBooking = true;
+          } else if (now >= checkInTime && now <= effectiveOutTime) {
             isLiveBooking = true;
-          } else if (now < checkInTime) {
+          } else {
             isUpcomingBooking = true;
-          } else if (now > effectiveOutTime) {
-            if (now > (effectiveOutTime + threeDaysMs)) {
-              isExpiredOver3Days = true;
-              alert("This booking closed more than 3 days ago. It is non-editable and can only be viewed or printed.");
-              printInvoice(bookingId);
-              return;
-            } else {
-              isClosedAndWithin3Days = true;
-            }
           }
         }
       } else {
@@ -2776,8 +2773,8 @@
       document.getElementById('cab-trips-container').innerHTML = '';
       populateAgentDropdown();
 
-      setSectionEditability('sec-guest-info', !isClosedAndWithin3Days);
-      setSectionEditability('sec-room-dates', !isClosedAndWithin3Days);
+      setSectionEditability('sec-guest-info', !isClosedBooking);
+      setSectionEditability('sec-room-dates', !isClosedBooking);
 
       const extChkBox = document.getElementById('cust-has-extended-checkout');
       const extDateInput = document.getElementById('cust-ext-checkout-date');
@@ -2803,7 +2800,7 @@
           }
         } else {
           if (timerNotice) {
-            timerNotice.innerText = isClosedAndWithin3Days ? "(Closed Booking - Inactive)" : "(Selectable only for Live Booking)";
+            timerNotice.innerText = isClosedBooking ? "(Closed Booking - Inactive)" : "(Selectable only for Live Booking)";
             timerNotice.classList.remove('hidden');
             timerNotice.classList.add('text-rose-600');
           }
@@ -2812,13 +2809,13 @@
 
       const mealsChkBox = document.getElementById('cust-include-meals');
       if (mealsChkBox) {
-        mealsChkBox.disabled = isClosedAndWithin3Days;
+        mealsChkBox.disabled = isClosedBooking;
       }
 
       const addFoodBtn = document.getElementById('btn-add-food-order');
       if (addFoodBtn) {
-        addFoodBtn.disabled = isClosedAndWithin3Days;
-        if (isClosedAndWithin3Days) {
+        addFoodBtn.disabled = isClosedBooking;
+        if (isClosedBooking) {
           addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -2827,15 +2824,15 @@
       
       const addCabBtn = document.getElementById('btn-add-cab-trip');
       if (addCabBtn) {
-        addCabBtn.disabled = isClosedAndWithin3Days;
-        if (isClosedAndWithin3Days) {
+        addCabBtn.disabled = isClosedBooking;
+        if (isClosedBooking) {
           addCabBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       }
 
-      setSectionEditability('sec-cab-fare', !isClosedAndWithin3Days);
+      setSectionEditability('sec-cab-fare', !isClosedBooking);
       setSectionEditability('sec-billing-summary', true);
 
       const extraPersonsInput = document.getElementById('cust-extra-persons');
@@ -2845,8 +2842,7 @@
       const extraPersonOutDateInput = document.getElementById('cust-extra-person-out-date');
       const extraPersonOutTimeInput = document.getElementById('cust-extra-person-out-time');
 
-      // Extra person inputs remain fully editable for any saved booking (unless > 3 days closed)
-      const canEditExtras = !isClosedAndWithin3Days;
+      const canEditExtras = !isClosedBooking;
       if (extraPersonsInput) setInputEnabled(extraPersonsInput, canEditExtras);
       if (extraPersonDateInput) setInputEnabled(extraPersonDateInput, canEditExtras);
       if (extraPersonTimeInput) setInputEnabled(extraPersonTimeInput, canEditExtras);
@@ -2864,15 +2860,15 @@
       }
 
       if (b) {
-        document.getElementById('modal-title').innerText = isClosedAndWithin3Days 
+        document.getElementById('modal-title').innerText = isClosedBooking 
           ? 'Closed Booking (Billing Active)' 
           : 'Edit Booking Details';
         
-        // ** LOCK MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS ALREADY CREATED **
-        setInputEnabled(document.getElementById('cust-checkin-date'), false);
-        setInputEnabled(document.getElementById('cust-checkin-time'), false);
-        setInputEnabled(document.getElementById('cust-checkout-date'), false);
-        setInputEnabled(document.getElementById('cust-checkout-time'), false);
+        // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
+        setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);
+        setInputEnabled(document.getElementById('cust-checkin-time'), isUpcomingBooking);
+        setInputEnabled(document.getElementById('cust-checkout-date'), isUpcomingBooking);
+        setInputEnabled(document.getElementById('cust-checkout-time'), isUpcomingBooking);
         
         document.getElementById('modal-booking-id').value = b.id;
         document.getElementById('cust-name').value = formatTitleCase(b.name);
@@ -2899,41 +2895,41 @@
         if (extraPersonsInput) extraPersonsInput.value = b.extraPersons || 0;
         
         if (b.extraPersonJoined) {
-          const [epDate, epTime] = b.extraPersonJoined.split('T');
+          const [epDate, epTime] = String(b.extraPersonJoined).replace(' ', 'T').split('T');
           if (extraPersonDateInput) extraPersonDateInput.value = epDate || '';
-          if (extraPersonTimeInput) extraPersonTimeInput.value = epTime || '';
+          if (extraPersonTimeInput) extraPersonTimeInput.value = epTime ? epTime.substring(0, 5) : '';
         } else {
           if (extraPersonDateInput) extraPersonDateInput.value = '';
           if (extraPersonTimeInput) extraPersonTimeInput.value = '';
         }
 
         if (b.extraPersonOut) {
-          const [epOutDate, epOutTime] = b.extraPersonOut.split('T');
+          const [epOutDate, epOutTime] = String(b.extraPersonOut).replace(' ', 'T').split('T');
           if (extraPersonOutDateInput) extraPersonOutDateInput.value = epOutDate || '';
-          if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = epOutTime || '';
+          if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = epOutTime ? epOutTime.substring(0, 5) : '';
         } else {
           if (extraPersonOutDateInput) extraPersonOutDateInput.value = '';
           if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = '';
         }
 
         if (b.checkIn) {
-          const [inDate, inTime] = b.checkIn.split('T');
+          const [inDate, inTime] = String(b.checkIn).replace(' ', 'T').split('T');
           document.getElementById('cust-checkin-date').value = inDate || '';
-          document.getElementById('cust-checkin-time').value = inTime || '';
+          document.getElementById('cust-checkin-time').value = inTime ? inTime.substring(0, 5) : '';
         }
         if (b.checkOut) {
-          const [outDate, outTime] = b.checkOut.split('T');
+          const [outDate, outTime] = String(b.checkOut).replace(' ', 'T').split('T');
           document.getElementById('cust-checkout-date').value = outDate || '';
-          document.getElementById('cust-checkout-time').value = outTime || '';
+          document.getElementById('cust-checkout-time').value = outTime ? outTime.substring(0, 5) : '';
           if (extDateInput) extDateInput.min = outDate || '';
         }
 
         extChkBox.checked = isTrue(b.hasExtendedCheckout);
         toggleExtendedCheckoutFields(extChkBox.checked);
         if (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) {
-          const [eDate, eTime] = b.extendedCheckOut.split('T');
+          const [eDate, eTime] = String(b.extendedCheckOut).replace(' ', 'T').split('T');
           extDateInput.value = eDate || '';
-          extTimeInput.value = eTime || '';
+          extTimeInput.value = eTime ? eTime.substring(0, 5) : '';
         }
 
         if (mealsChkBox) {
@@ -2951,11 +2947,11 @@
            foList.forEach(fo => {
             let fDate = '', fTime = '';
             if (fo.foodDateTime) {
-              const parts = fo.foodDateTime.split('T');
+              const parts = String(fo.foodDateTime).replace(' ', 'T').split('T');
               fDate = parts[0] || '';
-              fTime = parts[1] || '';
+              fTime = parts[1] ? parts[1].substring(0, 5) : '';
             }
-            addFoodOrderItem(fo.foodDesc || '', fo.plates || 1, fo.itemPrice || 0, fo.foodCharge || 0, fDate, fTime, isClosedAndWithin3Days);
+            addFoodOrderItem(fo.foodDesc || '', fo.plates || 1, fo.itemPrice || 0, fo.foodCharge || 0, fDate, fTime, isClosedBooking);
           });
         }
         
@@ -2969,13 +2965,13 @@
            
            if (tripsList.length > 0) {
              tripsList.forEach(trip => {
-                addCabTripRow(trip.rate || 0, trip.dateStr || '', trip.timeStr || '', trip.remark || '', isClosedAndWithin3Days);
+                addCabTripRow(trip.rate || 0, trip.dateStr || '', trip.timeStr || '', trip.remark || '', isClosedBooking);
              });
            } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
-             addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedAndWithin3Days);
+             addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedBooking);
            }
         } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
-          addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedAndWithin3Days);
+          addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedBooking);
         }
 
         document.getElementById('cust-price').value = b.perDayPrice;
@@ -3121,7 +3117,7 @@
         const mainInFull = new Date(`${mainInDate}T${mainInTime}`);
 
         if (epInFull < mainInFull) {
-          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(mainInFull.toISOString())}). Please correct it.`);
+          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(mainInFull)}). Please correct it.`);
         }
       }
 
@@ -3130,7 +3126,7 @@
         const mainOutFull = new Date(`${latestOutD}T${latestOutT}`);
 
         if (epOutFull > mainOutFull) {
-          alert(`⚠️ Additional person check-out date cannot be later than the main/extended check-out date (${formatDateTime(mainOutFull.toISOString())}). Please correct it.`);
+          alert(`⚠️ Additional person check-out date cannot be later than the main/extended check-out date (${formatDateTime(mainOutFull)}). Please correct it.`);
         }
       }
       
@@ -3201,10 +3197,10 @@
       let latestMainCheckoutDt = null;
 
       if (inDate && outDate) {
-        const d1 = new Date(`${inDate}T${inTime}`);
         latestMainCheckoutDt = new Date(`${outDate}T${outTime}`);
-        const diff = latestMainCheckoutDt - d1;
-        days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+        const inDateOnly = new Date(inDate);
+        const outDateOnly = new Date(outDate);
+        days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
       }
 
       const price = parseFloat(document.getElementById('cust-price').value) || 0;
@@ -3225,11 +3221,14 @@
 
           if (epOutDt > latestMainCheckoutDt) {
             epOutDt = new Date(latestMainCheckoutDt.getTime());
+            epOutDate = toLocalISOString(epOutDt).split('T')[0];
           }
 
           if (epInDt < epOutDt) {
-            const epDiff = epOutDt - epInDt;
-            extraPersonDays = Math.max(1, Math.ceil(epDiff / (1000 * 60 * 60 * 24)));
+            const epInOnly = new Date(epInDate);
+            const epOutOnly = new Date(epOutDate);
+            const diffDays = Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24));
+            extraPersonDays = Math.max(1, diffDays);
           } else {
             extraPersonDays = 0;
           }
@@ -3386,10 +3385,13 @@
           alert(`⚠️ Additional Person Check-Out date & time cannot exceed main/extended Check-Out date & time (${formatDateTime(latestCheckoutStr)}).`);
           extraPersonOut = latestCheckoutStr;
           epOutDt = latestCheckoutDt;
+          epOutDate = toLocalISOString(epOutDt).split('T')[0];
         }
 
         if (epInDt < epOutDt) {
-          extraPersonDays = Math.max(1, Math.ceil((epOutDt - epInDt) / (1000 * 60 * 60 * 24)));
+          const epInOnly = new Date(epDate);
+          const epOutOnly = new Date(epOutDate);
+          extraPersonDays = Math.max(1, Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24)));
         }
       }
 
@@ -3425,8 +3427,8 @@
       });
 
       if (foodValidationError && foodWin) {
-        const minStr = formatDateTime(foodWin.minFoodDt.toISOString());
-        const maxStr = formatDateTime(foodWin.maxFoodDt.toISOString());
+        const minStr = formatDateTime(foodWin.minFoodDt);
+        const maxStr = formatDateTime(foodWin.maxFoodDt);
         alert(`❌ Extra Food Order Validation Error!\n\nAll Extra Food order times must be strictly after 15 minutes of Check-In (${minStr}) and at least 30 minutes before Check-Out / Extended Check-Out (${maxStr}).`);
         return;
       }
@@ -3594,9 +3596,9 @@
       if (dateFilter) {
         listToRender = listToRender.filter(b => {
           if (!b.checkIn || !b.checkOut) return false;
-          const bIn = b.checkIn.split('T')[0];
+          const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
           const bOutVal = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
-          const bOut = bOutVal.split('T')[0];
+          const bOut = String(bOutVal).replace(' ', 'T').split('T')[0];
           return (dateFilter >= bIn && dateFilter <= bOut);
         });
       }
@@ -3914,9 +3916,9 @@
             if (isInactiveBooking(b) || !b.checkIn || !b.checkOut) return false;
             if (!isRoomInMaster(b.roomNo)) return false;
 
-            const bIn = b.checkIn.split('T')[0];
+            const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
             const bOutVal = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
-            const bOut = bOutVal.split('T')[0];
+            const bOut = String(bOutVal).replace(' ', 'T').split('T')[0];
 
             return (dateStr >= bIn && dateStr <= bOut);
           });
