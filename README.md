@@ -1766,7 +1766,6 @@
           "Total Amount": b.totalAmount || 0,
           "Initial Advance": b.initialAdv || 0,
           "Cleared Due": b.clearedDue || 0,
-          "Advance Paid": b.advanced || 0,
           "Balance Due": b.totalDue || 0
         };
       });
@@ -2140,7 +2139,7 @@
           <div id="alert-details-${i}" class="hidden bg-white border-t border-amber-200/60 p-3 space-y-2 text-[10px]">
             <div class="grid grid-cols-2 gap-1 text-slate-600">
               <div>Total Charges: <strong>₹${b.totalAmount}</strong></div>
-              <div>Advance Paid: <strong class="text-emerald-600">₹${b.advanced}</strong></div>
+              <div>Advance Paid: <strong class="text-emerald-600">₹${b.initialAdv || 0}</strong></div>
             </div>
             <div class="flex justify-end pt-1 border-t border-slate-100">
               <button onclick="closeAlertModal(); openBookingModal('${b.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-full font-bold text-[10px] flex items-center gap-1 transition shadow-xs">
@@ -2380,7 +2379,7 @@
 
       const totalBookings = filteredBookings.length;
       const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.advanced || 0), 0);
+      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
       const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
 
       document.getElementById('dash-total-bookings').innerText = totalBookings;
@@ -2398,12 +2397,13 @@
       const b = activeModalBooking;
       let rawCountryCode = b.countryCode ? String(b.countryCode).replace(/\D/g, '') : '91';
       let phone = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
+      let initialAdvanceVal = b.initialAdv !== undefined ? parseFloat(b.initialAdv) : 0;
       
       let validationErrors = [];
       if (!phone || phone.length !== 10) {
         validationErrors.push("• Guest contact number must be exactly 10 digits.");
       }
-      if (!(parseFloat(b.advanced) > 0)) {
+      if (!(initialAdvanceVal > 0)) {
         validationErrors.push("• Advanced payment must be greater than 0.");
       }
 
@@ -2428,7 +2428,7 @@
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
         `*Billing Summary:*\n` +
         `• Total Amount: ₹${b.totalAmount}\n` +
-        `• Advance Amount: ₹${b.advanced}\n` +
+        `• Advance Amount: ₹${initialAdvanceVal}\n` +
         `• Balance Due: ₹${b.totalDue}\n\n` +
         `*UPI Payment Details:*\n` +
         `• UPI ID: *${upiId}*\n\n` +
@@ -2473,7 +2473,7 @@
           waBtn.classList.remove('hidden');
           const contactDigits = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
           const hasValidContact = contactDigits.length === 10;
-          const hasAdvanced = (parseFloat(b.advanced) || 0) > 0;
+          const hasAdvanced = (parseFloat(b.initialAdv) || 0) > 0;
 
           if (hasValidContact && hasAdvanced) {
             waBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -2615,7 +2615,7 @@
         });
       }
 
-      const initialAdv = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
+      const initialAdv = b.initialAdv || 0;
       const clearDueAmt = b.clearedDue || 0;
 
       document.getElementById('inv-sum-total').innerText = `₹${(b.totalAmount || 0).toLocaleString('en-IN')}`;
@@ -3062,7 +3062,7 @@
         document.getElementById('cust-price').value = b.perDayPrice;
         
         const advanceElem = document.getElementById('cust-advance');
-        const baseAdv = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
+        const baseAdv = b.initialAdv || 0;
         advanceElem.value = baseAdv;
         advanceElem.setAttribute('data-initial-adv', baseAdv);
 
@@ -3640,7 +3640,6 @@
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
         clearedDue: clearedDueAmt,
-        advanced: totalPaid,
         totalDue: Math.max(0, totalAmt - totalPaid),
         inactive: false
       };
@@ -3800,6 +3799,8 @@
         const extraPersonsText = (b.extraPersons && b.extraPersons > 0) ? `<span class="text-amber-700 font-bold block text-[9px]">(+${b.extraPersons} Extra)</span>` : '';
         const contactDisplay = b.contactNo ? `${b.countryCode || '+91'} ${b.contactNo}`.trim() : '-';
 
+        const totalReceived = (b.initialAdv || 0) + (b.clearedDue || 0);
+
         const tr = document.createElement('tr');
         tr.className = `${statusBgClass} transition border-b border-slate-100`;
         tr.innerHTML = `
@@ -3829,7 +3830,7 @@
           </td>
           <td class="py-2.5 px-3 font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">
             ₹${b.totalAmount}
-            <span class="block text-[9px] text-emerald-600 font-medium">Adv: ₹${b.advanced}</span>
+            <span class="block text-[9px] text-emerald-600 font-medium">Adv: ₹${totalReceived}</span>
           </td>
           <td class="py-2.5 px-3 font-bold ${b.totalDue > 0 ? 'text-rose-600' : 'text-emerald-600'}">₹${b.totalDue}</td>
           <td class="py-2.5 px-3 text-center">
