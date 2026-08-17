@@ -1050,7 +1050,7 @@
     function getBookingRooms(b) {
       if (!b || b.roomNo === undefined || b.roomNo === null) return [];
       if (Array.isArray(b.roomNo)) return b.roomNo.map(r => String(r).trim());
-      return String(b.roomNo).split(',').map(s => s.trim());
+      return String(b.roomNo).split(',').map(s => s.trim()).filter(Boolean);
     }
 
     function parseDateMs(dtStr) {
@@ -2189,8 +2189,11 @@
       container.innerHTML = '';
 
       let selArr = [];
-      if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
-      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
+      if (Array.isArray(selectedRoomNos)) {
+        selArr = selectedRoomNos.map(s => String(s).trim());
+      } else if (selectedRoomNos !== undefined && selectedRoomNos !== null && selectedRoomNos !== '') {
+        selArr = String(selectedRoomNos).split(',').map(s => s.trim()).filter(Boolean);
+      }
 
       const allDiv = document.createElement('div');
       allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";
@@ -2248,9 +2251,8 @@
     
     function getSelectedRooms() {
       const itemChks = document.querySelectorAll('.item-chk');
-      if(!itemChks.length) return [];
+      if (!itemChks.length) return [];
       const checkedVals = Array.from(itemChks).filter(c => c.checked).map(c => c.value);
-      if (checkedVals.length === itemChks.length) return ["ALL"];
       return checkedVals;
     }
 
@@ -3409,9 +3411,6 @@
       }
       
       let selectedRooms = getSelectedRooms();
-      if (selectedRooms.includes("ALL")) {
-        selectedRooms = state.roomsCapacity.map(m => String(m.roomNo));
-      }
 
       if (selectedRooms.length === 0) {
         alert("⚠️ Please select at least one Room No.");
