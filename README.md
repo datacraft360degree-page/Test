@@ -1049,8 +1049,12 @@
 
     function getBookingRooms(b) {
       if (!b || b.roomNo === undefined || b.roomNo === null) return [];
-      if (Array.isArray(b.roomNo)) return b.roomNo.map(r => String(r).trim());
-      return String(b.roomNo).split(',').map(s => s.trim()).filter(Boolean);
+      let val = b.roomNo;
+      if (typeof val === 'string' && val.startsWith('[') && val.endsWith(']')) {
+        try { val = JSON.parse(val); } catch(e) {}
+      }
+      if (Array.isArray(val)) return val.map(r => String(r).trim()).filter(Boolean);
+      return String(val).split(',').map(s => s.trim()).filter(Boolean);
     }
 
     function parseDateMs(dtStr) {
@@ -1919,6 +1923,13 @@
         
         if (sheetData && sheetData.bookings) {
           state = sheetData;
+          if (Array.isArray(state.bookings)) {
+            state.bookings.forEach(b => {
+              if (b && b.roomNo !== undefined && b.roomNo !== null) {
+                b.roomNo = getBookingRooms(b);
+              }
+            });
+          }
           refreshAllUI(); 
           msg.innerText = 'Database synced successfully!';
         }
@@ -2189,11 +2200,13 @@
       container.innerHTML = '';
 
       let selArr = [];
-      if (Array.isArray(selectedRoomNos)) {
-        selArr = selectedRoomNos.map(s => String(s).trim());
-      } else if (selectedRoomNos) {
-        selArr = String(selectedRoomNos).split(',').map(s => s.trim()).filter(Boolean);
+      if (typeof selectedRoomNos === 'string') {
+        if (selectedRoomNos.startsWith('[') && selectedRoomNos.endsWith(']')) {
+          try { selectedRoomNos = JSON.parse(selectedRoomNos); } catch(e) {}
+        }
       }
+      if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String).map(s => s.trim());
+      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
 
       const allDiv = document.createElement('div');
       allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";
@@ -2215,12 +2228,14 @@
       });
 
       const itemChks = container.querySelectorAll('.item-chk');
-      const allChk = container.querySelector('#room-all');
-      if (allChk && itemChks.length > 0) {
-        allChk.checked = Array.from(itemChks).every(c => c.checked);
+      if (itemChks.length > 0) {
+        const allSelected = Array.from(itemChks).every(c => c.checked);
+        const allChk = container.querySelector('#room-all');
+        if (allChk) allChk.checked = allSelected;
       }
 
       updateRoomDropdownText();
+      autoCaptureRoomDetails();
     }
 
     function handleRoomSelection(chk) {
@@ -2245,10 +2260,10 @@
       
       if (checkedVals.length === 0) {
         textSpan.innerText = "Select Rooms...";
-      } else if (checkedVals.length === itemChks.length && itemChks.length > 0) {
+      } else if (itemChks.length > 0 && checkedVals.length === itemChks.length) {
         textSpan.innerText = "All Rooms Selected";
         const allChk = document.getElementById('room-all');
-        if (allChk) allChk.checked = true;
+        if(allChk) allChk.checked = true;
       } else {
         textSpan.innerText = checkedVals.map(r => `Room ${r}`).join(', ');
       }
@@ -2256,8 +2271,9 @@
     
     function getSelectedRooms() {
       const itemChks = document.querySelectorAll('.item-chk');
-      if (!itemChks.length) return [];
+      if(!itemChks.length) return [];
       const checkedVals = Array.from(itemChks).filter(c => c.checked).map(c => c.value);
+      if (checkedVals.length === itemChks.length) return ["ALL"];
       return checkedVals;
     }
 
@@ -2279,13 +2295,24 @@
 
     function autoCaptureRoomDetails() {
       let totalCap = 0;
-      const itemChks = document.querySelectorAll('.item-chk');
-      itemChks.forEach(chk => {
-        if (chk.checked) {
-          const matched = state.roomsCapacity.find(m => String(m.roomNo) === String(chk.value));
-          if (matched) totalCap += (matched.capacity || 1);
-        }
-      });
+      let allSelected = false;
+
+      const allChk = document.getElementById('room-all');
+      if (allChk && allChk.checked) {
+         allSelected = true;
+      }
+
+      if (allSelected) {
+         totalCap = state.roomsCapacity.reduce((sum, m) => sum + (m.capacity || 1), 0);
+      } else {
+         const itemChks = document.querySelectorAll('.item-chk');
+         itemChks.forEach(chk => {
+           if (chk.checked) {
+             const matched = state.roomsCapacity.find(m => String(m.roomNo) === chk.value);
+             if (matched) totalCap += (matched.capacity || 1);
+           }
+         });
+      }
       
       document.getElementById('cust-capacity').value = totalCap > 0 ? totalCap : 1;
       calculateModalBilling();
@@ -2812,6 +2839,7 @@
         b = state.bookings.find(item => String(item.id) === String(bookingId));
         if (b) {
           if (isInactiveBooking(b)) {
+            // "just receipt view will be enabled."
             printInvoice(bookingId);
             return;
           }
@@ -2955,7 +2983,7 @@
       if (b) {
         document.getElementById('modal-title').innerText = isPast3Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
         
-        // ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING
+        // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
         setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);
         setInputEnabled(document.getElementById('cust-checkin-time'), isUpcomingBooking);
         setInputEnabled(document.getElementById('cust-checkout-date'), isUpcomingBooking);
@@ -3404,6 +3432,9 @@
       }
       
       let selectedRooms = getSelectedRooms();
+      if (selectedRooms.includes("ALL")) {
+        selectedRooms = state.roomsCapacity.map(m => String(m.roomNo));
+      }
 
       if (selectedRooms.length === 0) {
         alert("⚠️ Please select at least one Room No.");
