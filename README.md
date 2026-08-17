@@ -1049,12 +1049,8 @@
 
     function getBookingRooms(b) {
       if (!b || b.roomNo === undefined || b.roomNo === null) return [];
-      let val = b.roomNo;
-      if (typeof val === 'string' && val.startsWith('[') && val.endsWith(']')) {
-        try { val = JSON.parse(val); } catch(e) {}
-      }
-      if (Array.isArray(val)) return val.map(r => String(r).trim()).filter(Boolean);
-      return String(val).split(',').map(s => s.trim()).filter(Boolean);
+      if (Array.isArray(b.roomNo)) return b.roomNo.map(r => String(r).trim());
+      return String(b.roomNo).split(',').map(s => s.trim());
     }
 
     function parseDateMs(dtStr) {
@@ -1923,13 +1919,6 @@
         
         if (sheetData && sheetData.bookings) {
           state = sheetData;
-          if (Array.isArray(state.bookings)) {
-            state.bookings.forEach(b => {
-              if (b && b.roomNo !== undefined && b.roomNo !== null) {
-                b.roomNo = getBookingRooms(b);
-              }
-            });
-          }
           refreshAllUI(); 
           msg.innerText = 'Database synced successfully!';
         }
@@ -2200,12 +2189,7 @@
       container.innerHTML = '';
 
       let selArr = [];
-      if (typeof selectedRoomNos === 'string') {
-        if (selectedRoomNos.startsWith('[') && selectedRoomNos.endsWith(']')) {
-          try { selectedRoomNos = JSON.parse(selectedRoomNos); } catch(e) {}
-        }
-      }
-      if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String).map(s => s.trim());
+      if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
       else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
 
       const allDiv = document.createElement('div');
@@ -2226,13 +2210,6 @@
         `;
         container.appendChild(div);
       });
-
-      const itemChks = container.querySelectorAll('.item-chk');
-      if (itemChks.length > 0) {
-        const allSelected = Array.from(itemChks).every(c => c.checked);
-        const allChk = container.querySelector('#room-all');
-        if (allChk) allChk.checked = allSelected;
-      }
 
       updateRoomDropdownText();
       autoCaptureRoomDetails();
@@ -2260,7 +2237,7 @@
       
       if (checkedVals.length === 0) {
         textSpan.innerText = "Select Rooms...";
-      } else if (itemChks.length > 0 && checkedVals.length === itemChks.length) {
+      } else if (checkedVals.length === itemChks.length) {
         textSpan.innerText = "All Rooms Selected";
         const allChk = document.getElementById('room-all');
         if(allChk) allChk.checked = true;
