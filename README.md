@@ -1,3 +1,5 @@
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1763,7 +1765,6 @@
           "Price / Day": b.perDayPrice || 0,
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
-          "Total Cab Fare": b.cabFare || 0,
           "Total Amount": b.totalAmount || 0,
           "Initial Advance": b.initialAdv || 0,
           "Cleared Due": b.clearedDue || 0,
@@ -3058,8 +3059,6 @@
             }
             addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isClosedBooking);
           });
-        } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
-          addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedBooking);
         }
 
         document.getElementById('cust-price').value = b.perDayPrice;
@@ -3530,8 +3529,6 @@
       }
       
       const cabTripsList = [];
-      let totalCabFareToSave = 0;
-      let cabRemarksList = [];
       
       document.querySelectorAll('.cab-trip-row').forEach((row, index) => {
         const rate = parseFloat(row.querySelector('.cust-cab-rate').value) || 0;
@@ -3541,10 +3538,6 @@
         const dt = (dateVal && timeVal) ? `${dateVal}T${timeVal}:00+05:30` : '';
 
         if (rate > 0 || remark) {
-          totalCabFareToSave += rate;
-          if (remark) {
-             cabRemarksList.push(remark);
-          }
           cabTripsList.push({
             tripName: `Trip ${index + 1}`,
             dateStr: dateVal,
@@ -3646,8 +3639,6 @@
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
-        cabFare: totalCabFareToSave,
-        cabRemark: cabRemarksList.join(' | '),
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
         clearedDue: clearedDueAmt,
@@ -3779,14 +3770,8 @@
         }
         
         let cabSummaryHtml = '';
-        let totalCab = 0;
         const parseCab = parseJSONField(b.cabTrips);
-        
-        if (parseCab.length > 0) {
-            totalCab = parseCab.reduce((acc, t) => acc + (t.rate || 0), 0);
-        } else if (b.cabFare > 0) {
-            totalCab = b.cabFare; 
-        }
+        const totalCab = parseCab.reduce((acc, t) => acc + (t.rate || 0), 0);
         
         if (totalCab > 0) {
           cabSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-indigo-800 font-semibold'}"><i class="fa-solid fa-taxi text-[8px] mr-0.5"></i>Cab: +₹${totalCab}</div>`;
