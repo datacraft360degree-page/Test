@@ -1050,7 +1050,7 @@
     function getBookingRooms(b) {
       if (!b || b.roomNo === undefined || b.roomNo === null) return [];
       if (Array.isArray(b.roomNo)) return b.roomNo.map(r => String(r).trim());
-      return String(b.roomNo).split(',').map(s => s.trim());
+      return String(b.roomNo).split(/[,|]/).map(s => s.trim());
     }
 
     function parseDateMs(dtStr) {
@@ -1747,7 +1747,7 @@
           "State": b.state || "",
           "Country": b.country || "",
           "Pin/Zip Code": b.zipCode || "",
-          "Room No(s)": getBookingRooms(b).join(", "),
+          "Room No(s)": getBookingRooms(b).join(" | "),
           "Capacity": b.capacity || 1,
           "Extra Persons": b.extraPersons || 0,
           "Extra Person Joined": format24hDate(b.extraPersonJoined),
@@ -3621,7 +3621,7 @@
         contactNo: contactNoVal,
         idProofBase64: document.getElementById('cust-id-file-base64').value,
         idProofFileName: document.getElementById('cust-id-file-name').value,
-        roomNo: selectedRooms.join(', '),
+        roomNo: selectedRooms.join(' | '),
         agentInfo: document.getElementById('cust-agent').value,
         capacity: parseInt(document.getElementById('cust-capacity').value) || 1,
         extraPersons: extraPersons,
