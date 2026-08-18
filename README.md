@@ -3621,7 +3621,7 @@
         contactNo: contactNoVal,
         idProofBase64: document.getElementById('cust-id-file-base64').value,
         idProofFileName: document.getElementById('cust-id-file-name').value,
-        roomNo: selectedRooms.join(', '), // Fix applied here: array converted to comma separated string
+        roomNo: selectedRooms.join(', '),
         agentInfo: document.getElementById('cust-agent').value,
         capacity: parseInt(document.getElementById('cust-capacity').value) || 1,
         extraPersons: extraPersons,
