@@ -402,35 +402,113 @@
       </div>
 
       <!-- One UI Rounded Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Bookings</p>
-            <p id="dash-total-bookings" class="text-xl font-black text-slate-900 mt-0.5">0</p>
+    <!-- 6-Box Grid Layout (Line 1: 3 Boxes | Line 2: 3 Boxes) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+        <!-- BOX 1: TOTAL BOOKINGS (COUNT PIE CHART) -->
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Total Bookings</p>
+              <p id="dash-total-bookings" class="text-lg font-black text-slate-900 leading-tight">0</p>
+            </div>
+            <div class="p-2.5 bg-amber-50 text-amber-600 rounded-2xl"><i class="fa-solid fa-bookmark text-sm"></i></div>
           </div>
-          <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-bookmark text-base"></i></div>
-        </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Booking Amount</p>
-            <p id="dash-total-amount" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
+          <div class="flex items-center space-x-3">
+            <div id="pie-bookings" class="w-16 h-16 rounded-full shrink-0 shadow-inner border border-slate-100" style="background: conic-gradient(#E2E8F0 0% 100%);"></div>
+            <div class="text-[11px] space-y-1 font-semibold text-slate-700 w-full">
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live:</span> <strong id="dash-count-live" class="text-amber-600 font-bold">0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Upcoming:</span> <strong id="dash-count-upcoming" class="text-blue-600 font-bold">0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Closed:</span> <strong id="dash-count-closed" class="text-emerald-600 font-bold">0</strong></div>
+            </div>
           </div>
-          <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><i class="fa-solid fa-receipt text-base"></i></div>
         </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
-            <p id="dash-advanced" class="text-xl font-black text-emerald-600 mt-0.5">₹0</p>
+
+        <!-- BOX 2: BOOKING AMOUNT (AMOUNT PIE CHART) -->
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Booking Amount</p>
+              <p id="dash-total-amount" class="text-lg font-black text-slate-900 leading-tight">₹0</p>
+            </div>
+            <div class="p-2.5 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-receipt text-sm"></i></div>
           </div>
-          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-wallet text-base"></i></div>
-        </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Due Amount</p>
-            <p id="dash-due" class="text-xl font-black text-rose-600 mt-0.5">₹0</p>
+          <div class="flex items-center space-x-3">
+            <div id="pie-amount" class="w-16 h-16 rounded-full shrink-0 shadow-inner border border-slate-100" style="background: conic-gradient(#E2E8F0 0% 100%);"></div>
+            <div class="text-[11px] space-y-1 font-semibold text-slate-700 w-full">
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live:</span> <strong id="dash-amount-live" class="text-amber-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Upcoming:</span> <strong id="dash-amount-upcoming" class="text-blue-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Closed:</span> <strong id="dash-amount-closed" class="text-emerald-600 font-bold">₹0</strong></div>
+            </div>
           </div>
-          <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-hand-holding-dollar text-base"></i></div>
         </div>
+
+        <!-- BOX 3: AMOUNT RECEIVED (ADVANCE PIE CHART) -->
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Amount Received</p>
+              <p id="dash-advanced" class="text-lg font-black text-emerald-600 leading-tight">₹0</p>
+            </div>
+            <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-wallet text-sm"></i></div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div id="pie-received" class="w-16 h-16 rounded-full shrink-0 shadow-inner border border-slate-100" style="background: conic-gradient(#E2E8F0 0% 100%);"></div>
+            <div class="text-[11px] space-y-1 font-semibold text-slate-700 w-full">
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live:</span> <strong id="dash-recv-live" class="text-amber-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Upcoming:</span> <strong id="dash-recv-upcoming" class="text-blue-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Closed:</span> <strong id="dash-recv-closed" class="text-emerald-600 font-bold">₹0</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOX 4: TOTAL DUE AMOUNT (DUE PIE CHART) -->
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+            <div>
+              <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Total Due Amount</p>
+              <p id="dash-due" class="text-lg font-black text-rose-600 leading-tight">₹0</p>
+            </div>
+            <div class="p-2.5 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-hand-holding-dollar text-sm"></i></div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div id="pie-due" class="w-16 h-16 rounded-full shrink-0 shadow-inner border border-slate-100" style="background: conic-gradient(#E2E8F0 0% 100%);"></div>
+            <div class="text-[11px] space-y-1 font-semibold text-slate-700 w-full">
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live Due:</span> <strong id="dash-due-live" class="text-amber-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Upcoming Due:</span> <strong id="dash-due-upcoming" class="text-blue-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Closed Due:</span> <strong id="dash-due-closed" class="text-emerald-600 font-bold">₹0</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOX 5: INACTIVE BOOKINGS SUMMARY (RED THEME) -->
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+            <div>
+              <p class="text-[10px] uppercase font-bold text-red-500 tracking-wider break-words">Inactive Bookings</p>
+              <p id="dash-inactive-count" class="text-lg font-black text-red-600 leading-tight">0 Bookings</p>
+            </div>
+            <div class="p-2.5 bg-red-50 text-red-600 rounded-2xl"><i class="fa-solid fa-ban text-sm"></i></div>
+          </div>
+          <div class="bg-red-50/50 p-3 rounded-2xl border border-red-100 text-[11px] space-y-1">
+            <p class="text-slate-500 font-medium">Inactive Total Booking Amount:</p>
+            <p id="dash-inactive-amount" class="text-lg font-black text-red-600">₹0</p>
+          </div>
+        </div>
+
+        <!-- BOX 6: TODAY'S LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-2">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Today's Live Bookings Details</p>
+            <span class="px-2 py-0.5 text-[9px] font-bold bg-amber-50 text-amber-600 rounded-full border border-amber-200 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span> Live Today
+            </span>
+          </div>
+          <div id="dash-today-live-container" class="overflow-x-auto max-h-32 overflow-y-auto">
+            <p class="text-[11px] text-slate-400 italic py-2 text-center">No live bookings active today.</p>
+          </div>
+        </div>
+
       </div>
 
       <!-- Active years Directory Table Hidden -->
@@ -2353,41 +2431,209 @@
       updateDashboardCards();
     }
 
-    function updateDashboardCards() {
-      const selectedFilter = state.dashSelectedYear;
-      const label = document.getElementById('dash-filter-label');
+  // Helper to render conic-gradient pie charts (Live = Amber, Upcoming = Blue, Closed = Emerald, Inactive = Slate)
+function updatePieChart(elementId, liveVal, upcomingVal, closedVal, inactiveVal = 0) {
+  const elem = document.getElementById(elementId);
+  if (!elem) return;
 
-      let filteredBookings = [];
+  const total = liveVal + upcomingVal + closedVal + inactiveVal;
+  if (total <= 0) {
+    elem.style.background = 'conic-gradient(#e2e8f0 0% 100%)';
+    return;
+  }
 
-      if (selectedFilter === 'ALL' || !selectedFilter) {
-        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
-        if (label) label.innerText = "Consolidated Summary (All Years)";
-      } else {
-        const targetYear = parseInt(selectedFilter);
-        filteredBookings = state.bookings.filter(b => {
-          if (isInactiveBooking(b) || !b.checkIn) return false;
-          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
-          return yr === targetYear;
-        });
+  const p1 = ((liveVal / total) * 100).toFixed(2);
+  const p2 = (((liveVal + upcomingVal) / total) * 100).toFixed(2);
+  const p3 = (((liveVal + upcomingVal + closedVal) / total) * 100).toFixed(2);
 
-        if (label) {
-          label.innerText = targetYear === defaultAppYear 
-            ? `Year ${targetYear} (Current Year)` 
-            : `Year ${targetYear}`;
-        }
-      }
+  elem.style.background = `conic-gradient(
+    #f59e0b 0% ${p1}%,
+    #3b82f6 ${p1}% ${p2}%,
+    #10b981 ${p2}% ${p3}%,
+    #94a3b8 ${p3}% 100%
+  )`;
+}
 
-      const totalBookings = filteredBookings.length;
-      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
-      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
+// Helper to update Box 6: Today's Live Booking Details Table (Moved to Top-Level Scope)
+function updateDashboardLiveBookings(liveBookings) {
+  const container = document.getElementById('dash-today-live-container');
+  if (!container) return;
 
-      document.getElementById('dash-total-bookings').innerText = totalBookings;
-      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
-      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
-      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
+  if (!liveBookings || !Array.isArray(liveBookings) || liveBookings.length === 0) {
+    container.innerHTML = '<p class="text-[11px] text-slate-400 italic py-2 text-center">No live bookings active today.</p>';
+    return;
+  }
+
+  let html = `
+    <table class="w-full text-left text-[10px] divide-y divide-slate-100">
+      <thead class="bg-amber-50/60 text-amber-900 font-bold sticky top-0 bg-white">
+        <tr>
+          <th class="py-1 px-1.5">Guest Name</th>
+          <th class="py-1 px-1.5">Room No</th>
+          <th class="py-1 px-1.5">Total Amount</th>
+          <th class="py-1 px-1.5">Due Amount</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+  `;
+
+  liveBookings.forEach(b => {
+    // Safe extraction for room numbers and formatted dates
+    const roomList = typeof getBookingRooms === 'function' ? getBookingRooms(b) : (b.rooms || []);
+    const roomsStr = Array.isArray(roomList) && roomList.length > 0 ? roomList.join(', ') : '-';
+
+    const rawOutDate = b.hasExtendedCheckout && b.extendedCheckOut ? b.extendedCheckOut : b.checkOut;
+    const outStr = typeof format24hDate === 'function' ? format24hDate(rawOutDate) : (rawOutDate || '-');
+
+    html += `
+      <tr class="hover:bg-amber-50/40 transition">
+        <td class="py-1 px-1.5 font-mono text-blue-600 font-bold">${b.name || b.id || 'N/A'}</td>
+        <td class="py-1 px-1.5 font-bold text-slate-800">${roomsStr}</td>
+        <td class="py-1 px-1.5"><span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-md text-[9px]">₹ ${Number(b.totalAmount || 0).toLocaleString('en-IN')}</span></td>
+        <td class="py-1 px-1.5 text-slate-600">₹ ${Number(b.totalDue || 0).toLocaleString('en-IN')}</td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+// Main Dashboard Update Function
+function updateDashboardCards() {
+  const selectedFilter = typeof state !== 'undefined' ? state.dashSelectedYear : null;
+  const label = document.getElementById('dash-filter-label');
+  const targetYear = (selectedFilter && selectedFilter !== 'ALL') ? parseInt(selectedFilter, 10) : null;
+
+  // 1. Update Filter Header Label
+  if (label) {
+    if (!targetYear) {
+      label.innerText = "Consolidated Summary (All Years)";
+    } else {
+      const defaultYr = typeof defaultAppYear !== 'undefined' ? defaultAppYear : new Date().getFullYear();
+      label.innerText = targetYear === defaultYr
+        ? `Year ${targetYear} (Current Year)`
+        : `Year ${targetYear}`;
+    }
+  }
+
+  const now = Date.now();
+  const liveBookingsList = []; // Array to store live bookings for Box 6
+
+  // 2. Initialize Metrics Object
+  const stats = {
+    live: { count: 0, amount: 0, adv: 0, due: 0 },
+    upcoming: { count: 0, amount: 0, adv: 0, due: 0 },
+    closed: { count: 0, amount: 0, adv: 0, due: 0 },
+    inactive: { count: 0, amount: 0, adv: 0, due: 0 }
+  };
+
+  const parseDate = (dtStr) => {
+    if (!dtStr) return NaN;
+    return new Date(String(dtStr).replace(' ', 'T')).getTime();
+  };
+
+  // 3. Loop and Categorize Bookings
+  const bookings = (typeof state !== 'undefined' && Array.isArray(state.bookings)) ? state.bookings : [];
+
+  bookings.forEach(b => {
+    const checkInMs = parseDate(b.checkIn);
+    const checkOutMs = parseDate(b.checkOut);
+
+    // Year Filter Validation
+    if (targetYear && !isNaN(checkInMs)) {
+      const yr = new Date(checkInMs).getFullYear();
+      if (yr !== targetYear) return;
     }
 
+    // Amount extractions
+    const amt = Number(b.totalAmount || 0);
+    const adv = Number(b.initialAdv || 0) + Number(b.clearedDue || 0);
+    const due = Number(b.totalDue || 0);
+
+    // Check Inactive Status
+    if (typeof isInactiveBooking === 'function' && isInactiveBooking(b)) {
+      stats.inactive.count++;
+      stats.inactive.amount += amt;
+      stats.inactive.adv += adv;
+      stats.inactive.due += due;
+      return;
+    }
+
+    // Active Status Categorization (Live / Upcoming / Closed)
+    if (!isNaN(checkInMs) && !isNaN(checkOutMs)) {
+      if (now >= checkInMs && now <= checkOutMs) {
+        stats.live.count++;
+        stats.live.amount += amt;
+        stats.live.adv += adv;
+        stats.live.due += due;
+        liveBookingsList.push(b); // Collect live booking item
+      } else if (now < checkInMs) {
+        stats.upcoming.count++;
+        stats.upcoming.amount += amt;
+        stats.upcoming.adv += adv;
+        stats.upcoming.due += due;
+      } else {
+        stats.closed.count++;
+        stats.closed.amount += amt;
+        stats.closed.adv += adv;
+        stats.closed.due += due;
+      }
+    }
+  });
+
+  // Calculate Active Totals
+  const totalBookings = stats.live.count + stats.upcoming.count + stats.closed.count;
+  const totalAmt = stats.live.amount + stats.upcoming.amount + stats.closed.amount;
+  const totalAdv = stats.live.adv + stats.upcoming.adv + stats.closed.adv;
+  const totalDue = stats.live.due + stats.upcoming.due + stats.closed.due;
+
+  // DOM Safe Setters
+  const setTxt = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+  };
+
+  const fmt = num => `₹${Number(num || 0).toLocaleString('en-IN')}`;
+
+  // 4. Update UI Elements & Pie Charts
+
+  // --- Total Bookings Card ---
+  setTxt('dash-total-bookings', totalBookings);
+  setTxt('dash-count-live', stats.live.count);
+  setTxt('dash-count-upcoming', stats.upcoming.count);
+  setTxt('dash-count-closed', stats.closed.count);
+  updatePieChart('pie-bookings', stats.live.count, stats.upcoming.count, stats.closed.count, stats.inactive.count);
+
+  // --- Total Booking Amount Card ---
+  setTxt('dash-total-amount', fmt(totalAmt));
+  setTxt('dash-amount-live', fmt(stats.live.amount));
+  setTxt('dash-amount-upcoming', fmt(stats.upcoming.amount));
+  setTxt('dash-amount-closed', fmt(stats.closed.amount));
+  updatePieChart('pie-amount', stats.live.amount, stats.upcoming.amount, stats.closed.amount, stats.inactive.amount);
+
+  // --- Box 3: Total Advanced / Received Card ---
+  setTxt('dash-advanced', fmt(totalAdv));
+  setTxt('dash-recv-live', fmt(stats.live.adv));
+  setTxt('dash-recv-upcoming', fmt(stats.upcoming.adv));
+  setTxt('dash-recv-closed', fmt(stats.closed.adv));
+  updatePieChart('pie-received', stats.live.adv, stats.upcoming.adv, stats.closed.adv, stats.inactive.adv);
+
+  // --- Total Due Card ---
+  setTxt('dash-due', fmt(totalDue));
+  setTxt('dash-due-live', fmt(stats.live.due));
+  setTxt('dash-due-upcoming', fmt(stats.upcoming.due));
+  setTxt('dash-due-closed', fmt(stats.closed.due));
+  updatePieChart('pie-due', stats.live.due, stats.upcoming.due, stats.closed.due, stats.inactive.due);
+
+  // --- Inactive Card ---
+  setTxt('dash-inactive-count', `${stats.inactive.count} Bookings`);
+  setTxt('dash-inactive-amount', fmt(stats.inactive.amount));
+
+  // --- Box 6: Live Bookings Table Update ---
+  updateDashboardLiveBookings(liveBookingsList);
+}
+    
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");
