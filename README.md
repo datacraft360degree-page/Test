@@ -1913,7 +1913,7 @@ function checkBirthdayTrigger() {
           "State": b.state || "",
           "Country": b.country || "",
           "Pin/Zip Code": b.zipCode || "",
-          "Room No(s)": getBookingRooms(b).join(", "),
+          "Room No(s)": getBookingRooms(b).join(" | "),
           "Capacity": b.capacity || 1,
           "Extra Persons": b.extraPersons || 0,
           "Extra Person Joined": format24hDate(b.extraPersonJoined),
@@ -2356,7 +2356,7 @@ function checkBirthdayTrigger() {
 
       let selArr = [];
       if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
-      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
+      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(/[,|]/).map(s => s.trim());
 
       const allDiv = document.createElement('div');
       allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";
