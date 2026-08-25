@@ -434,7 +434,7 @@
     <section id="tab-dashboard" class="tab-content space-y-4">
       <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-5 text-white shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 class="text-base font-bold tracking-tight">Hi Aniruddha, Welcome to dashboard 🏠</h2>
+          <h2 class="text-base font-bold tracking-tight">Hi, Welcome to dashboard 🏠</h2>
           <p class="text-blue-100 text-[10px] mt-0.5">Quickly view, schedule, and manage room allocations and orders.</p>
         </div>
         <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 space-x-2">
@@ -1079,7 +1079,7 @@
 
       <div class="flex justify-between items-start border-b border-slate-200 pb-3">
         <div>
-          <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Aniruddha Homestay</h2>
+          <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Sonam Homestay</h2>
           <p class="text-[10px] text-slate-500 mt-0.5">Sittong, Village in West Bengal</p>
           <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: info@businessportal.com</p>
         </div>
@@ -2761,7 +2761,7 @@ function updateDashboardCards() {
       const effectiveOut = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
       const roomsDisplay = getBookingRooms(b).join(', ');
 
-      const messageText = `*Aniruddha Homestay - Booking Receipt*\n\n` +
+      const messageText = `*Sonam Homestay - Booking Receipt*\n\n` +
         `Dear *${b.name}*,\n` +
         `Thank you for booking with us! Here are your booking details:\n\n` +
         `*Reservation Details:*\n` +
