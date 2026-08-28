@@ -1027,8 +1027,11 @@
                 <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
                 <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
              </div>
+          <div>
+                <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink (₹)</label>
+                <input type="number" id="cust-food-total" readonly="" class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+             </div>
           </div>
-          
           <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Days</label>
@@ -1079,9 +1082,9 @@
 
       <div class="flex justify-between items-start border-b border-slate-200 pb-3">
         <div>
-          <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Sonam Homestay</h2>
+          <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Sanoum Pema Homestay-by Anaristays</h2>
           <p class="text-[10px] text-slate-500 mt-0.5">Sittong, Village in West Bengal</p>
-          <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: info@businessportal.com</p>
+          <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: demo@gmail.com</p>
         </div>
         <div class="text-right">
           <div id="e-invoice-section">
@@ -2761,7 +2764,7 @@ function updateDashboardCards() {
       const effectiveOut = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
       const roomsDisplay = getBookingRooms(b).join(', ');
 
-      const messageText = `*Sonam Homestay - Booking Receipt*\n\n` +
+      const messageText = `*Sanoum Pema Homestay-by Anaristays - Booking Receipt*\n\n` +
         `Dear *${b.name}*,\n` +
         `Thank you for booking with us! Here are your booking details:\n\n` +
         `*Reservation Details:*\n` +
@@ -3152,7 +3155,7 @@ function updateDashboardCards() {
       let isLiveBooking = false;
       let isClosedBooking = false;
       let isUpcomingBooking = false;
-      let isPast3Days = false;
+      let isPast730Days = false;
 
       let b = null;
       if (bookingId) {
@@ -3174,8 +3177,8 @@ function updateDashboardCards() {
 
           if (now > effectiveOutTime) {
             isClosedBooking = true;
-            if (now > effectiveOutTime + (3 * 24 * 60 * 60 * 1000)) {
-               isPast3Days = true;
+            if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
+               isPast730Days = true;
             }
           } else if (now >= checkInTime && now <= effectiveOutTime) {
             isLiveBooking = true;
@@ -3261,11 +3264,11 @@ function updateDashboardCards() {
       }
 
       setSectionEditability('sec-cab-fare', !isClosedBooking);
-      setSectionEditability('sec-billing-summary', !isPast3Days);
+      setSectionEditability('sec-billing-summary', !isPast730Days);
 
       const btnSave = document.getElementById('btn-save-booking');
       if (btnSave) {
-         if (isPast3Days) {
+         if (isPast730Days) {
             btnSave.disabled = true;
             btnSave.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
             btnSave.classList.remove('bg-blue-600', 'hover:bg-blue-700');
@@ -3301,7 +3304,7 @@ function updateDashboardCards() {
       }
 
       if (b) {
-        document.getElementById('modal-title').innerText = isPast3Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
+        document.getElementById('modal-title').innerText = isPast730Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
         
         // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
         setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);
@@ -3708,6 +3711,10 @@ function updateDashboardCards() {
       
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
+
+         const foodTotalInput = document.getElementById('cust-food-total');
+if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
+  
     }
 
     function handleSaveBooking(e) {
