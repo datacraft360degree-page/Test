@@ -3245,8 +3245,8 @@ function updateDashboardCards() {
 
       const addFoodBtn = document.getElementById('btn-add-food-order');
       if (addFoodBtn) {
-        addFoodBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
+        addFoodBtn.disabled = isPast730Days;
+        if (isPast730Days) {
           addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -3255,15 +3255,14 @@ function updateDashboardCards() {
       
       const addCabBtn = document.getElementById('btn-add-cab-trip');
       if (addCabBtn) {
-        addCabBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
+        addCabBtn.disabled = isPast730Days;
+        if (isPast730Days) {
           addCabBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       }
-
-      setSectionEditability('sec-cab-fare', !isClosedBooking);
+      setSectionEditability('sec-cab-fare', !isPast730Days);
       setSectionEditability('sec-billing-summary', !isPast730Days);
 
       const btnSave = document.getElementById('btn-save-booking');
