@@ -1089,17 +1089,17 @@
       <div class="flex justify-between items-start border-b border-slate-200 pb-3">
         <div>
           <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Anaristays</h2>
-          <p class="text-xs sm:text-sm font-medium text-gray-600 tracking-normal">Sanoum Pema Homestay</p>
+          <p class="text-base sm:text-sm font-medium text-blue-600 tracking-normal">Sanoum Pema Homestay</p>
           <p class="text-[10px] text-slate-500 mt-0.5">Sittong, Village in West Bengal</p>
           <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: demo@gmail.com</p>
         </div>
         <div class="text-right">
           <div id="e-invoice-section">
             <span id="inv-badge" class="inline-block bg-blue-50 text-blue-700 text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase mb-1 border border-blue-100">e-Invoice</span>
-            <p id="inv-id-container" class="text-[10px] text-slate-500">Invoice ID: <strong id="inv-id" class="text-slate-800 font-mono">INV-2026-0000001</strong></p>
+            <p id="inv-id-container" class="text-[10px] text-slate-500">Invoice ID: <strong id="inv-id" class="text-blue-800 font-mono">INV-2026-0000001</strong></p>
           </div>
           <p class="text-[10px] text-slate-500">Booking ID: <strong id="inv-booking-id" class="text-blue-600 font-mono">BKG-2026-0000001</strong></p>
-          <p class="text-[10px] text-slate-500">Issued On: <strong id="inv-date" class="text-slate-800"></strong></p>
+          <p class="text-[10px] text-slate-500">Issued On: <strong id="inv-date" class="text-blue-800"></strong></p>
         </div>
       </div>
 
