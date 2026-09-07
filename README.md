@@ -3995,6 +3995,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         includeMeals: includeMeals,
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
+        ExtraperDayPrice: parseFloat(document.getElementById('cust-extra-price').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
         totalAmount: totalAmt,
