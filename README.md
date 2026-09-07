@@ -3719,7 +3719,7 @@ const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons
 const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
 
 // Calculates extra total based on extra guests, extra rate, and duration days
-const extrapersonTotal = extraPersonsCount * extraPersonRate * days;
+const extrapersonTotal = extraPersonsCount * extraPersonRate * extraPersonDays;
 document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
       
       const cabTotalInput = document.getElementById('cust-cab-total');
