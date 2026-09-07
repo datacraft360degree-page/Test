@@ -3412,6 +3412,7 @@ function updateDashboardCards() {
         }
 
         document.getElementById('cust-price').value = b.perDayPrice;
+        document.getElementById('cust-extra-rate').value = b.ExtraperDayPrice;
         
         const advanceElem = document.getElementById('cust-advance');
         const baseAdv = b.initialAdv || 0;
@@ -3996,6 +3997,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         includeMeals: includeMeals,
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
+        ExtraperDayPrice: parseFloat(document.getElementById('cust-extra-rate').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
         totalAmount: totalAmt,
