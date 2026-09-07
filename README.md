@@ -3711,6 +3711,7 @@ function updateDashboardCards() {
       const due = Math.max(0, total - currentAdvVal - clearBillVal);
 
       document.getElementById('cust-days').value = days;
+      document.getElementById('extraPersonDays').value = extraPersondays;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
@@ -3990,7 +3991,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         extraPersons: extraPersons,
         extraPersonJoined: extraPersonJoined,
         extraPersonOut: extraPersonOut,
-        extraPersonDays: extraPersonDays,
+        extraPersonDays: parseInt(document.getElementById('extraPersonDays').value) || 0,
         checkIn: checkIn,
         checkOut: checkOut,
         hasExtendedCheckout: hasExtendedCheckout,
