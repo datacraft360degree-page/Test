@@ -1937,6 +1937,7 @@ function checkBirthdayTrigger() {
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
           "Stay Days": b.noOfDays || 0,
           "Price / Day": b.perDayPrice || 0,
+          "Extra Price / Day": b.ExtraperDayPrice || 0,
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
           "Total Amount": b.totalAmount || 0,
@@ -2909,7 +2910,7 @@ function updateDashboardCards() {
       tbody.appendChild(roomTr);
 
       if (b.extraPersons && b.extraPersons > 0 && b.extraPersonDays > 0) {
-        const extraPersonTotal = b.extraPersons * b.extraPersonDays * (b.perDayPrice || 0);
+        const extraPersonTotal = b.extraPersons * b.extraPersonDays * (b.ExtraperDayPrice || 0);
         const extraJoinedFmt = b.extraPersonJoined ? formatDateTime(b.extraPersonJoined) : '';
         const extraOutFmt = b.extraPersonOut ? formatDateTime(b.extraPersonOut) : '';
         const extraDaysCount = parseInt(b.extraPersonDays) || 0;
@@ -2922,7 +2923,7 @@ function updateDashboardCards() {
             <span class="text-[9px] text-amber-700 font-normal block">Stay: ${extraJoinedFmt} to ${extraOutFmt || 'Check-Out'}</span>
           </td>
           <td class="p-2.5 text-center">${extraDaysFormattedStr}</td>
-          <td class="p-2.5 text-right">₹${(b.perDayPrice || 0).toLocaleString('en-IN')}</td>
+          <td class="p-2.5 text-right">₹${(b.ExtraperDayPrice || 0).toLocaleString('en-IN')}</td>
           <td class="p-2.5 text-right font-semibold text-amber-900">₹${extraPersonTotal.toLocaleString('en-IN')}</td>
         `;
         tbody.appendChild(extraTr);
@@ -3681,7 +3682,7 @@ function updateDashboardCards() {
       }
 
       const roomTotal = days * price * capacity;
-      const extraPersonTotal = extraPersons * extraPersonDays * price;
+      const extraPersonTotal = extraPersons * extraPersonDays * Extraprice;
 
       let foodTotalCharge = 0;
       document.querySelectorAll('.cust-food-charge').forEach(input => {
