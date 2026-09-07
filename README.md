@@ -3682,8 +3682,7 @@ function updateDashboardCards() {
       }
 
       const roomTotal = days * price * capacity;
-      const extraTotal = extraPersonsCount * extraPersonRate * days;
-      document.getElementById('cust-extra-total').value = Math.round(extraTotal);
+      const extraPersonTotal = extraPersons * extraPersonDays * price;
 
       let foodTotalCharge = 0;
       document.querySelectorAll('.cust-food-charge').forEach(input => {
@@ -3719,6 +3718,9 @@ function updateDashboardCards() {
 const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
 const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
 
+  // Calculates extra total based on extra guests, extra rate, and duration days
+const extraTotal = extraPersonsCount * extraPersonRate * days;
+document.getElementById('cust-extra-total').value = Math.round(extraTotal);
       
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
