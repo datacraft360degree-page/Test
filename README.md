@@ -3647,6 +3647,7 @@ function updateDashboardCards() {
       }
 
       const price = parseFloat(document.getElementById('cust-price').value) || 0;
+      const Extraprice = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
       const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
 
       const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
@@ -3681,7 +3682,7 @@ function updateDashboardCards() {
       }
 
       const roomTotal = days * price * capacity;
-      const extraPersonTotal = extraPersons * extraPersonDays * price;
+      const extraPersonTotal = extraPersons * extraPersonDays * Extraprice;
 
       let foodTotalCharge = 0;
       document.querySelectorAll('.cust-food-charge').forEach(input => {
