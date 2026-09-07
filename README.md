@@ -902,21 +902,14 @@
                 <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
               </div>
             </div>
-          <!-- EXTRA PERSON(S) COUNT FIELD -->
-<div>
-  <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-    <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
-  </label>
-  <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-</div>
 
-<!-- ADD THIS NEW INDEPENDENT EXTRA PERSON RATE FIELD -->
-<div>
-  <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-    <i class="fa-solid fa-indian-rupee-sign text-amber-600"></i> Extra Rate/Day (₹)
-  </label>
-  <input type="number" id="cust-extra-rate" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-</div>
+            <!-- EXTRA PERSON(S) COUNT FIELD -->
+            <div>
+              <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+                <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
+              </label>
+              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+            </div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
@@ -1026,6 +1019,12 @@
           </h4>
           
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
+             <div>
+  <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+    <i class="fa-solid fa-indian-rupee-sign text-amber-600"></i> Extra Rate/Day (₹)
+  </label>
+  <input type="number" id="cust-extra-rate" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+</div>
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
                 <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
@@ -1937,7 +1936,6 @@ function checkBirthdayTrigger() {
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
           "Stay Days": b.noOfDays || 0,
           "Price / Day": b.perDayPrice || 0,
-          "Extra Price / Day": b.ExtraperDayPrice || 0,
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
           "Total Amount": b.totalAmount || 0,
@@ -2910,7 +2908,7 @@ function updateDashboardCards() {
       tbody.appendChild(roomTr);
 
       if (b.extraPersons && b.extraPersons > 0 && b.extraPersonDays > 0) {
-        const extraPersonTotal = b.extraPersons * b.extraPersonDays * (b.ExtraperDayPrice || 0);
+        const extraPersonTotal = b.extraPersons * b.extraPersonDays * (b.perDayPrice || 0);
         const extraJoinedFmt = b.extraPersonJoined ? formatDateTime(b.extraPersonJoined) : '';
         const extraOutFmt = b.extraPersonOut ? formatDateTime(b.extraPersonOut) : '';
         const extraDaysCount = parseInt(b.extraPersonDays) || 0;
@@ -2923,7 +2921,7 @@ function updateDashboardCards() {
             <span class="text-[9px] text-amber-700 font-normal block">Stay: ${extraJoinedFmt} to ${extraOutFmt || 'Check-Out'}</span>
           </td>
           <td class="p-2.5 text-center">${extraDaysFormattedStr}</td>
-          <td class="p-2.5 text-right">₹${(b.ExtraperDayPrice || 0).toLocaleString('en-IN')}</td>
+          <td class="p-2.5 text-right">₹${(b.perDayPrice || 0).toLocaleString('en-IN')}</td>
           <td class="p-2.5 text-right font-semibold text-amber-900">₹${extraPersonTotal.toLocaleString('en-IN')}</td>
         `;
         tbody.appendChild(extraTr);
@@ -3413,7 +3411,6 @@ function updateDashboardCards() {
         }
 
         document.getElementById('cust-price').value = b.perDayPrice;
-        document.getElementById('cust-extra-rate').value = b.ExtraperDayPrice;
         
         const advanceElem = document.getElementById('cust-advance');
         const baseAdv = b.initialAdv || 0;
@@ -3711,17 +3708,11 @@ function updateDashboardCards() {
       const due = Math.max(0, total - currentAdvVal - clearBillVal);
 
       document.getElementById('cust-days').value = days;
-      document.getElementById('extraPersonDays').value = extraPersondays;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
-   // NEW DE-LINKED CODE:
-const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
-const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
-
-  // Calculates extra total based on extra guests, extra rate, and duration days
-const extrapersonTotal = extraPersonsCount * extraPersonRate * days;
-document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
+      const extraTotalInput = document.getElementById('cust-extra-total');
+      if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
       
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
@@ -3991,7 +3982,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         extraPersons: extraPersons,
         extraPersonJoined: extraPersonJoined,
         extraPersonOut: extraPersonOut,
-        extraPersonDays: parseInt(document.getElementById('extraPersonDays').value) || 0,
+        extraPersonDays: extraPersonDays,
         checkIn: checkIn,
         checkOut: checkOut,
         hasExtendedCheckout: hasExtendedCheckout,
@@ -3999,7 +3990,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         includeMeals: includeMeals,
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
-        ExtraperDayPrice: parseFloat(document.getElementById('cust-extra-rate').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
         totalAmount: totalAmt,
