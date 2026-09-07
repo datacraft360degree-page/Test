@@ -1089,6 +1089,7 @@
       <div class="flex justify-between items-start border-b border-slate-200 pb-3">
         <div>
           <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Anaristays</h2>
+          <p class="text-xs sm:text-sm font-medium text-gray-600 tracking-normal">Sanoum Pema Homestay</p>
           <p class="text-[10px] text-slate-500 mt-0.5">Sittong, Village in West Bengal</p>
           <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: demo@gmail.com</p>
         </div>
