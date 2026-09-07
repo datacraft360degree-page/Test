@@ -3651,14 +3651,12 @@ function updateDashboardCards() {
       const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
 
       const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
-      const extraRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
 
 if (extraPersons > 0 && extraRate < 1) {
   alert("Validation Warning: When 'Add Extra Person(s)' is greater than 0, 'Extra Rate/Day (₹)' must be at least 1.");
   document.getElementById('cust-extra-rate').focus();
   return; // Blocks form submission
 }
-      <!-- let extraPersonDays = 0; -->
 
       if (extraPersons > 0 && latestMainCheckoutDt) {
         const epInDate = document.getElementById('cust-extra-person-date')?.value;
