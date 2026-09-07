@@ -3705,8 +3705,8 @@ function updateDashboardCards() {
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
-      const extraTotalInput = document.getElementById('cust-extra-total');
-      if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
+      <!-- const extraTotalInput = document.getElementById('cust-extra-total');
+      if (extraTotalInput) extraTotalInput.value = extraPersonTotal; -->
       
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
