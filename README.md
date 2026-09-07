@@ -902,14 +902,21 @@
                 <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
               </div>
             </div>
+          <!-- EXTRA PERSON(S) COUNT FIELD -->
+<div>
+  <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+    <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
+  </label>
+  <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+</div>
 
-            <!-- EXTRA PERSON(S) COUNT FIELD -->
-            <div>
-              <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-                <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
-              </label>
-              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-            </div>
+<!-- ADD THIS NEW INDEPENDENT EXTRA PERSON RATE FIELD -->
+<div>
+  <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+    <i class="fa-solid fa-indian-rupee-sign text-amber-600"></i> Extra Rate/Day (₹)
+  </label>
+  <input type="number" id="cust-extra-rate" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+</div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
@@ -3705,8 +3712,13 @@ function updateDashboardCards() {
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
-      <!-- const extraTotalInput = document.getElementById('cust-extra-total');
-      if (extraTotalInput) extraTotalInput.value = extraPersonTotal; -->
+   // NEW DE-LINKED CODE:
+const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
+const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
+
+// Calculates extra total based on extra guests, extra rate, and duration days
+const extraTotal = extraPersonsCount * extraPersonRate * days;
+document.getElementById('cust-extra-total').value = Math.round(extraTotal);
       
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
