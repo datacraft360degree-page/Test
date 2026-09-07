@@ -3713,14 +3713,7 @@ function updateDashboardCards() {
       document.getElementById('cust-days').value = days;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
-      
-    // NEW DE-LINKED CODE:
-const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
-const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
-
-// Calculates extra total based on extra guests, extra rate, and duration days
-const extrapersonTotal = extraPersons * ExtraperDayPrice * extraPersonDays;
-document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
+  
       
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
