@@ -3682,7 +3682,7 @@ function updateDashboardCards() {
       }
 
       const roomTotal = days * price * capacity;
-      const extraPersonTotal = extraPersons * extraPersonDays * Extraprice;
+      const extraTotal = extraPersonsCount * extraPersonRate * days;
 
       let foodTotalCharge = 0;
       document.querySelectorAll('.cust-food-charge').forEach(input => {
