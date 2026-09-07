@@ -1,3 +1,5 @@
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1923,7 +1925,7 @@ function checkBirthdayTrigger() {
           "Country": b.country || "",
           "Pin/Zip Code": b.zipCode || "",
           "Room No(s)": getBookingRooms(b).join(" | "),
-          "Main Guest Joined": b.capacity || 1,
+          "Capacity": b.capacity || 1,
           "Extra Persons": b.extraPersons || 0,
           "Extra Person Joined": format24hDate(b.extraPersonJoined),
           "Extra Person Check-Out": format24hDate(b.extraPersonOut),
@@ -4467,3 +4469,4 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
   </script>
 </body>
 </html>
+
