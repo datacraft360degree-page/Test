@@ -2909,7 +2909,7 @@ function updateDashboardCards() {
       tbody.appendChild(roomTr);
 
       if (b.extraPersons && b.extraPersons > 0 && b.extraPersonDays > 0) {
-        const extraPersonTotal = b.extraPersons * b.extraPersonDays * (b.perDayPrice || 0);
+        const extraPersonTotal = b.extraPersons * b.extraPersonDays * (b.ExtraperDayPrice || 0);
         const extraJoinedFmt = b.extraPersonJoined ? formatDateTime(b.extraPersonJoined) : '';
         const extraOutFmt = b.extraPersonOut ? formatDateTime(b.extraPersonOut) : '';
         const extraDaysCount = parseInt(b.extraPersonDays) || 0;
