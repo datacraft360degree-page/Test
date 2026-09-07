@@ -1936,7 +1936,7 @@ function checkBirthdayTrigger() {
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
           "Stay Days": b.noOfDays || 0,
           "Price / Day": b.perDayPrice || 0,
-          "Extra Price / Day": b.ExtraperDayPrice || 0,
+          "Extra Person Price / Day": b.ExtraperDayPrice || 0,
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
           "Total Amount": b.totalAmount || 0,
@@ -3412,6 +3412,7 @@ function updateDashboardCards() {
         }
 
         document.getElementById('cust-price').value = b.perDayPrice;
+        document.getElementById('cust-extra-rate').value = b.ExtraperDayPrice;
         
         const advanceElem = document.getElementById('cust-advance');
         const baseAdv = b.initialAdv || 0;
