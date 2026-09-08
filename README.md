@@ -4007,7 +4007,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         extraPersons: extraPersons,
         extraPersonJoined: extraPersonJoined,
         extraPersonOut: extraPersonOut,
-        extraPersonDays: extraPersonDays,
+        extraPersonDays: parseInt(document.getElementById('cust-extra-days').value) || 0,
         checkIn: checkIn,
         checkOut: checkOut,
         hasExtendedCheckout: hasExtendedCheckout,
