@@ -1952,7 +1952,6 @@ function checkBirthdayTrigger() {
           "Extended Check-Out": format24hDate(b.extendedCheckOut),
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
           "Stay Days": b.noOfDays || 0,
-          "Main Guest Total Price": parseFloat(booking.mainGuestTotal) || ((booking.perDayPrice || 0) * (booking.noOfDays || 0)),
           "Price / Day": b.perDayPrice || 0,
           "Extra Person Price / Day": b.ExtraperDayPrice || 0,
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
@@ -3701,15 +3700,6 @@ function updateDashboardCards() {
 
       const roomTotal = days * price * capacity;
       const extraPersonTotal = extraPersons * extraPersonDays * Extraprice;
-      // Extract the main guest total from the HTML input element
-const mainGuestTotalVal = parseFloat(document.getElementById('cust-main-total').value) || 0;
-
-// Add 'mainGuestTotal' to your booking object before saving
-const bookingData = {
-  // ... your other booking properties ...
-  mainGuestTotal: mainGuestTotalVal, // <--- Add this field
-  // ...
-};
 
       let foodTotalCharge = 0;
       document.querySelectorAll('.cust-food-charge').forEach(input => {
@@ -4025,7 +4015,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         extendedCheckOut: extendedCheckOut,
         includeMeals: includeMeals,
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
-        custmaintotal: parseInt(document.getElementById('cust-main-total').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         ExtraperDayPrice: parseFloat(document.getElementById('cust-extra-rate').value) || 0,
         foodOrders: foodOrdersList,
@@ -4496,4 +4485,3 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
   </script>
 </body>
 </html>
-
