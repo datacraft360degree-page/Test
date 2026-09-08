@@ -3745,8 +3745,6 @@ const mainPersonsCount = parseFloat(document.getElementById('cust-capacity').val
 const mainPersonRate = parseFloat(document.getElementById('cust-price').value) || 0;
 const mainPersonDays = parseFloat(document.getElementById('cust-days').value) || 0;
 
-
-// Calculates extra total based on extra guests, extra rate, and duration days
 const mainpersonTotal = mainPersonsCount * mainPersonRate * mainPersonDays;
 document.getElementById('cust-main-total').value = Math.round(mainpersonTotal);
 
