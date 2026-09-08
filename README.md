@@ -3732,15 +3732,24 @@ function updateDashboardCards() {
       document.getElementById('cust-extra-days').value = extraPersonDays;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
-      
-    // NEW DE-LINKED CODE:
+
+// Calculates extra total based on extra guests, extra rate, and duration days
 const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
 const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
 
-// Calculates extra total based on extra guests, extra rate, and duration days
 const extrapersonTotal = extraPersonsCount * extraPersonRate * extraPersonDays;
 document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
-      
+
+// Calculates Main total based on main guests, main rate, and duration days
+const mainPersonsCount = parseFloat(document.getElementById('cust-capacity').value) || 0;
+const mainPersonRate = parseFloat(document.getElementById('cust-price').value) || 0;
+const mainPersonDays = parseFloat(document.getElementById('cust-days').value) || 0;
+
+
+// Calculates extra total based on extra guests, extra rate, and duration days
+const mainpersonTotal = mainPersonsCount * mainPersonRate * mainPersonDays;
+document.getElementById('cust-main-total').value = Math.round(mainpersonTotal);
+
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
 
