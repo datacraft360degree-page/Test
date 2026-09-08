@@ -3733,6 +3733,7 @@ function updateDashboardCards() {
       document.getElementById('cust-days').value = days;
       document.getElementById('cust-extra-days').value = extraPersonDays;
       document.getElementById('cust-total').value = total;
+      document.getElementById('cust-main-total').value = Maintotal;
       document.getElementById('cust-due').value = due;
       
     // NEW DE-LINKED CODE:
