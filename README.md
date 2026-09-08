@@ -2905,7 +2905,6 @@ function updateDashboardCards() {
       tbody.innerHTML = '';
 
       const roomTotal = (b.noOfDays || 0) * (b.perDayPrice || 0) * (b.capacity || 1);
-      const MainTotal = (b.noOfDays || 0) * (b.perDayPrice || 0) * (b.capacity || 1);
       const showMealsNote = b.includeMeals !== false && b.includeMeals !== 'false';
       const mealNotesStr = showMealsNote ? '<span class="text-[9px] text-slate-500 block font-normal">(*Include Breakfast,Lunch,Evening snack & Dinner)</span>' : '';
 
@@ -3702,7 +3701,6 @@ function updateDashboardCards() {
 
       const roomTotal = days * price * capacity;
       const extraPersonTotal = extraPersons * extraPersonDays * Extraprice;
-      const MainTotal = days * price * capacity;
 
       let foodTotalCharge = 0;
       document.querySelectorAll('.cust-food-charge').forEach(input => {
@@ -3733,7 +3731,6 @@ function updateDashboardCards() {
       document.getElementById('cust-days').value = days;
       document.getElementById('cust-extra-days').value = extraPersonDays;
       document.getElementById('cust-total').value = total;
-      document.getElementById('cust-main-total').value = Maintotal;
       document.getElementById('cust-due').value = due;
       
     // NEW DE-LINKED CODE:
