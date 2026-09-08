@@ -1962,8 +1962,8 @@ function checkBirthdayTrigger() {
           "Total Extra Food & Drinks": b.custfoodtotal || 0,
           "Grand Total": b.totalAmount || 0,
           "Advanced": b.initialAdv || 0,
-          "Balance Due": b.totalDue || 0
-          "Cleared Bill": b.clearedDue || 0,
+          "Balance Due": b.totalDue || 0,
+          "Cleared Bill": b.clearedDue || 0
         };
       });
 
