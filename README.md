@@ -96,7 +96,7 @@
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
-<!-- BIRTHDAY HURRAY ANIMATION MODAL (TRIGGERS ON 20TH AUGUST) -->
+<!-- BIRTHDAY HURRAY ANIMATION MODAL (TRIGGERS ON 27th September) -->
   <div id="birthday-hurray-modal" class="hidden fixed inset-0 z-[110] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print overflow-hidden">
 
     <!-- Modal Card (Soft Light Palette) -->
@@ -800,6 +800,31 @@
     </div>
   </div>
 
+  <!-- CLOSED BOOKING CONFIRMATION MODAL -->
+  <div id="closed-booking-confirm-modal" class="hidden fixed inset-0 z-[80] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl shadow-2xl border border-amber-100 max-w-md w-full p-5 space-y-4 text-left">
+      <div class="flex items-start gap-3">
+        <div class="bg-amber-50 text-amber-600 w-11 h-11 rounded-2xl flex items-center justify-center text-lg shadow-sm shrink-0">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Closed Booking Confirmation</h3>
+          <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
+            This Booking will be considered as “Closed Booking” so make sure you have filled all the required details because after saving this Only “Extra Food/Drink, Cab Fare &amp; Billing Summary Section" will be editable”
+          </p>
+        </div>
+      </div>
+      <div class="flex space-x-2 pt-1">
+        <button type="button" onclick="closeClosedBookingConfirm(false)" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-[11px] transition">
+          Back
+        </button>
+        <button type="button" onclick="closeClosedBookingConfirm(true)" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-[11px]">
+          Go ahead
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- COMPACT ADD / EDIT BOOKING MODAL -->
  <div id="booking-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-3xl w-full p-5 space-y-3 my-4 max-h-[90vh] overflow-y-auto">
@@ -1197,7 +1222,7 @@
 
   <script>
 
-// Function to check and display the birthday animation on August 20th
+// Function to check and display the birthday animation on September 27th
 function checkBirthdayTrigger() {
       const now = new Date();
       const currentMonth = now.getMonth() + 1; // Month 9 is September
@@ -1924,7 +1949,7 @@ function checkBirthdayTrigger() {
         const foodList = parseJSONField(b.foodOrders);
         const cabList = parseJSONField(b.cabTrips);
         
-          return {
+      return {
           "Booking ID (System)": b.id || "",
           "Booking ID": b.bookingCode || "",
           "Invoice ID": b.invoiceNo || "",
@@ -3475,11 +3500,9 @@ function updateDashboardCards() {
         const tomorrowStr = `${t_yyyy}-${t_mm}-${t_dd}`;
 
         const checkInElem = document.getElementById('cust-checkin-date');
-        checkInElem.min = todayStr;
         checkInElem.value = todayStr;
 
         const checkOutElem = document.getElementById('cust-checkout-date');
-        checkOutElem.min = todayStr;
         checkOutElem.value = tomorrowStr;
 
         populateRoomDropdown(state.roomsCapacity.length > 0 ? [state.roomsCapacity[0].roomNo] : []);
@@ -3732,25 +3755,17 @@ function updateDashboardCards() {
       const due = Math.max(0, total - currentAdvVal - clearBillVal);
 
       document.getElementById('cust-days').value = days;
-      document.getElementById('cust-extra-days').value = extraPersonDays;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
-
-// Calculates extra total based on extra guests, extra rate, and duration days
-const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
-const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
-
-const extrapersonTotal = extraPersonsCount * extraPersonRate * extraPersonDays;
-document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
-
-// Calculates Main total based on main guests, main rate, and duration days
-const mainPersonsCount = parseFloat(document.getElementById('cust-capacity').value) || 0;
-const mainPersonRate = parseFloat(document.getElementById('cust-price').value) || 0;
-const mainPersonDays = parseFloat(document.getElementById('cust-days').value) || 0;
-
-const mainpersonTotal = mainPersonsCount * mainPersonRate * mainPersonDays;
-document.getElementById('cust-main-total').value = Math.round(mainpersonTotal);
-
+      
+      // Update Billing Summary fields.
+      const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
+      const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
+      const extrapersonTotal = extraPersonsCount * extraPersonRate * extraPersonDays;
+      document.getElementById('cust-extra-days').value = extraPersonDays;
+      document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
+      document.getElementById('cust-main-total').value = Math.round(roomTotal);
+      
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
 
@@ -3759,7 +3774,33 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
   
     }
 
-    function handleSaveBooking(e) {
+    let closedBookingConfirmResolver = null;
+
+    function closeClosedBookingConfirm(goAhead) {
+      const modal = document.getElementById('closed-booking-confirm-modal');
+      if (modal) modal.classList.add('hidden');
+
+      if (closedBookingConfirmResolver) {
+        const resolver = closedBookingConfirmResolver;
+        closedBookingConfirmResolver = null;
+        resolver(goAhead);
+      }
+    }
+
+    function askClosedBookingConfirmation() {
+      return new Promise((resolve) => {
+        closedBookingConfirmResolver = resolve;
+        const modal = document.getElementById('closed-booking-confirm-modal');
+        if (modal) {
+          modal.classList.remove('hidden');
+        } else {
+          closedBookingConfirmResolver = null;
+          resolve(false);
+        }
+      });
+    }
+
+    async function handleSaveBooking(e) {
       e.preventDefault();
 
       const guestName = formatTitleCase(document.getElementById('cust-name').value.trim());
@@ -3783,23 +3824,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const bookingModalId = document.getElementById('modal-booking-id').value;
       const id = bookingModalId;
 
-      // Add strict check-in date validation for New Booking
-      if (!id) {
-        const todayDt = new Date();
-        const utcMs = todayDt.getTime();
-        const istDate = new Date(utcMs + (330 * 60000));
-        
-        const yyyy = istDate.getUTCFullYear();
-        const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
-        const dd = String(istDate.getUTCDate()).padStart(2, '0');
-        const todayStr = `${yyyy}-${mm}-${dd}`;
-        
-        if (inDate < todayStr) {
-          alert("⚠️ Main check-in date cannot be earlier than today!");
-          return;
-        }
-      }
-      
       let selectedRooms = getSelectedRooms();
       if (selectedRooms.includes("ALL")) {
         selectedRooms = state.roomsCapacity.map(m => String(m.roomNo));
@@ -3812,6 +3836,34 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 
       const checkIn = `${inDate}T${inTime}:00+05:30`;
       const checkOut = `${outDate}T${outTime}:00+05:30`;
+
+      // If both main Check-In and Check-Out dates are earlier than today,
+      // ask for confirmation before continuing with the normal save process.
+      const todayLocal = new Date();
+      const todayDateOnly = new Date(
+        todayLocal.getFullYear(),
+        todayLocal.getMonth(),
+        todayLocal.getDate()
+      );
+      const checkInDateOnly = inDate ? new Date(`${inDate}T00:00:00`) : null;
+      const checkOutDateOnly = outDate ? new Date(`${outDate}T00:00:00`) : null;
+
+      // Show the Closed Booking confirmation ONLY when creating a NEW booking.
+      // Existing bookings being edited must not show this confirmation again.
+      const isNewBooking = !bookingModalId;
+
+      if (
+        isNewBooking &&
+        checkInDateOnly &&
+        checkOutDateOnly &&
+        checkInDateOnly < todayDateOnly &&
+        checkOutDateOnly < todayDateOnly
+      ) {
+        const goAhead = await askClosedBookingConfirmation();
+        if (!goAhead) {
+          return;
+        }
+      }
 
       const hasExtendedCheckout = document.getElementById('cust-has-extended-checkout')?.checked || false;
       let extendedCheckOut = null;
