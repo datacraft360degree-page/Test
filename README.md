@@ -1060,7 +1060,7 @@
             <h4 class="text-[9px] font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
               <i class="fa-solid fa-comment-dots text-indigo-600"></i> Booking Remark
             </h4>
-            <button type="button" id="btn-toggle-booking-remark" onclick="toggleBookingRemark()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-2.5 py-1 rounded-full text-[10px] font-semibold inline-flex items-center gap-1 transition">
+            <button type="button" id="btn-toggle-booking-remark" onclick="toggleBookingRemark()" class="bg-lime-100 hover:bg-lime-200 text-green-800 border border-green-200 px-2.5 py-1 rounded-full text-[10px] font-semibold inline-flex items-center gap-1 transition">
               <i class="fa-solid fa-plus text-[9px]"></i> Add Remark
             </button>
           </div>
@@ -2731,7 +2731,19 @@ function updateDashboardAllRemarks() {
   const container = document.getElementById('dash-all-remarks-container');
   if (!container) return;
   const bookings = (typeof state !== 'undefined' && Array.isArray(state.bookings)) ? state.bookings : [];
-  const remarkBookings = bookings.filter(b => String(b.remark || '').trim());
+  const statusOrder = { Live: 0, Upcoming: 1, Closed: 2, Inactive: 3 };
+  const remarkBookings = bookings
+    .filter(b => String(b.remark || '').trim())
+    .map((booking, originalIndex) => ({
+      booking,
+      originalIndex,
+      status: getDashboardRemarkBookingStatus(booking)
+    }))
+    .sort((a, b) =>
+      (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4) ||
+      a.originalIndex - b.originalIndex
+    )
+    .map(item => item.booking);
 
   if (!remarkBookings.length) {
     container.innerHTML = '<p class="text-[11px] text-slate-400 italic py-2 text-center">No saved remarks found.</p>';
