@@ -574,7 +574,7 @@
             <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
               <i class="fa-solid fa-comment-dots text-indigo-600"></i> All Booking Remarks
             </h3>
-            <p class="text-[10px] text-slate-500 mt-0.5">View saved remarks by booking, in serial order.</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">View saved remarks by booking.</p>
           </div>
           <button type="button" id="btn-toggle-all-remarks" onclick="toggleDashboardAllRemarks()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1.5 transition whitespace-nowrap">
             <i class="fa-solid fa-plus text-[9px]"></i> Show all remarks
@@ -2013,6 +2013,7 @@ function checkBirthdayTrigger() {
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
+	  "Booking Remarks": b.remark || "",
           "Extra Guest Price / Day": b.ExtraperDayPrice || 0,
           "Extra Guest Stay Days": b.extraPersonDays || 0,
           "Extra Guest Total Price": b.custextratotal || 0,
