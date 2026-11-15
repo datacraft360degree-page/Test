@@ -1209,11 +1209,11 @@ Hh
         <input type="number" id="cust-due" readonly class="w-full bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
       <div>
-        <label class="block font-semibold text-blue-700 mb-0.5">Discount by %</label>
+        <label class="block font-semibold text-blue-700 mb-0.5">Discounted %</label>
         <input type="number" id="cust-discount-percent" step="any" min="0" max="100" value="0" oninput="handleDiscountPercent(this.value)" class="w-full bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
       </div>
       <div>
-        <label class="block font-semibold text-blue-700 mb-0.5">Discount by Amount (₹)</label>
+        <label class="block font-semibold text-blue-700 mb-0.5">Discounted Amount (₹)</label>
         <input type="number" id="cust-discount-amount" min="0" value="0" oninput="handleDiscountAmount(this.value)" class="w-full bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
       </div>
       <div>
@@ -1248,8 +1248,6 @@ Hh
         <div class="flex items-center gap-3">
           <img alt="Anaristays logo" class="w-20 h-20 object-contain rounded-xl" src="https://drive.google.com/thumbnail?id=1aczulPhfblxUriWbWgcQI-h80dsKcrWQ&amp;sz=w512" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1aczulPhfblxUriWbWgcQI-h80dsKcrWQ'">
           <div>
-          <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Anaristays</h2>
-          <p class="text-base sm:text-sm font-medium text-blue-600 tracking-normal">Sanoum Pema Homestay</p>
           <p class="text-[10px] text-slate-500 mt-0.5">Sittong, Village in West Bengal</p>
           <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: demo@gmail.com</p>
           </div>
