@@ -601,12 +601,12 @@
       <div class="bg-white rounded-3xl shadow-sm border border-violet-200/80 p-4 space-y-3">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <h3 class="text-xs font-bold text-slate-900"><i class="fa-solid fa-chart-pie text-violet-600"></i> Agent / Self Booking Amount Summary</h3>
-          <span class="text-[10px] text-slate-500">Status-wise totals</span>
+          <span class="text-[10px] text-slate-500">Consolidated totals</span>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-[10px] text-left">
             <thead class="bg-violet-50 text-violet-800">
-              <tr><th class="p-2">Booking Status</th><th class="p-2">Booking Source</th><th class="p-2 text-right">Total Amount</th><th class="p-2 text-right">Received</th><th class="p-2 text-right">Due</th></tr>
+              <tr><th class="p-2">Booking Source</th><th class="p-2">Booking Status</th><th class="p-2 text-right">Total Amount</th><th class="p-2 text-right">Total Advance</th><th class="p-2 text-right">Total Due</th></tr>
             </thead>
             <tbody id="dash-agent-self-summary">
               <tr><td colspan="5" class="p-2 text-center text-slate-400">No booking data available.</td></tr>
@@ -1327,7 +1327,7 @@
         </label>
       </div>
       <div id="inv-payment-qr" class="hidden flex flex-col items-center border-t border-slate-100 pt-3">
-        <img alt="Google Pay payment QR code" class="w-36 h-48 object-contain" src="https://drive.google.com/uc?export=view&id=1u77yidlo2DpGI0Z74yyb2lzIT9HEpLp7">
+        <img alt="Google Pay payment QR code" class="w-36 h-48 object-contain" src="https://drive.google.com/thumbnail?id=1u77yidlo2DpGI0Z74yyb2lzIT9HEpLp7&amp;sz=w1000" referrerpolicy="no-referrer" loading="eager" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1u77yidlo2DpGI0Z74yyb2lzIT9HEpLp7'">
         <p class="text-[9px] text-slate-500 font-semibold">Scan to pay using any UPI app</p>
       </div>
       <div id="inv-booking-remark" class="hidden mb-3 p-3 border border-slate-200 rounded-xl text-[10px] whitespace-pre-wrap break-words"></div>
@@ -3158,8 +3158,9 @@ function updateDashboardCards() {
     else statusKey = 'closed';
 
     const rawSource = String(b.agentInfo || '').trim();
-    const sourceName = (!rawSource || rawSource.toLowerCase() === 'self' || rawSource.toLowerCase() === 'direct')
-      ? 'Self (Direct)' : rawSource;
+    const normalizedSource = rawSource.toLowerCase().replace(/[^a-z]/g, '');
+    const sourceName = (normalizedSource === 'selfdirect' || normalizedSource === 'direct')
+      ? 'Self (Direct)' : 'Agent';
     if (!agentSourceStats[sourceName]) {
       agentSourceStats[sourceName] = {};
       ['live', 'upcoming', 'closed', 'inactive'].forEach(k => {
@@ -3222,32 +3223,55 @@ function updateDashboardCards() {
   setTxt('dash-extra-food-total', fmt(Object.values(stats.extras).reduce((sum, x) => sum + x.food, 0)));
   setTxt('dash-cab-total', fmt(Object.values(stats.extras).reduce((sum, x) => sum + x.cab, 0)));
 
-  // --- Individual Agent / Self (Direct) status-wise amount, received and due ---
+  // --- Self (Direct) vs Agent summary, broken down by booking status ---
   const sourceBody = document.getElementById('dash-agent-self-summary');
   if (sourceBody) {
-    const statusLabels = { live: 'Live', upcoming: 'Upcoming', closed: 'Closed', inactive: 'Inactive' };
-    const sourceNames = Object.keys(agentSourceStats).sort((a, b) => {
-      if (a === 'Self (Direct)') return 1;
-      if (b === 'Self (Direct)') return -1;
-      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-    });
-    const rows = [];
-    ['live', 'upcoming', 'closed', 'inactive'].forEach(status => {
-      sourceNames.forEach(sourceName => {
-        const item = agentSourceStats[sourceName][status];
-        if (!item || (!item.amount && !item.received && !item.due)) return;
-        rows.push(`<tr class="border-b border-slate-100">
-          <td class="p-2 font-semibold">${statusLabels[status]}</td>
-          <td class="p-2 font-semibold ${sourceName === 'Self (Direct)' ? 'text-emerald-700' : 'text-violet-700'}">${escapeRemarkHtml(sourceName)}</td>
-          <td class="p-2 text-right">₹${item.amount.toLocaleString('en-IN')}</td>
-          <td class="p-2 text-right">₹${item.received.toLocaleString('en-IN')}</td>
-          <td class="p-2 text-right">₹${item.due.toLocaleString('en-IN')}</td>
-        </tr>`);
+    const statuses = [
+      ['live', 'Live'],
+      ['upcoming', 'Upcoming'],
+      ['closed', 'Closed'],
+      ['inactive', 'Inactive']
+    ];
+    const totals = {
+      'Self (Direct)': Object.fromEntries(statuses.map(([key]) => [key, { amount: 0, advance: 0, due: 0 }])),
+      'Agent': Object.fromEntries(statuses.map(([key]) => [key, { amount: 0, advance: 0, due: 0 }]))
+    };
+
+    Object.entries(agentSourceStats).forEach(([sourceName, buckets]) => {
+      const group = sourceName === 'Self (Direct)' ? 'Self (Direct)' : 'Agent';
+      statuses.forEach(([statusKey]) => {
+        const item = buckets[statusKey] || {};
+        totals[group][statusKey].amount += Number(item.amount || 0);
+        totals[group][statusKey].advance += Number(item.received || 0);
+        totals[group][statusKey].due += Number(item.due || 0);
       });
     });
-    sourceBody.innerHTML = rows.length
-      ? rows.join('')
-      : '<tr><td colspan="5" class="p-2 text-center text-slate-400">No booking data available.</td></tr>';
+
+    const money = value => `₹${Number(value || 0).toLocaleString('en-IN')}`;
+    sourceBody.innerHTML = ['Self (Direct)', 'Agent'].map(group => {
+      const rows = statuses.map(([statusKey, statusLabel], index) => {
+        const item = totals[group][statusKey];
+        return `<tr class="border-b border-slate-100">
+          ${index === 0 ? `<td rowspan="5" class="p-2 align-top font-bold ${group === 'Self (Direct)' ? 'text-emerald-700' : 'text-violet-700'}">${group}</td>` : ''}
+          <td class="p-2 text-slate-600">${statusLabel}</td>
+          <td class="p-2 text-right">${money(item.amount)}</td>
+          <td class="p-2 text-right">${money(item.advance)}</td>
+          <td class="p-2 text-right">${money(item.due)}</td>
+        </tr>`;
+      }).join('');
+      const total = statuses.reduce((sum, [key]) => {
+        sum.amount += totals[group][key].amount;
+        sum.advance += totals[group][key].advance;
+        sum.due += totals[group][key].due;
+        return sum;
+      }, { amount: 0, advance: 0, due: 0 });
+      return rows + `<tr class="border-b-2 border-slate-300 bg-slate-50 font-bold">
+        <td class="p-2">Total</td>
+        <td class="p-2 text-right">${money(total.amount)}</td>
+        <td class="p-2 text-right">${money(total.advance)}</td>
+        <td class="p-2 text-right">${money(total.due)}</td>
+      </tr>`;
+    }).join('');
   }
 
   // --- Box 6: Live Bookings Table Update ---
@@ -5088,13 +5112,12 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
           const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
           
           const matchingBookings = state.bookings.filter(b => {
-            if (isInactiveBooking(b) || !b.checkIn || !b.checkOut) return false;
+            if (!b.checkIn || !b.checkOut) return false;
             if (!isRoomInMaster(b.roomNo)) return false;
 
             const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
             const bOutVal = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
             const bOut = String(bOutVal).replace(' ', 'T').split('T')[0];
-
             return (dateStr >= bIn && dateStr <= bOut);
           });
 
@@ -5105,7 +5128,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
             .filter(room => isRoomInMaster(room.roomNo))
             .map(room => String(room.roomNo));
           const occupiedRooms = new Set();
-          matchingBookings.forEach(booking => {
+          matchingBookings.filter(booking => !isInactiveBooking(booking)).forEach(booking => {
             getBookingRooms(booking).forEach(roomNo => {
               const roomKey = String(roomNo);
               if (validRooms.includes(roomKey)) occupiedRooms.add(roomKey);
@@ -5113,30 +5136,30 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
           });
           const isHouseFull = validRooms.length > 0 && validRooms.every(roomNo => occupiedRooms.has(roomNo));
           const hasLive = matchingBookings.some(booking =>
-            nowMs >= parseDateMs(booking.checkIn) && nowMs <= getEffectiveCheckoutTime(booking)
+            !isInactiveBooking(booking) && nowMs >= parseDateMs(booking.checkIn) && nowMs <= getEffectiveCheckoutTime(booking)
           );
-          const hasUpcoming = matchingBookings.some(booking => nowMs < parseDateMs(booking.checkIn));
-          const hasClosed = matchingBookings.some(booking => nowMs > getEffectiveCheckoutTime(booking));
+          const hasUpcoming = matchingBookings.some(booking =>
+            !isInactiveBooking(booking) && nowMs < parseDateMs(booking.checkIn)
+          );
+          const hasClosed = matchingBookings.some(booking =>
+            !isInactiveBooking(booking) && nowMs > getEffectiveCheckoutTime(booking)
+          );
+          const hasInactive = matchingBookings.some(booking => isInactiveBooking(booking));
 
-          let dayStatusClass = 'bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border border-slate-100';
-          if (isHouseFull) {
-            dayStatusClass = 'bg-gradient-to-br from-red-600 via-rose-500 to-white text-white border-2 border-red-300 shadow-[0_0_10px_rgba(239,68,68,0.85)]';
-          } else if (hasLive) {
-            dayStatusClass = 'bg-amber-300 text-amber-950 border border-amber-500 shadow-xs animate-pulse';
-          } else if (hasUpcoming) {
-            dayStatusClass = 'bg-blue-500 text-white border border-blue-600 shadow-xs';
-          } else if (hasClosed) {
-            dayStatusClass = 'bg-emerald-500 text-white border border-emerald-600 shadow-xs';
-          }
-
+          // Simple calendar highlighting: ordinary booking dates are light yellow.
+          // Housefull dates use a red/white neon treatment and take priority.
           cell.className = `py-1 rounded-xl text-[10px] font-bold cursor-pointer transition relative flex items-center justify-center overflow-hidden ${
             isToday ? 'ring-2 ring-blue-700 ring-offset-1 z-10' : ''
-          } ${dayStatusClass}`;
-          cell.innerHTML = isHouseFull
-            ? `<span class="relative z-10">${day}</span><span class="absolute inset-0 flex items-center justify-center text-[8px] font-black tracking-widest text-white/75 opacity-80 pointer-events-none">HF</span>`
-            : `<span class="relative z-10">${day}</span>`;
-          if (isHouseFull) cell.title = 'Housefull (HF) — all rooms are booked';
-
+          } ${
+            isHouseFull
+              ? 'bg-gradient-to-br from-red-600 via-rose-500 to-white text-white border-2 border-red-300 shadow-[0_0_12px_rgba(239,68,68,0.95)]'
+              : isBooked
+                ? 'bg-amber-100 text-amber-950 border border-amber-300'
+                : 'bg-white text-slate-700 border border-slate-100 hover:bg-slate-50'
+          }`;
+          cell.innerHTML = `<span class="relative z-10">${day}</span>`;
+          if (isHouseFull) cell.title = 'Housefull — all rooms are booked';
+          else if (isBooked) cell.title = 'Booking date';
           if (isBooked) {
             cell.onclick = (e) => {
               e.stopPropagation();
