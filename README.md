@@ -606,10 +606,10 @@
         <div class="overflow-x-auto">
           <table class="w-full text-[10px] text-left">
             <thead class="bg-violet-50 text-violet-800">
-              <tr><th class="p-2">Booking Status</th><th class="p-2 text-right">Agent Amount</th><th class="p-2 text-right">Agent Received</th><th class="p-2 text-right">Agent Due</th><th class="p-2 text-right">Self Amount</th><th class="p-2 text-right">Self Received</th><th class="p-2 text-right">Self Due</th></tr>
+              <tr><th class="p-2">Booking Status</th><th class="p-2">Booking Source</th><th class="p-2 text-right">Total Amount</th><th class="p-2 text-right">Received</th><th class="p-2 text-right">Due</th></tr>
             </thead>
             <tbody id="dash-agent-self-summary">
-              <tr><td colspan="7" class="p-2 text-center text-slate-400">No booking data available.</td></tr>
+              <tr><td colspan="5" class="p-2 text-center text-slate-400">No booking data available.</td></tr>
             </tbody>
           </table>
         </div>
@@ -840,6 +840,12 @@
           </div>
         </div>
 
+        <div class="flex flex-wrap items-center gap-3 text-[9px] font-semibold mb-3">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-red-600 border border-red-300"></span>Housefull (HF)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-amber-300 border border-amber-500"></span>Live</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>Upcoming</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>Closed</span>
+        </div>
         <div id="calendar-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
       </div>
     </section>
@@ -1239,7 +1245,7 @@
 
       <div class="flex justify-between items-start border-b border-slate-200 pb-3">
         <div class="flex items-center gap-3">
-          <img alt="Anaristays logo" class="w-20 h-20 object-contain rounded-xl" src="https://drive.google.com/uc?export=view&id=1aczulPhfblxUriWbWgcQI-h80dsKcrWQ">
+          <img alt="Anaristays logo" class="w-20 h-20 object-contain rounded-xl" src="https://drive.google.com/thumbnail?id=1aczulPhfblxUriWbWgcQI-h80dsKcrWQ&amp;sz=w512" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1aczulPhfblxUriWbWgcQI-h80dsKcrWQ'">
           <div>
           <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Anaristays</h2>
           <p class="text-base sm:text-sm font-medium text-blue-600 tracking-normal">Sanoum Pema Homestay</p>
@@ -1729,7 +1735,8 @@ function checkBirthdayTrigger() {
             const now = Date.now();
             const checkout = parseDateMs(booking.checkOut);
             const live = now >= parseDateMs(booking.checkIn) && now <= getEffectiveCheckoutTime(booking);
-            extToggle.disabled = !(live || (now > checkout && now <= checkout + ONE_HOUR_MS));
+            const closed = now > getEffectiveCheckoutTime(booking);
+            extToggle.disabled = !(live || closed);
           }
         }
       }
@@ -3060,9 +3067,9 @@ function updateDashboardCards() {
     const checkOutMs = getEffectiveCheckoutTime(b);
 
     // Year Filter Validation
-    if (targetYear && !isNaN(checkInMs)) {
-      const yr = new Date(checkInMs).getFullYear();
-      if (yr !== targetYear) return;
+    if (targetYear) {
+      const bookingYear = parseInt(String(b.checkIn || '').slice(0, 4), 10);
+      if (!Number.isFinite(bookingYear) || bookingYear !== targetYear) return;
     }
 
     // Amount extractions
@@ -3132,6 +3139,39 @@ function updateDashboardCards() {
   const totalAdv = stats.live.adv + stats.upcoming.adv + stats.closed.adv;
   const totalDue = stats.live.due + stats.upcoming.due + stats.closed.due;
 
+  // Build individual Agent 1 / Agent 2 / ... and Self (Direct) totals.
+  // The year filter uses the booking's stored check-in calendar year.
+  const agentSourceStats = {};
+  bookings.forEach(b => {
+    if (targetYear) {
+      const bookingYear = parseInt(String(b.checkIn || '').slice(0, 4), 10);
+      if (!Number.isFinite(bookingYear) || bookingYear !== targetYear) return;
+    }
+    const checkInMs = parseDate(b.checkIn);
+    const checkOutMs = getEffectiveCheckoutTime(b);
+    if (!Number.isFinite(checkInMs) || !Number.isFinite(checkOutMs)) return;
+
+    let statusKey;
+    if (isInactiveBooking(b)) statusKey = 'inactive';
+    else if (now >= checkInMs && now <= checkOutMs) statusKey = 'live';
+    else if (now < checkInMs) statusKey = 'upcoming';
+    else statusKey = 'closed';
+
+    const rawSource = String(b.agentInfo || '').trim();
+    const sourceName = (!rawSource || rawSource.toLowerCase() === 'self' || rawSource.toLowerCase() === 'direct')
+      ? 'Self (Direct)' : rawSource;
+    if (!agentSourceStats[sourceName]) {
+      agentSourceStats[sourceName] = {};
+      ['live', 'upcoming', 'closed', 'inactive'].forEach(k => {
+        agentSourceStats[sourceName][k] = { amount: 0, received: 0, due: 0 };
+      });
+    }
+    const bucket = agentSourceStats[sourceName][statusKey];
+    bucket.amount += Number(b.totalAmount || 0);
+    bucket.received += Number(b.initialAdv || 0) + Number(b.clearedDue || 0);
+    bucket.due += Number(b.totalDue || 0);
+  });
+
   // DOM Safe Setters
   const setTxt = (id, text) => {
     const el = document.getElementById(id);
@@ -3182,16 +3222,32 @@ function updateDashboardCards() {
   setTxt('dash-extra-food-total', fmt(Object.values(stats.extras).reduce((sum, x) => sum + x.food, 0)));
   setTxt('dash-cab-total', fmt(Object.values(stats.extras).reduce((sum, x) => sum + x.cab, 0)));
 
-  // --- Agent / Self status-wise amount, received and due ---
+  // --- Individual Agent / Self (Direct) status-wise amount, received and due ---
   const sourceBody = document.getElementById('dash-agent-self-summary');
   if (sourceBody) {
-    sourceBody.innerHTML = ['live', 'upcoming', 'closed', 'inactive'].map(status => {
-      const a = stats.source[status].agent, self = stats.source[status].self;
-      const title = status.charAt(0).toUpperCase() + status.slice(1);
-      return `<tr class="border-b border-slate-100"><td class="p-2 font-semibold">${title}</td>
-        <td class="p-2 text-right">₹${a.amount.toLocaleString('en-IN')}</td><td class="p-2 text-right">₹${a.received.toLocaleString('en-IN')}</td><td class="p-2 text-right">₹${a.due.toLocaleString('en-IN')}</td>
-        <td class="p-2 text-right">₹${self.amount.toLocaleString('en-IN')}</td><td class="p-2 text-right">₹${self.received.toLocaleString('en-IN')}</td><td class="p-2 text-right">₹${self.due.toLocaleString('en-IN')}</td></tr>`;
-    }).join('');
+    const statusLabels = { live: 'Live', upcoming: 'Upcoming', closed: 'Closed', inactive: 'Inactive' };
+    const sourceNames = Object.keys(agentSourceStats).sort((a, b) => {
+      if (a === 'Self (Direct)') return 1;
+      if (b === 'Self (Direct)') return -1;
+      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+    });
+    const rows = [];
+    ['live', 'upcoming', 'closed', 'inactive'].forEach(status => {
+      sourceNames.forEach(sourceName => {
+        const item = agentSourceStats[sourceName][status];
+        if (!item || (!item.amount && !item.received && !item.due)) return;
+        rows.push(`<tr class="border-b border-slate-100">
+          <td class="p-2 font-semibold">${statusLabels[status]}</td>
+          <td class="p-2 font-semibold ${sourceName === 'Self (Direct)' ? 'text-emerald-700' : 'text-violet-700'}">${escapeRemarkHtml(sourceName)}</td>
+          <td class="p-2 text-right">₹${item.amount.toLocaleString('en-IN')}</td>
+          <td class="p-2 text-right">₹${item.received.toLocaleString('en-IN')}</td>
+          <td class="p-2 text-right">₹${item.due.toLocaleString('en-IN')}</td>
+        </tr>`);
+      });
+    });
+    sourceBody.innerHTML = rows.length
+      ? rows.join('')
+      : '<tr><td colspan="5" class="p-2 text-center text-slate-400">No booking data available.</td></tr>';
   }
 
   // --- Box 6: Live Bookings Table Update ---
@@ -3748,7 +3804,7 @@ function updateDashboardCards() {
         const initialCheckOutTime = parseDateMs(b.checkOut);
         const isWithin1HrPastCheckout = now > initialCheckOutTime && now <= (initialCheckOutTime + ONE_HOUR_MS);
 
-        if (isLiveBooking || isWithin1HrPastCheckout) {
+        if (isLiveBooking || isClosedBooking) {
           canToggleExtendedCheckout = true;
         }
       }
@@ -3771,10 +3827,13 @@ function updateDashboardCards() {
 
       const tripCancelChk = document.getElementById('cust-has-trip-cancel');
       if (tripCancelChk) {
-        tripCancelChk.disabled = !isLiveBooking;
-        if (!isLiveBooking) tripCancelChk.checked = false;
+        const canToggleTripCancel = isLiveBooking || isClosedBooking;
+        tripCancelChk.disabled = !canToggleTripCancel;
+        if (!canToggleTripCancel) tripCancelChk.checked = false;
         const tripNotice = document.getElementById('trip-cancel-notice');
-        if (tripNotice) tripNotice.innerText = isLiveBooking ? '(Available while booking is live)' : '(Selectable only for Live Booking)';
+        if (tripNotice) tripNotice.innerText = canToggleTripCancel
+          ? (isLiveBooking ? '(Available for Live Booking)' : '(Available for Closed Booking)')
+          : '(Not available for Upcoming Booking)';
       }
 
       const mealsChkBox = document.getElementById('cust-include-meals');
@@ -4871,8 +4930,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
             ${cabSummaryHtml}
           </td>
           <td class="py-2.5 px-3 font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">
-            ₹${b.totalAmount}
-            <span class="block text-[9px] text-emerald-600 font-medium">Adv: ₹${totalReceived}</span>
+            <span class="block">Total Amount: ₹${Number(b.totalAmount || 0).toLocaleString('en-IN')}</span>
+            <span class="block text-[9px] text-emerald-600 font-medium">Advance Payment: ₹${Number(totalReceived || 0).toLocaleString('en-IN')}</span>
           </td>
           <td class="py-2.5 px-3 font-bold ${b.totalDue > 0 ? 'text-rose-600' : 'text-emerald-600'}">₹${b.totalDue}</td>
           <td class="py-2.5 px-3 text-center">
@@ -5041,18 +5100,42 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 
           const isBooked = matchingBookings.length > 0;
           const isToday = isCurrentYearAndMonth && todayObj.getDate() === day;
+          const nowMs = Date.now();
+          const validRooms = (state.roomsCapacity || [])
+            .filter(room => isRoomInMaster(room.roomNo))
+            .map(room => String(room.roomNo));
+          const occupiedRooms = new Set();
+          matchingBookings.forEach(booking => {
+            getBookingRooms(booking).forEach(roomNo => {
+              const roomKey = String(roomNo);
+              if (validRooms.includes(roomKey)) occupiedRooms.add(roomKey);
+            });
+          });
+          const isHouseFull = validRooms.length > 0 && validRooms.every(roomNo => occupiedRooms.has(roomNo));
+          const hasLive = matchingBookings.some(booking =>
+            nowMs >= parseDateMs(booking.checkIn) && nowMs <= getEffectiveCheckoutTime(booking)
+          );
+          const hasUpcoming = matchingBookings.some(booking => nowMs < parseDateMs(booking.checkIn));
+          const hasClosed = matchingBookings.some(booking => nowMs > getEffectiveCheckoutTime(booking));
 
-          cell.className = `py-1 rounded-xl text-[10px] font-bold cursor-pointer transition relative flex items-center justify-center ${
-            isToday 
-              ? 'ring-2 ring-blue-600 ring-offset-1 z-10' 
-              : ''
-          } ${
-            isBooked 
-              ? 'bg-amber-400 text-slate-900 hover:bg-amber-500 shadow-xs' 
-              : 'bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border border-slate-100'
-          }`;
+          let dayStatusClass = 'bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border border-slate-100';
+          if (isHouseFull) {
+            dayStatusClass = 'bg-gradient-to-br from-red-600 via-rose-500 to-white text-white border-2 border-red-300 shadow-[0_0_10px_rgba(239,68,68,0.85)]';
+          } else if (hasLive) {
+            dayStatusClass = 'bg-amber-300 text-amber-950 border border-amber-500 shadow-xs animate-pulse';
+          } else if (hasUpcoming) {
+            dayStatusClass = 'bg-blue-500 text-white border border-blue-600 shadow-xs';
+          } else if (hasClosed) {
+            dayStatusClass = 'bg-emerald-500 text-white border border-emerald-600 shadow-xs';
+          }
 
-          cell.innerText = day;
+          cell.className = `py-1 rounded-xl text-[10px] font-bold cursor-pointer transition relative flex items-center justify-center overflow-hidden ${
+            isToday ? 'ring-2 ring-blue-700 ring-offset-1 z-10' : ''
+          } ${dayStatusClass}`;
+          cell.innerHTML = isHouseFull
+            ? `<span class="relative z-10">${day}</span><span class="absolute inset-0 flex items-center justify-center text-[8px] font-black tracking-widest text-white/75 opacity-80 pointer-events-none">HF</span>`
+            : `<span class="relative z-10">${day}</span>`;
+          if (isHouseFull) cell.title = 'Housefull (HF) — all rooms are booked';
 
           if (isBooked) {
             cell.onclick = (e) => {
