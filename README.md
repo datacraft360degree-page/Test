@@ -1,3 +1,4 @@
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1193,31 +1194,34 @@
       </div>
     </div>
 
-    <!-- Third row: Grand Total, Advanced, Due, Discount %, Discount Amount, Clear Due -->
-    <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
-      <div>
+    <!-- Third row: Grand Total, Advanced, Due, Discount %, Discount Amount -->
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
+      <div class="min-w-0">
         <label class="block font-semibold text-slate-600 mb-0.5">Grand Total (₹)</label>
-        <input type="number" id="cust-total" readonly class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+        <input type="number" id="cust-total" readonly class="w-full min-w-0 box-border bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
-      <div>
+      <div class="min-w-0">
         <label class="block font-semibold text-slate-600 mb-0.5">Advanced (₹)</label>
-        <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
+        <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full min-w-0 box-border bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
       </div>
-      <div>
+      <div class="min-w-0">
         <label class="block font-semibold text-slate-600 mb-0.5">Due (₹)</label>
-        <input type="number" id="cust-due" readonly class="w-full bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+        <input type="number" id="cust-due" readonly class="w-full min-w-0 box-border bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
-      <div>
+      <div class="min-w-0">
         <label class="block font-semibold text-blue-700 mb-0.5">Discounted %</label>
-        <input type="number" id="cust-discount-percent" step="any" min="0" max="100" value="0" oninput="handleDiscountPercent(this.value)" class="w-full bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
+        <input type="number" id="cust-discount-percent" step="any" min="0" max="100" value="0" oninput="handleDiscountPercent(this.value)" class="w-full min-w-0 box-border bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
       </div>
-      <div>
+      <div class="min-w-0">
         <label class="block font-semibold text-blue-700 mb-0.5">Discounted Amount (₹)</label>
-        <input type="number" id="cust-discount-amount" min="0" value="0" oninput="handleDiscountAmount(this.value)" class="w-full bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
+        <input type="number" id="cust-discount-amount" min="0" value="0" oninput="handleDiscountAmount(this.value)" class="w-full min-w-0 box-border bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
       </div>
-      <div>
-        <label class="block font-semibold text-emerald-700 mb-0.5">Clear Due (₹)</label>
-        <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500" title="Payment amount received against due" />
+    </div>
+    <!-- Clear Due sits centered on its own final row to prevent crowding -->
+    <div class="flex justify-center pt-1">
+      <div class="w-full sm:w-1/2 lg:w-1/3 min-w-0">
+        <label class="block font-semibold text-emerald-700 mb-0.5 text-center">Clear Due (₹)</label>
+        <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full min-w-0 box-border bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500 text-center" title="Payment amount received against due" />
       </div>
     </div>
   </div>
@@ -1243,12 +1247,12 @@
         <span class="text-[9px] text-slate-400 font-normal">System Protected</span>
       </div>
 
-      <div class="flex justify-between items-start border-b border-slate-200 pb-3">
-        <div class="flex items-center gap-3">
-          <img alt="Anaristays logo" class="w-20 h-20 object-contain rounded-xl" src="https://drive.google.com/thumbnail?id=1aczulPhfblxUriWbWgcQI-h80dsKcrWQ&amp;sz=w512" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1aczulPhfblxUriWbWgcQI-h80dsKcrWQ'">
-          <div>
-          <p class="text-[10px] text-slate-500 mt-0.5">Sittong, Village in West Bengal</p>
-          <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: demo@gmail.com</p>
+      <div class="flex justify-between items-start border-b border-slate-200 pb-3 gap-3">
+        <div class="flex flex-col items-start gap-2 min-w-0">
+          <img alt="Aanaristays logo" class="w-28 h-28 object-contain rounded-xl" src="https://drive.google.com/thumbnail?id=1aczulPhfblxUriWbWgcQI-h80dsKcrWQ&amp;sz=w512" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1aczulPhfblxUriWbWgcQI-h80dsKcrWQ'">
+          <div class="text-left">
+            <p class="text-[10px] text-slate-500 mt-0.5">Sittong, Village in West Bengal</p>
+            <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: demo@gmail.com</p>
           </div>
         </div>
         <div class="text-right">
@@ -3310,7 +3314,7 @@ function updateDashboardCards() {
       const effectiveOut = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
       const roomsDisplay = getBookingRooms(b).join(', ');
 
-      const messageText = `*Sanoum Pema Homestay-by Anaristays - Booking Receipt*\n\n` +
+      const messageText = `*Sanoum Pema Homestay-by Aanaristays - Booking Receipt*\n\n` +
         `Dear *${b.name}*,\n` +
         `Thank you for booking with us! Here are your booking details:\n\n` +
         `*Reservation Details:*\n` +
