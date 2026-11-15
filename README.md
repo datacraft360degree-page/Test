@@ -1,3 +1,4 @@
+Hh
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1311,8 +1312,8 @@
             <span>Balance Due:</span>
             <span id="inv-sum-due">₹0</span>
           </div>
-          <div id="inv-discount-percent-row" class="hidden flex justify-between text-blue-700 font-bold border-t border-slate-100 pt-1"><span>Discount by %:</span><strong id="inv-sum-discount-percent">0%</strong></div>
-          <div id="inv-discount-amount-row" class="hidden flex justify-between text-blue-700 font-bold"><span>Discount by Amount:</span><strong id="inv-sum-discount-amount">₹0</strong></div>
+          <div id="inv-discount-percent-row" class="hidden flex justify-between text-blue-700 font-bold border-t border-slate-100 pt-1"><span>Discounted %:</span><strong id="inv-sum-discount-percent">0%</strong></div>
+          <div id="inv-discount-amount-row" class="hidden flex justify-between text-blue-700 font-bold"><span>Discounted Amount:</span><strong id="inv-sum-discount-amount">₹0</strong></div>
           <div id="inv-clear-due-row" class="hidden flex justify-between text-emerald-700 font-bold border-t border-slate-100 pt-1">
             <span>Clear Due:</span>
             <strong id="inv-sum-clear-due">₹0</strong>
@@ -2204,8 +2205,8 @@ function checkBirthdayTrigger() {
           "Advanced": b.initialAdv || 0,
           "Balance Due": b.totalDue || 0,
           "Cleared Bill": b.clearedDue || 0,
-          "Discount %": Number(b.discountPercent || 0),
-          "Discount Amount": Number(b.discountAmount || 0)
+          "Discounted %": Number(b.discountPercent || 0),
+          "Discounted Amount": Number(b.discountAmount || 0)
         };
       });
 
