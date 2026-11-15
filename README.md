@@ -3418,10 +3418,17 @@ function updateDashboardCards() {
 
       const roomsDisplay = getBookingRooms(b).join(', ');
       document.getElementById('inv-room').innerText = `Room No: ${roomsDisplay}`;
-      document.getElementById('inv-checkin').innerText = `Check-in: ${formatDateTime(isTrue(b.hasTripCancel) && b.tripCancelCheckIn ? b.tripCancelCheckIn : b.checkIn)}`;
-      document.getElementById('inv-checkout').innerText = `Check-out: ${formatDateTime(isTrue(b.hasTripCancel) && b.tripCancelCheckOut ? b.tripCancelCheckOut : b.checkOut)}`;
+      // Always retain the original reservation dates on the receipt/invoice.
+      document.getElementById('inv-checkin').innerText = `Check-in: ${formatDateTime(b.checkIn)}`;
+      document.getElementById('inv-checkout').innerText = `Check-out: ${formatDateTime(b.checkOut)}`;
+      // Show the shortened trip-cancellation stay separately beneath the original dates.
       const tripCancelInvoiceNote = document.getElementById('inv-trip-cancel-details');
-      if (tripCancelInvoiceNote) { tripCancelInvoiceNote.innerText = isTrue(b.hasTripCancel) ? `Trip cancellation: ${formatDateTime(b.tripCancelCheckIn)} – ${formatDateTime(b.tripCancelCheckOut)}` : ''; tripCancelInvoiceNote.classList.toggle('hidden', !isTrue(b.hasTripCancel)); }
+      if (tripCancelInvoiceNote) {
+        tripCancelInvoiceNote.innerText = isTrue(b.hasTripCancel)
+          ? `Trip Cancel Check-in: ${formatDateTime(b.tripCancelCheckIn)} | Trip Cancel Check-out: ${formatDateTime(b.tripCancelCheckOut)}`
+          : '';
+        tripCancelInvoiceNote.classList.toggle('hidden', !isTrue(b.hasTripCancel));
+      }
 
       const extCheckoutElem = document.getElementById('inv-ext-checkout');
       if (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) {
