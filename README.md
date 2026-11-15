@@ -1,4 +1,5 @@
 
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1151,9 +1152,9 @@
     <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
   </h4>
   
-  <div class="space-y-2">
-    <!-- First row: Extra guest price/day, Extra guest stay days, Extra guest Total price, Total cab fare -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+  <div class="grid grid-cols-3 gap-2">
+    <!-- Billing fields flow in strict groups of three boxes per row -->
+    <div class="contents">
       <div>
         <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
           <i class="fa-solid fa-indian-rupee-sign text-amber-600"></i> Extra Guest/Minor Price/Day (₹)
@@ -1168,19 +1169,13 @@
         <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest/Minor Total Price (₹)</label>
         <input type="number" id="cust-extra-total" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
-      <div>
-        <label class="block font-semibold text-slate-600 mb-0.5">Total Cab Fare (₹)</label>
-        <input type="number" id="cust-cab-total" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
-      </div>
-    </div>
-
-    <!-- Second row: Main guest price/Day, Main guest Stay Days, Main guest Total price, Total extra food & drinks -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <div class="contents">
       <div>
         <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Price/Day (₹)</label>
         <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
       </div>
-      <div>
+    </div>
+ <div>
         <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Stay Days</label>
         <input type="number" id="cust-days" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
@@ -1188,14 +1183,19 @@
         <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Total Price (₹)</label>
         <input type="number" id="cust-main-total" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
+
+<div>
+        <label class="block font-semibold text-slate-600 mb-0.5">Total Cab Fare (₹)</label>
+        <input type="number" id="cust-cab-total" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+      </div>
+
       <div>
         <label class="block font-semibold text-slate-600 mb-0.5">Total Extra Food &amp; Drinks (₹)</label>
         <input type="number" id="cust-food-total" readonly class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
     </div>
 
-    <!-- Third row: Grand Total, Advanced, Due, Discount %, Discount Amount -->
-    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
+    <div class="contents">
       <div class="min-w-0">
         <label class="block font-semibold text-slate-600 mb-0.5">Grand Total (₹)</label>
         <input type="number" id="cust-total" readonly class="w-full min-w-0 box-border bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
@@ -1204,24 +1204,27 @@
         <label class="block font-semibold text-slate-600 mb-0.5">Advanced (₹)</label>
         <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full min-w-0 box-border bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
       </div>
-      <div class="min-w-0">
-        <label class="block font-semibold text-slate-600 mb-0.5">Due (₹)</label>
-        <input type="number" id="cust-due" readonly class="w-full min-w-0 box-border bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
-      </div>
+    
       <div class="min-w-0">
         <label class="block font-semibold text-blue-700 mb-0.5">Discounted %</label>
         <input type="number" id="cust-discount-percent" step="any" min="0" max="100" value="0" oninput="handleDiscountPercent(this.value)" class="w-full min-w-0 box-border bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
       </div>
+    </div>
+    <!-- Final row continues the same left-to-right sequence -->
+    <div class="contents">
       <div class="min-w-0">
         <label class="block font-semibold text-blue-700 mb-0.5">Discounted Amount (₹)</label>
         <input type="number" id="cust-discount-amount" min="0" value="0" oninput="handleDiscountAmount(this.value)" class="w-full min-w-0 box-border bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
       </div>
-    </div>
-    <!-- Clear Due sits centered on its own final row to prevent crowding -->
-    <div class="flex justify-center pt-1">
-      <div class="w-full sm:w-1/2 lg:w-1/3 min-w-0">
-        <label class="block font-semibold text-emerald-700 mb-0.5 text-center">Clear Due (₹)</label>
-        <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full min-w-0 box-border bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500 text-center" title="Payment amount received against due" />
+
+   <div class="min-w-0">
+        <label class="block font-semibold text-slate-600 mb-0.5">Due (₹)</label>
+        <input type="number" id="cust-due" readonly class="w-full min-w-0 box-border bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+      </div>
+
+      <div class="min-w-0">
+        <label class="block font-semibold text-emerald-700 mb-0.5">Clear Due (₹)</label>
+        <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full min-w-0 box-border bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500" title="Payment amount received against due" />
       </div>
     </div>
   </div>
