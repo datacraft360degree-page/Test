@@ -1004,7 +1004,7 @@
 
       <div>
         <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-          <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Guest(s)
+          <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Guest(s)/Minor
         </label>
         <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" style="height: 34px;" />
       </div>
@@ -1016,14 +1016,14 @@
               </label>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Guest Check-In</label>
+                  <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Guest/Minor Check-In</label>
                   <div class="flex gap-1">
                     <input type="date" id="cust-extra-person-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-amber-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
                     <input type="time" id="cust-extra-person-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-amber-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
                   </div>
                 </div>
                 <div>
-                  <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Guest Check-Out</label>
+                  <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Guest/Minor Check-Out</label>
                   <div class="flex gap-1">
                     <input type="date" id="cust-extra-person-out-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-amber-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
                     <input type="time" id="cust-extra-person-out-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-amber-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
@@ -1155,16 +1155,16 @@
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
       <div>
         <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-          <i class="fa-solid fa-indian-rupee-sign text-amber-600"></i> Extra Guest Price/Day (₹)
+          <i class="fa-solid fa-indian-rupee-sign text-amber-600"></i> Extra Guest/Minor Price/Day (₹)
         </label>
         <input type="number" id="cust-extra-rate" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
       </div>
       <div>
-        <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Stay Days</label>
+        <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest/Minor Stay Days</label>
         <input type="number" id="cust-extra-days" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
       <div>
-        <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Total Price (₹)</label>
+        <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest/Minor Total Price (₹)</label>
         <input type="number" id="cust-extra-total" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
       <div>
@@ -2178,9 +2178,9 @@ function checkBirthdayTrigger() {
           "Room No(s)": getBookingRooms(b).join(" | "),
           "Agent Info": b.agentInfo || "",
           "Main Guest Joined": b.capacity || 1,
-          "Add Extra Guest": b.extraPersons || 0,
-          "Extra Guest Check-In": format24hDate(b.extraPersonJoined),
-          "Extra Guest Check-Out": format24hDate(b.extraPersonOut),
+          "Add Extra Guest/Minor": b.extraPersons || 0,
+          "Extra Guest/Minor Check-In": format24hDate(b.extraPersonJoined),
+          "Extra Guest/Minor Check-Out": format24hDate(b.extraPersonOut),
           "Check-In": format24hDate(b.checkIn),
           "Check-Out": format24hDate(b.checkOut),
           "Has Extended Check-Out": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
@@ -2192,9 +2192,9 @@ function checkBirthdayTrigger() {
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
 	  "Booking Remarks": b.remark || "",
-          "Extra Guest Price / Day": b.ExtraperDayPrice || 0,
-          "Extra Guest Stay Days": b.extraPersonDays || 0,
-          "Extra Guest Total Price": b.custextratotal || 0,
+          "Extra Guest/Minor Price / Day": b.ExtraperDayPrice || 0,
+          "Extra Guest/Minor Stay Days": b.extraPersonDays || 0,
+          "Extra Guest/Minor Total Price": b.custextratotal || 0,
           "Total Cab Fare": b.custcabtotal || 0,
           "Main Guest Price / Day": b.perDayPrice || 0,
           "Main Guest Stay Days": b.noOfDays || 0,
@@ -3474,7 +3474,7 @@ function updateDashboardCards() {
         const extraTr = document.createElement('tr');
         extraTr.innerHTML = `
           <td class="p-2.5 font-semibold text-amber-900">
-            Additional Guest Accommodation (${b.extraPersons} ${b.extraPersons === 1 ? 'Person' : 'Persons'})
+            Additional Guest/Minor Accommodation (${b.extraPersons} ${b.extraPersons === 1 ? 'Person' : 'Persons'})
             <span class="text-[9px] text-amber-700 font-normal block">Stay: ${extraJoinedFmt} to ${extraOutFmt || 'Check-Out'}</span>
           </td>
           <td class="p-2.5 text-center">${extraDaysFormattedStr}</td>
