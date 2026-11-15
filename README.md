@@ -1157,7 +1157,7 @@
     <div class="contents">
       <div>
         <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-          <i class="fa-solid fa-indian-rupee-sign text-amber-600"></i> Extra Guest/Minor Price/Day (₹)
+ </i> Extra Guest/Minor Price/Day (₹)
         </label>
         <input type="number" id="cust-extra-rate" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
       </div>
