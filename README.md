@@ -1,3 +1,5 @@
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -601,7 +603,7 @@
       <div class="bg-white rounded-3xl shadow-sm border border-violet-200/80 p-4 space-y-3">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
           <h3 class="text-xs font-bold text-slate-900"><i class="fa-solid fa-chart-pie text-violet-600"></i> Agent / Self Booking Amount Summary</h3>
-          <span class="text-[10px] text-slate-500">Consolidated totals</span>
+        
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-[10px] text-left">
@@ -838,14 +840,7 @@
             </label>
             <select id="cal-year-select" onchange="renderCalendar(parseInt(this.value))" class="bg-white text-blue-900 text-[11px] font-bold rounded-xl px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-sm"></select>
           </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-3 text-[9px] font-semibold mb-3">
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-red-600 border border-red-300"></span>Housefull (HF)</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-amber-300 border border-amber-500"></span>Live</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-blue-500"></span>Upcoming</span>
-          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>Closed</span>
-        </div>
+        </div> 
         <div id="calendar-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
       </div>
     </section>
@@ -1154,8 +1149,7 @@
     <!-- Billing fields flow in strict groups of three boxes per row -->
     <div class="contents">
       <div>
-        <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
- </i> Extra Guest/Minor Price/Day (₹)
+        <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">Extra Guest/Minor Price/Day (₹)
         </label>
         <input type="number" id="cust-extra-rate" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
       </div>
@@ -4964,8 +4958,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
             ${cabSummaryHtml}
           </td>
           <td class="py-2.5 px-3 font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">
-            <span class="block">Total Amount: ₹${Number(b.totalAmount || 0).toLocaleString('en-IN')}</span>
-            <span class="block text-[9px] text-emerald-600 font-medium">Advance Payment: ₹${Number(totalReceived || 0).toLocaleString('en-IN')}</span>
+            <span class="block">Total: ₹${Number(b.totalAmount || 0).toLocaleString('en-IN')}</span>
+            <span class="block text-[9px] text-emerald-600 font-medium">Adv: ₹${Number(totalReceived || 0).toLocaleString('en-IN')}</span>
           </td>
           <td class="py-2.5 px-3 font-bold ${b.totalDue > 0 ? 'text-rose-600' : 'text-emerald-600'}">₹${b.totalDue}</td>
           <td class="py-2.5 px-3 text-center">
