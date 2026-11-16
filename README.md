@@ -2198,10 +2198,9 @@ function checkBirthdayTrigger() {
           "Grand Total": b.totalAmount || 0,
           "Advanced": b.initialAdv || 0,
 	  "Discounted %": Number(b.discountPercent || 0),
-          "Discounted Amount": Number(b.discountAmount || 0)
+          "Discounted Amount": Number(b.discountAmount || 0),
           "Balance Due": b.totalDue || 0,
-          "Cleared Bill": b.clearedDue || 0,
-         
+          "Cleared Bill": b.clearedDue || 0,  
         };
       });
 
