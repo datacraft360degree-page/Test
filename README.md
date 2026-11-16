@@ -1,3 +1,4 @@
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -688,7 +689,7 @@
             <!-- Search by Agent Name / Contact -->
             <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
               <label for="booking-agent-search" class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 pl-1">
-                <i class="fa-solid fa-user-tie text-blue-600"></i> Agent:
+                <i class="fa-solid fa-user-tie text-blue-600"></i> Agent/Self:
               </label>
               <select id="booking-agent-search" onchange="searchBookingByAgent()" class="bg-white text-[11px] border border-slate-200 rounded-xl px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 max-w-[150px]">
                 <option value="">All Agents</option>
