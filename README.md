@@ -1,3 +1,4 @@
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -2236,7 +2237,7 @@ function checkBirthdayTrigger() {
       if (!select) return;
       const selected = select.value;
       const agents = [...new Set((state.masterAgents || []).map(a => `${a.agentName} (${a.phone})`))];
-      select.innerHTML = '<option value="">All Agents</option>' + agents.map(a => `<option value="${escapeRemarkHtml(a)}">${escapeRemarkHtml(a)}</option>`).join('');
+      select.innerHTML = '<option value="">Select All</option>' + agents.map(a => `<option value="${escapeRemarkHtml(a)}">${escapeRemarkHtml(a)}</option>`).join('');
       if (agents.includes(selected)) select.value = selected;
     }
 
@@ -3588,7 +3589,7 @@ function updateDashboardCards() {
       const clearDueRow = document.getElementById('inv-clear-due-row');
       if (clearDueAmt > 0) {
         document.getElementById('inv-sum-clear-due').innerText = `₹${clearDueAmt.toLocaleString('en-IN')}`;
-        document.getElementById('inv-clear-due-label').innerText = `Clear Due (Full Paid ₹${clearDueAmt.toLocaleString('en-IN')}):`;
+        document.getElementById('inv-clear-due-label').innerText = `Clear Due (Full Paid)`;
         clearDueRow.classList.remove('hidden');
       } else {
         clearDueRow.classList.add('hidden');
