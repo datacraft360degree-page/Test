@@ -2190,17 +2190,18 @@ function checkBirthdayTrigger() {
           "Extra Guest/Minor Price / Day": b.ExtraperDayPrice || 0,
           "Extra Guest/Minor Stay Days": b.extraPersonDays || 0,
           "Extra Guest/Minor Total Price": b.custextratotal || 0,
-          "Total Cab Fare": b.custcabtotal || 0,
           "Main Guest Price / Day": b.perDayPrice || 0,
           "Main Guest Stay Days": b.noOfDays || 0,
           "Main Guest Total Price": b.custmaintotal || 0,
+	  "Total Cab Fare": b.custcabtotal || 0,
           "Total Extra Food & Drinks": b.custfoodtotal || 0,
           "Grand Total": b.totalAmount || 0,
           "Advanced": b.initialAdv || 0,
+	  "Discounted %": Number(b.discountPercent || 0),
+          "Discounted Amount": Number(b.discountAmount || 0)
           "Balance Due": b.totalDue || 0,
           "Cleared Bill": b.clearedDue || 0,
-          "Discounted %": Number(b.discountPercent || 0),
-          "Discounted Amount": Number(b.discountAmount || 0)
+         
         };
       });
 
