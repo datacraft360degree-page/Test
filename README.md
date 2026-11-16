@@ -685,6 +685,15 @@
                 <i class="fa-solid fa-rotate-left"></i> Reset
               </button>
             </div>
+            <!-- Search by Agent Name / Contact -->
+            <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
+              <label for="booking-agent-search" class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 pl-1">
+                <i class="fa-solid fa-user-tie text-blue-600"></i> Agent:
+              </label>
+              <select id="booking-agent-search" onchange="searchBookingByAgent()" class="bg-white text-[11px] border border-slate-200 rounded-xl px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 max-w-[150px]">
+                <option value="">All Agents</option>
+              </select>
+            </div>
 
             <button onclick="openBookingModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition shadow-sm whitespace-nowrap">
               <i class="fa-solid fa-plus text-[10px]"></i> Add Booking
@@ -877,7 +886,7 @@
         <div>
           <h3 class="text-sm font-bold text-slate-900">Closed Booking Confirmation</h3>
           <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
-            This Booking will be considered as “Closed Booking” so make sure you have filled correct “main check in and check out date-time” because after saving this “main check in & check out date-time” will be non editable.
+            Please confirm the booking details before continuing.
           </p>
         </div>
       </div>
@@ -1048,7 +1057,7 @@
               <div class="flex items-center gap-2 mb-1">
                 <input type="checkbox" id="cust-has-extended-checkout" onchange="toggleExtendedCheckoutFields(this.checked)" class="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer" />
                 <label for="cust-has-extended-checkout" id="lbl-has-extended-checkout" class="font-bold text-slate-700 cursor-pointer flex items-center gap-1 select-none text-[11px]">
-                  <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Extended Check-out Date &amp; Time <span id="ext-checkout-timer-notice" class="text-[9px] text-amber-700 font-normal ml-1 hidden">(Active post check-out)</span>
+                  <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Extended Check-out Date &amp; Time <span id="ext-checkout-timer-notice" class="hidden"></span>
                 </label>
               </div>
 
@@ -1068,7 +1077,7 @@
               <div class="flex items-center gap-2 mb-1">
                 <input type="checkbox" id="cust-has-trip-cancel" onchange="toggleTripCancelFields(this.checked)" class="w-4 h-4 text-rose-600 rounded-md border-slate-300 cursor-pointer" />
                 <label for="cust-has-trip-cancel" class="font-bold text-rose-700 cursor-pointer flex items-center gap-1 select-none text-[11px]">
-                  <i class="fa-solid fa-ban text-rose-600"></i> Trip Cancelled <span id="trip-cancel-notice" class="text-[9px] text-rose-600 font-normal ml-1">(Active for Live Booking)</span>
+                  <i class="fa-solid fa-ban text-rose-600"></i> Trip Cancelled <span id="trip-cancel-notice" class="hidden"></span>
                 </label>
               </div>
               <div id="trip-cancel-container" class="hidden bg-rose-50/70 p-2.5 rounded-2xl border border-rose-200/80 mt-1.5">
@@ -1196,14 +1205,18 @@
       </div>
     
       <div class="min-w-0">
-        <label class="block font-semibold text-blue-700 mb-0.5">Discounted %</label>
+        <label class="block font-semibold text-blue-700 mb-0.5 flex items-center justify-between gap-1">Discounted %
+          <span class="inline-flex items-center gap-1 text-[10px] font-semibold"><input type="checkbox" id="cust-discount-percent-selected" checked  class="w-3.5 h-3.5 accent-blue-600" aria-label="Show discount percentage on invoice" /> Show on invoice</span>
+        </label>
         <input type="number" id="cust-discount-percent" step="any" min="0" max="100" value="0" oninput="handleDiscountPercent(this.value)" class="w-full min-w-0 box-border bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
       </div>
     </div>
     <!-- Final row continues the same left-to-right sequence -->
     <div class="contents">
       <div class="min-w-0">
-        <label class="block font-semibold text-blue-700 mb-0.5">Discounted Amount (₹)</label>
+        <label class="block font-semibold text-blue-700 mb-0.5 flex items-center justify-between gap-1">Discounted Amount (₹)
+          <span class="inline-flex items-center gap-1 text-[10px] font-semibold"><input type="checkbox" id="cust-discount-amount-selected" checked class="w-3.5 h-3.5 accent-blue-600" aria-label="Show discount amount on invoice" /> Show on invoice</span>
+        </label>
         <input type="number" id="cust-discount-amount" min="0" value="0" oninput="handleDiscountAmount(this.value)" class="w-full min-w-0 box-border bg-blue-50 border border-blue-200 font-bold text-blue-800 rounded-xl px-2 py-1.5" />
       </div>
 
@@ -1298,18 +1311,22 @@
             <span>Total Amount:</span>
             <strong id="inv-sum-total" class="text-slate-800">₹0</strong>
           </div>
-          <div class="flex justify-between text-emerald-600">
-            <span>Advance Payment:</span>
+          <div id="inv-advance-row" class="flex justify-between text-emerald-600">
+            <span>Advanced:</span>
             <strong id="inv-sum-advance">₹0</strong>
           </div>
-          <div class="flex justify-between text-rose-600 font-bold border-t border-slate-200 pt-1">
+          <div id="inv-discount-percent-row" class="hidden flex justify-between text-blue-700 font-bold"><span>Discounted %:</span><strong id="inv-sum-discount-percent">0%</strong></div>
+          <div id="inv-discount-amount-row" class="hidden flex justify-between text-blue-700 font-bold"><span>Discounted Amount:</span><strong id="inv-sum-discount-amount">₹0</strong></div>
+          <div class="flex justify-between text-slate-800 font-bold border-t border-slate-200 pt-1">
+            <span>Grand Total:</span>
+            <strong id="inv-sum-grand-total">₹0</strong>
+          </div>
+          <div class="flex justify-between text-rose-600 font-bold">
             <span>Balance Due:</span>
             <span id="inv-sum-due">₹0</span>
           </div>
-          <div id="inv-discount-percent-row" class="hidden flex justify-between text-blue-700 font-bold border-t border-slate-100 pt-1"><span>Discounted %:</span><strong id="inv-sum-discount-percent">0%</strong></div>
-          <div id="inv-discount-amount-row" class="hidden flex justify-between text-blue-700 font-bold"><span>Discounted Amount:</span><strong id="inv-sum-discount-amount">₹0</strong></div>
           <div id="inv-clear-due-row" class="hidden flex justify-between text-emerald-700 font-bold border-t border-slate-100 pt-1">
-            <span>Clear Due:</span>
+            <span id="inv-clear-due-label">Clear Due (Full Paid):</span>
             <strong id="inv-sum-clear-due">₹0</strong>
           </div>
         </div>
@@ -2199,6 +2216,8 @@ function checkBirthdayTrigger() {
           "Advanced": b.initialAdv || 0,
 	  "Discounted %": Number(b.discountPercent || 0),
           "Discounted Amount": Number(b.discountAmount || 0),
+          "Discount % Shown on Receipt": b.discountPercentSelected !== false ? "Yes" : "No",
+          "Discount Amount Shown on Receipt": b.discountAmountSelected !== false ? "Yes" : "No",
           "Balance Due": b.totalDue || 0,
           "Cleared Bill": b.clearedDue || 0,  
         };
@@ -2212,14 +2231,28 @@ function checkBirthdayTrigger() {
       closeExportModal();
     }
 
+    function populateBookingAgentSearch() {
+      const select = document.getElementById('booking-agent-search');
+      if (!select) return;
+      const selected = select.value;
+      const agents = [...new Set((state.masterAgents || []).map(a => `${a.agentName} (${a.phone})`))];
+      select.innerHTML = '<option value="">All Agents</option>' + agents.map(a => `<option value="${escapeRemarkHtml(a)}">${escapeRemarkHtml(a)}</option>`).join('');
+      if (agents.includes(selected)) select.value = selected;
+    }
+
     function searchBookingByDate() {
-      const dateVal = document.getElementById('booking-date-search').value;
-      renderBookingsTable(dateVal);
+      renderBookingsTable(document.getElementById('booking-date-search')?.value || '', document.getElementById('booking-agent-search')?.value || '');
+    }
+
+    function searchBookingByAgent() {
+      renderBookingsTable(document.getElementById('booking-date-search')?.value || '', document.getElementById('booking-agent-search')?.value || '');
     }
 
     function clearDateSearchBooking() {
       const input = document.getElementById('booking-date-search');
-      if (input) input.value = "";
+      const agent = document.getElementById('booking-agent-search');
+      if (input) input.value = '';
+      if (agent) agent.value = '';
       renderBookingsTable();
     }
 
@@ -2694,17 +2727,22 @@ function checkBirthdayTrigger() {
       const agentSelect = document.getElementById('cust-agent');
       if (!agentSelect) return;
       agentSelect.innerHTML = '';
-
-      state.masterAgents.forEach(a => {
+      (state.masterAgents || []).forEach(a => {
         const opt = document.createElement('option');
         opt.value = `${a.agentName} (${a.phone})`;
         opt.text = `${a.agentName} (${a.phone})`;
-        if (selectedAgentName && opt.value.includes(selectedAgentName)) {
-          opt.selected = true;
-        }
+        if (selectedAgentName && opt.value.includes(selectedAgentName)) opt.selected = true;
         agentSelect.appendChild(opt);
       });
     }
+
+    function setDiscountDisplayMode(mode) {
+      const pct = document.getElementById('cust-discount-percent-selected');
+      const amt = document.getElementById('cust-discount-amount-selected');
+      if (pct) pct.checked = true;
+      if (amt) amt.checked = true;
+    }
+
 
     function autoCaptureRoomDetails() {
       let totalCap = 0;
@@ -3307,6 +3345,8 @@ function updateDashboardCards() {
       const effectiveOut = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
       const roomsDisplay = getBookingRooms(b).join(', ');
 
+      const discountValue = (b.discountPercentSelected !== false && Number(b.discountPercent || 0) > 0 ? `• Discounted: ${Number(b.discountPercent).toFixed(2).replace(/\.?0+$/, '')}%\n` : '') +
+        (b.discountAmountSelected !== false && Number(b.discountAmount || 0) > 0 ? `• Discount Amount: ₹${Number(b.discountAmount).toLocaleString('en-IN')}\n` : '');
       const messageText = `*Sanoum Pema Homestay-by Aanaristays - Booking Receipt*\n\n` +
         `Dear *${b.name}*,\n` +
         `Thank you for booking with us! Here are your booking details:\n\n` +
@@ -3318,6 +3358,8 @@ function updateDashboardCards() {
         `*Billing Summary:*\n` +
         `• Total Amount: ₹${b.totalAmount}\n` +
         `• Advance Amount: ₹${initialAdvanceVal}\n` +
+        discountValue +
+        `• Grand Total: ₹${Math.max(0, Number(b.totalAmount || 0) - Number(b.discountAmount || 0)).toLocaleString('en-IN')}\n` +
         `• Balance Due: ₹${b.totalDue}\n\n` +
         `*UPI Payment Details:*\n` +
         `• UPI ID: *${upiId}*\n\n` +
@@ -3522,19 +3564,31 @@ function updateDashboardCards() {
       const initialAdv = b.initialAdv || 0;
       const clearDueAmt = b.clearedDue || 0;
 
-      document.getElementById('inv-sum-total').innerText = `₹${(b.totalAmount || 0).toLocaleString('en-IN')}`;
-      document.getElementById('inv-sum-advance').innerText = `₹${(initialAdv || 0).toLocaleString('en-IN')}`;
-      document.getElementById('inv-sum-due').innerText = `₹${(b.totalDue || 0).toLocaleString('en-IN')}`;
-
+      const totalAmount = Number(b.totalAmount || 0);
       const discountPct = Number(b.discountPercent || 0);
       const discountAmount = Number(b.discountAmount || 0);
+      const showPct = b.discountPercentSelected !== false;
+      const showAmt = b.discountAmountSelected !== false;
+      const grandTotal = Math.max(0, totalAmount - discountAmount);
+      const dueNow = Number(b.totalDue || 0);
+      document.getElementById('inv-sum-total').innerText = `₹${totalAmount.toLocaleString('en-IN')}`;
+      document.getElementById('inv-sum-advance').innerText = `₹${Number(initialAdv || 0).toLocaleString('en-IN')}`;
+      document.getElementById('inv-advance-row').classList.toggle('hidden', !(Number(initialAdv || 0) > 0));
+      document.getElementById('inv-sum-grand-total').innerText = `₹${grandTotal.toLocaleString('en-IN')}`;
+      const dueEl = document.getElementById('inv-sum-due');
+      if (dueNow <= 0 && clearDueAmt > 0) {
+        dueEl.innerHTML = `<del class="text-slate-400">₹${clearDueAmt.toLocaleString('en-IN')}</del> <strong class="text-emerald-700">₹0</strong>`;
+      } else {
+        dueEl.textContent = `₹${dueNow.toLocaleString('en-IN')}`;
+      }
       const discountPctRow = document.getElementById('inv-discount-percent-row');
       const discountAmountRow = document.getElementById('inv-discount-amount-row');
-      if (discountPctRow) { document.getElementById('inv-sum-discount-percent').innerText = `${discountPct.toFixed(2).replace(/\.?0+$/, '')}%`; discountPctRow.classList.toggle('hidden', discountPct <= 0); }
-      if (discountAmountRow) { document.getElementById('inv-sum-discount-amount').innerText = `₹${discountAmount.toLocaleString('en-IN')}`; discountAmountRow.classList.toggle('hidden', discountAmount <= 0); }
+      if (discountPctRow) { document.getElementById('inv-sum-discount-percent').innerText = `${discountPct.toFixed(2).replace(/\.?0+$/, '')}%`; discountPctRow.classList.toggle('hidden', !showPct || discountPct <= 0); }
+      if (discountAmountRow) { document.getElementById('inv-sum-discount-amount').innerText = `₹${discountAmount.toLocaleString('en-IN')}`; discountAmountRow.classList.toggle('hidden', !showAmt || discountAmount <= 0); }
       const clearDueRow = document.getElementById('inv-clear-due-row');
       if (clearDueAmt > 0) {
         document.getElementById('inv-sum-clear-due').innerText = `₹${clearDueAmt.toLocaleString('en-IN')}`;
+        document.getElementById('inv-clear-due-label').innerText = `Clear Due (Full Paid ₹${clearDueAmt.toLocaleString('en-IN')}):`;
         clearDueRow.classList.remove('hidden');
       } else {
         clearDueRow.classList.add('hidden');
@@ -3838,16 +3892,9 @@ function updateDashboardCards() {
       if (extChkBox) {
         extChkBox.disabled = !canToggleExtendedCheckout;
         if (canToggleExtendedCheckout) {
-          if (timerNotice) {
-            timerNotice.innerText = isLiveBooking ? "(Active for Live Booking)" : "(Active up to 1hr post check-out)";
-            timerNotice.classList.remove('hidden', 'text-rose-600');
-          }
+          if (timerNotice) timerNotice.classList.add('hidden');
         } else {
-          if (timerNotice) {
-            timerNotice.innerText = isClosedBooking ? "(Closed Booking - Inactive)" : "(Selectable only for Live Booking)";
-            timerNotice.classList.remove('hidden');
-            timerNotice.classList.add('text-rose-600');
-          }
+          if (timerNotice) timerNotice.classList.add('hidden');
         }
       }
 
@@ -3857,9 +3904,7 @@ function updateDashboardCards() {
         tripCancelChk.disabled = !canToggleTripCancel;
         if (!canToggleTripCancel) tripCancelChk.checked = false;
         const tripNotice = document.getElementById('trip-cancel-notice');
-        if (tripNotice) tripNotice.innerText = canToggleTripCancel
-          ? (isLiveBooking ? '(Available for Live Booking)' : '(Available for Closed Booking)')
-          : '(Not available for Upcoming Booking)';
+        if (tripNotice) tripNotice.classList.add('hidden');
       }
 
       const mealsChkBox = document.getElementById('cust-include-meals');
@@ -4053,9 +4098,15 @@ function updateDashboardCards() {
         }
         document.getElementById('cust-discount-amount').value = b.discountAmount || 0;
         document.getElementById('cust-discount-percent').value = b.discountPercent || 0;
+        document.getElementById('cust-discount-percent-selected').checked = b.discountPercentSelected !== false;
+        document.getElementById('cust-discount-amount-selected').checked = b.discountAmountSelected !== false;
+        document.getElementById('btn-save-booking').innerText = 'Update Booking';
 
         calculateModalBilling();
       } else {
+        document.getElementById('btn-save-booking').innerText = 'Save Booking';
+        document.getElementById('cust-discount-percent-selected').checked = true;
+        document.getElementById('cust-discount-amount-selected').checked = true;
         document.getElementById('modal-title').innerText = 'Add New Booking';
         const newTripCancel = document.getElementById('cust-has-trip-cancel');
         if (newTripCancel) { newTripCancel.checked = false; newTripCancel.disabled = true; }
@@ -4510,8 +4561,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
           alert('Please enter a valid Trip Cancellation check-in and check-out date/time. Check-out must be after check-in.');
           return;
         }
-        if (cancelInDate < inDate || cancelInDate > outDate || cancelOutDate < inDate || cancelOutDate > outDate) {
-          alert('Trip Cancel check-in and check-out dates must be within the main booking check-in and check-out dates.');
+        if (cancelInDate <= inDate || cancelInDate >= outDate || cancelOutDate <= inDate || cancelOutDate >= outDate) {
+          alert('Trip Cancel check-in and check-out dates must be strictly between the main booking check-in and check-out dates.');
           return;
         }
       }
@@ -4768,6 +4819,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         clearedDue: clearedDueAmt,
         discountPercent: parseFloat(document.getElementById('cust-discount-percent').value) || 0,
         discountAmount: parseFloat(document.getElementById('cust-discount-amount').value) || 0,
+        discountPercentSelected: document.getElementById('cust-discount-percent-selected')?.checked !== false,
+        discountAmountSelected: document.getElementById('cust-discount-amount-selected')?.checked !== false,
         inactive: false
       };
 
@@ -4798,7 +4851,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       openMasterDeleteModal('booking', id);
     }
 
-    function renderBookingsTable(dateFilter = "") {
+    function renderBookingsTable(dateFilter = "", agentFilter = "") {
+      populateBookingAgentSearch();
       const tbody = document.getElementById('bookings-tbody');
       tbody.innerHTML = '';
 
@@ -4812,6 +4866,9 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
           const bOut = String(bOutVal).replace(' ', 'T').split('T')[0];
           return (dateFilter >= bIn && dateFilter <= bOut);
         });
+      }
+      if (agentFilter) {
+        listToRender = listToRender.filter(b => String(b.agentInfo || '').trim() === agentFilter);
       }
 
       const now = new Date().getTime();
