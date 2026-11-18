@@ -1,4 +1,3 @@
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1319,7 +1318,7 @@
           <div id="inv-discount-percent-row" class="hidden flex justify-between text-blue-700 font-bold"><span>Discounted %:</span><strong id="inv-sum-discount-percent">0%</strong></div>
           <div id="inv-discount-amount-row" class="hidden flex justify-between text-blue-700 font-bold"><span>Discounted Amount:</span><strong id="inv-sum-discount-amount">₹0</strong></div>
           <div class="flex justify-between text-slate-800 font-bold border-t border-slate-200 pt-1">
-            <span>Grand Total:</span>
+            <span id="inv-grand-total-label">Grand Total:</span>
             <strong id="inv-sum-grand-total">₹0</strong>
           </div>
           <div class="flex justify-between text-rose-600 font-bold">
@@ -1757,28 +1756,30 @@ function checkBirthdayTrigger() {
       calculateModalBilling();
     }
 
+    // Discount is calculated on the full Billing Summary Grand Total.
+    // Advance is a separate payment and never reduces the discount base.
     function updateDiscountPercent() {
-      const dueBeforeDiscount = Math.max(0, (parseFloat(document.getElementById('cust-total')?.value) || 0) - (parseFloat(document.getElementById('cust-advance')?.value) || 0));
+      const grandTotal = Math.max(0, parseFloat(document.getElementById('cust-total')?.value) || 0);
       const pctEl = document.getElementById('cust-discount-percent');
       const amtEl = document.getElementById('cust-discount-amount');
       if (!pctEl || !amtEl) return;
-      const amount = Math.max(0, Math.min(dueBeforeDiscount, parseFloat(amtEl.value) || 0));
-      amtEl.value = amount.toFixed(2).replace(/\.?0+$/, '');
-      pctEl.value = dueBeforeDiscount > 0 ? (amount / dueBeforeDiscount * 100).toFixed(2).replace(/\.?0+$/, '') : '0';
+      const amount = Math.max(0, Math.min(grandTotal, parseFloat(amtEl.value) || 0));
+      amtEl.value = amount.toFixed(2).replace(/\\.?0+$/, '');
+      pctEl.value = grandTotal > 0 ? (amount / grandTotal * 100).toFixed(2).replace(/\\.?0+$/, '') : '0';
     }
 
     function handleDiscountPercent(value) {
-      const due = Math.max(0, (parseFloat(document.getElementById('cust-total')?.value) || 0) - (parseFloat(document.getElementById('cust-advance')?.value) || 0));
+      const grandTotal = Math.max(0, parseFloat(document.getElementById('cust-total')?.value) || 0);
       const pct = Math.max(0, Math.min(100, parseFloat(value) || 0));
-      document.getElementById('cust-discount-amount').value = (due * pct / 100).toFixed(2).replace(/\.?0+$/, '');
+      document.getElementById('cust-discount-amount').value = (grandTotal * pct / 100).toFixed(2).replace(/\\.?0+$/, '');
       recalculateDueAfterDiscount();
     }
 
     function handleDiscountAmount(value) {
-      const due = Math.max(0, (parseFloat(document.getElementById('cust-total')?.value) || 0) - (parseFloat(document.getElementById('cust-advance')?.value) || 0));
-      const amount = Math.max(0, Math.min(due, parseFloat(value) || 0));
+      const grandTotal = Math.max(0, parseFloat(document.getElementById('cust-total')?.value) || 0);
+      const amount = Math.max(0, Math.min(grandTotal, parseFloat(value) || 0));
       document.getElementById('cust-discount-amount').value = amount;
-      document.getElementById('cust-discount-percent').value = due > 0 ? (amount / due * 100).toFixed(2).replace(/\.?0+$/, '') : '0';
+      document.getElementById('cust-discount-percent').value = grandTotal > 0 ? (amount / grandTotal * 100).toFixed(2).replace(/\\.?0+$/, '') : '0';
       recalculateDueAfterDiscount();
     }
 
@@ -3576,6 +3577,8 @@ function updateDashboardCards() {
       document.getElementById('inv-sum-advance').innerText = `₹${Number(initialAdv || 0).toLocaleString('en-IN')}`;
       document.getElementById('inv-advance-row').classList.toggle('hidden', !(Number(initialAdv || 0) > 0));
       document.getElementById('inv-sum-grand-total').innerText = `₹${grandTotal.toLocaleString('en-IN')}`;
+      const grandTotalLabel = document.getElementById('inv-grand-total-label');
+      if (grandTotalLabel) grandTotalLabel.innerText = (!showPct && !showAmt) ? 'Grand Total @round off:' : 'Grand Total:';
       const dueEl = document.getElementById('inv-sum-due');
       if (dueNow <= 0 && clearDueAmt > 0) {
         dueEl.innerHTML = `<del class="text-slate-400">₹${clearDueAmt.toLocaleString('en-IN')}</del> <strong class="text-emerald-700">₹0</strong>`;
@@ -4770,7 +4773,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const initialAdvAmt = parseFloat(document.getElementById('cust-advance').getAttribute('data-initial-adv')) || parseFloat(document.getElementById('cust-advance').value) || 0;
       const clearedDueAmt = parseFloat(document.getElementById('cust-clear-bill').value) || 0;
 
-      const discountAmountForSave = parseFloat(document.getElementById('cust-discount-amount').value) || 0;
+      const discountAmountForSave = Math.max(0, Math.min(totalAmt, parseFloat(document.getElementById('cust-discount-amount').value) || 0));
+      // Discount reduces the full bill; advance and cleared due are independent payments.
       const totalPaid = initialAdvAmt + clearedDueAmt + discountAmountForSave;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
 
