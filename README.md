@@ -1,4 +1,3 @@
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -1952,7 +1951,14 @@ function checkBirthdayTrigger() {
     const LAST_SYNC_KEY='portal-last-cloud-sync';
     const TAB_LOCK_KEY='business-portal-active-tab-lock';
     const SERVER_SESSION_KEY='business-portal-server-session';
+    const DEVICE_ID_KEY='business-portal-device-id';
+    const DEVICE_META_KEY='business-portal-device-metadata';
     const SERVER_SESSION_HEARTBEAT_MS=15000;
+    function getPortalDeviceId(){let id=localStorage.getItem(DEVICE_ID_KEY);if(!id){id='device_'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'_'+Math.random().toString(36).slice(2));localStorage.setItem(DEVICE_ID_KEY,id);}return id;}
+    function getBrowserName(){const ua=navigator.userAgent||'';if(/Edg\//.test(ua))return 'Microsoft Edge';if(/OPR\//.test(ua))return 'Opera';if(/CriOS\//.test(ua))return 'Chrome (iOS)';if(/Chrome\//.test(ua))return 'Google Chrome';if(/FxiOS|Firefox\//.test(ua))return 'Firefox';if(/Safari\//.test(ua))return 'Safari';return 'Unknown browser';}
+    function getBrowserVersion(){const ua=navigator.userAgent||'';const match=ua.match(/(?:Edg|OPR|CriOS|Chrome|Firefox|Version)\/([0-9.]+)/);return match?match[1]:'Unknown';}
+    function getDeviceType(){const ua=navigator.userAgent||'';if(/iPad|Tablet/i.test(ua))return 'Tablet';if(/Mobile|Android|iPhone|iPod/i.test(ua))return 'Mobile';return 'Desktop';}
+    async function getPortalDeviceMetadata(){let model='Not exposed by browser',platform=(navigator.userAgentData&&navigator.userAgentData.platform)||navigator.platform||'Unknown';try{if(navigator.userAgentData&&navigator.userAgentData.getHighEntropyValues){const hints=await navigator.userAgentData.getHighEntropyValues(['model','platform','platformVersion']);model=hints.model||model;platform=hints.platform||platform;}}catch(e){}const meta={deviceId:getPortalDeviceId(),browserName:getBrowserName(),browserVersion:getBrowserVersion(),deviceType:getDeviceType(),deviceModel:model,platform:platform,userAgent:(navigator.userAgent||'').slice(0,240),lastUpdatedAt:new Date().toISOString()};try{const previous=JSON.parse(localStorage.getItem(DEVICE_META_KEY)||'{}');meta.firstCreatedAt=previous.firstCreatedAt||meta.lastUpdatedAt;localStorage.setItem(DEVICE_META_KEY,JSON.stringify(meta));}catch(e){}return meta;}
     let offlineMode=false, offlineDb=null, isSyncing=false, activeTabId='tab_'+Math.random().toString(36).slice(2);
     const SHEET_ROW_LIMIT=1000000, SHEET_ROW_RESERVE=50, SHEET_ROW_WARNING=100;
     let serverRowLimits=null;
@@ -2045,16 +2051,28 @@ function checkBirthdayTrigger() {
       if(!navigator.onLine)return {status:'offline'};
       const sessionId=getServerSessionId()||('sess_'+Date.now()+'_'+Math.random().toString(36).slice(2));
       try{
-        const result=await postToGoogleServer({action:'claimSession',sessionId:sessionId,userId:(userId||currentUserId||sessionStorage.getItem('portal_user_id')||'Unknown'),authToken:(authToken||''),clientLabel:(navigator.userAgent||'Browser').slice(0,120)});
+        const deviceMeta=await getPortalDeviceMetadata();
+        const result=await postToGoogleServer({action:'claimSession',sessionId:sessionId,userId:(userId||currentUserId||sessionStorage.getItem('portal_user_id')||'Unknown'),authToken:(authToken||''),clientLabel:deviceMeta.browserName+' · '+deviceMeta.platform,deviceId:deviceMeta.deviceId,browserName:deviceMeta.browserName,deviceModel:deviceMeta.deviceModel,deviceType:deviceMeta.deviceType,browserVersion:deviceMeta.browserVersion,platform:deviceMeta.platform,userAgent:deviceMeta.userAgent,clientTimestamp:new Date().toISOString()});
         if(result.status==='success'){setServerSessionId(sessionId);serverSessionLost=false;startServerSessionHeartbeat();return result;}
         return result;
       }catch(error){return {status:'unavailable',message:'Google Server session service is unavailable. You can continue in Offline mode; cross-device login protection will resume when the server is reachable.'};}
     }
     async function releaseGoogleServerSession(){
-      const sessionId=getServerSessionId();
+      // A normal logout may release only this exact authorised browser/device.
+      // The server verifies both the active session ID and persistent device ID.
+      // Browser close, device shutdown, refresh, and inactivity never call this.
       stopServerSessionHeartbeat();
-      if(sessionId&&navigator.onLine){try{await postToGoogleServer({action:'releaseSession',sessionId});}catch(e){console.warn('Could not release server session cleanly',e);}}
-      setServerSessionId('');
+      const sessionId=getServerSessionId();
+      if(!sessionId){return {status:'success',message:'No local server session to release.'};}
+      if(!navigator.onLine){
+        // Preserve the device identity; the reservation remains on the server.
+        return {status:'offline',message:'Offline logout: the server reservation remains active until this browser/device reconnects or an administrator releases it.'};
+      }
+      const deviceMeta=await getPortalDeviceMetadata();
+      const result=await postToGoogleServer({action:'releaseSession',sessionId:sessionId,deviceId:deviceMeta.deviceId});
+      if(result.status==='success')setServerSessionId('');
+      else throw new Error(result.message||'The server reservation could not be released.');
+      return result;
     }
     function startServerSessionHeartbeat(){
       stopServerSessionHeartbeat();
@@ -2065,7 +2083,7 @@ function checkBirthdayTrigger() {
           if(result.status!=='success'){
             serverSessionLost=true;stopServerSessionHeartbeat();setServerSessionId('');isLoggedIn=false;
             sessionStorage.removeItem('app_authenticated');releaseSingleTabLock();
-            alert('Your portal session was released or replaced by an administrator. Please log in again. Your locally saved offline data remains on this device.');
+            alert('Your portal session is no longer active. Please log in again. Your locally saved offline data remains on this device.');
             location.reload();
           }
         }catch(e){console.warn('Temporary Google Server heartbeat failure; will retry',e);updateSyncIndicator('error','Server unavailable · local data safe');}
@@ -2074,7 +2092,11 @@ function checkBirthdayTrigger() {
     function stopServerSessionHeartbeat(){if(serverSessionHeartbeat){clearInterval(serverSessionHeartbeat);serverSessionHeartbeat=null;}}
     function openOfflineDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB unavailable'));return;}const req=indexedDB.open(OFFLINE_DB_NAME,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(OFFLINE_STORE))req.result.createObjectStore(OFFLINE_STORE);};req.onsuccess=()=>{offlineDb=req.result;resolve(offlineDb);};req.onerror=()=>reject(req.error||new Error('IndexedDB open failed'));});}
     async function writeOfflineSnapshot(markPending=true){
-      const snapshot=JSON.stringify(state);
+      const now=new Date().toISOString();
+      try{const meta=await getPortalDeviceMetadata();meta.lastUpdatedAt=now;if(!meta.firstCreatedAt)meta.firstCreatedAt=now;localStorage.setItem(DEVICE_META_KEY,JSON.stringify(meta));}catch(e){}
+      localStorage.setItem('portal-offline-memory-last-updated',now);
+      let deviceMeta={};try{deviceMeta=JSON.parse(localStorage.getItem(DEVICE_META_KEY)||'{}');}catch(e){}
+      const snapshot=JSON.stringify({__portalOfflineSnapshot:true,state:state,deviceMetadata:deviceMeta,createdAt:deviceMeta.firstCreatedAt||now,lastUpdatedAt:now,pendingSync:!!markPending});
       try{localStorage.setItem(OFFLINE_KEY,snapshot);}catch(storageError){console.warn('Local recovery mirror unavailable',storageError);}
       try{const db=offlineDb||await openOfflineDB();await new Promise((resolve,reject)=>{const tx=db.transaction(OFFLINE_STORE,'readwrite');tx.objectStore(OFFLINE_STORE).put(snapshot,OFFLINE_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}
       catch(e){if(!localStorage.getItem(OFFLINE_KEY))throw new Error('Browser storage is full or unavailable. Offline data could not be saved.');console.warn('IndexedDB unavailable; using localStorage recovery copy',e);}
@@ -2083,9 +2105,10 @@ function checkBirthdayTrigger() {
       return true;
     }
     async function readOfflineSnapshot(){
-      try{const db=offlineDb||await openOfflineDB();const value=await new Promise((resolve,reject)=>{const tx=db.transaction(OFFLINE_STORE,'readonly');const req=tx.objectStore(OFFLINE_STORE).get(OFFLINE_KEY);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});if(value)return JSON.parse(value);}
+      const unwrap=value=>{if(!value)return null;const parsed=typeof value==='string'?JSON.parse(value):value;if(parsed&&parsed.__portalOfflineSnapshot){if(parsed.deviceMetadata){try{localStorage.setItem(DEVICE_META_KEY,JSON.stringify(parsed.deviceMetadata));}catch(e){}}return parsed.state||null;}return parsed;};
+      try{const db=offlineDb||await openOfflineDB();const value=await new Promise((resolve,reject)=>{const tx=db.transaction(OFFLINE_STORE,'readonly');const req=tx.objectStore(OFFLINE_STORE).get(OFFLINE_KEY);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});if(value)return unwrap(value);}
       catch(e){console.warn('IndexedDB read fallback',e);}
-      try{const raw=localStorage.getItem(OFFLINE_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
+      try{const raw=localStorage.getItem(OFFLINE_KEY);return raw?unwrap(raw):null;}catch(e){return null;}
     }
     async function clearOfflineSnapshot(){
       try{const db=offlineDb||await openOfflineDB();await new Promise((resolve,reject)=>{const tx=db.transaction(OFFLINE_STORE,'readwrite');tx.objectStore(OFFLINE_STORE).delete(OFFLINE_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}catch(e){console.warn('IndexedDB clear issue',e);}
@@ -2192,7 +2215,7 @@ function checkBirthdayTrigger() {
     }
     function closeOfflineSyncModal(){document.getElementById('offline-sync-modal')?.classList.add('hidden');}
     function showOfflineSyncModal(message,complete=false,title='Online synchronisation',buttonLabel='Continue'){const m=document.getElementById('offline-sync-modal');if(!m)return;document.getElementById('offline-sync-choice')?.classList.add('hidden');const heading=m.querySelector('h3');if(heading)heading.textContent=title;const modalIcon=m.querySelector('.mx-auto i');if(modalIcon){modalIcon.className='fa-solid '+(title.toLowerCase().includes('offline')?'fa-hard-drive':'fa-cloud-arrow-up');}document.getElementById('offline-sync-modal-message').textContent=message;document.getElementById('offline-sync-progress').classList.toggle('hidden',complete);const button=document.getElementById('offline-sync-continue');button.classList.toggle('hidden',!complete);button.textContent=buttonLabel;m.classList.remove('hidden');}
-    async function manualBackupDownload(){try{await writeOfflineSnapshot(false);const blob=new Blob([JSON.stringify({createdAt:new Date().toISOString(),state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Business_Portal_Backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);alert('Backup downloaded successfully. Keep this file in a safe location.');}catch(e){alert('Backup failed: '+e.message);}}
+    async function manualBackupDownload(){try{await writeOfflineSnapshot(false);const blob=new Blob([JSON.stringify({createdAt:new Date().toISOString(),deviceMetadata:JSON.parse(localStorage.getItem(DEVICE_META_KEY)||'{}'),state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Business_Portal_Backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);alert('Backup downloaded successfully. Keep this file in a safe location.');}catch(e){alert('Backup failed: '+e.message);}}
     async function syncWithCloud(showMessages=false,returnOffline=true){
       if(isSyncing)return false;if(!navigator.onLine){updateSyncIndicator('error','No internet connection');if(showMessages)console.warn('No internet connection; local data remains safe in Offline mode.');return false;}
       isSyncing=true;updateSyncIndicator('syncing','Synchronising');
@@ -2237,7 +2260,7 @@ function checkBirthdayTrigger() {
     // mode, request confirmation unless the in-app safe logout flow was used.
     window.addEventListener('beforeunload', function (e) {
       if (isLoggedIn && offlineMode && !navigator.onLine && !window.__safePortalLogout) {
-        try { localStorage.setItem(OFFLINE_KEY, JSON.stringify(state)); } catch (storageError) {}
+        try { const meta=JSON.parse(localStorage.getItem(DEVICE_META_KEY)||'{}'); const stamp=new Date().toISOString(); meta.deviceId=meta.deviceId||getPortalDeviceId(); meta.browserName=meta.browserName||getBrowserName(); meta.lastUpdatedAt=stamp; if(!meta.firstCreatedAt)meta.firstCreatedAt=stamp; localStorage.setItem(DEVICE_META_KEY,JSON.stringify(meta)); localStorage.setItem(OFFLINE_KEY,JSON.stringify({__portalOfflineSnapshot:true,state:state,deviceMetadata:meta,createdAt:meta.firstCreatedAt,lastUpdatedAt:stamp,pendingSync:true})); localStorage.setItem(OFFLINE_PENDING_KEY,'true'); } catch (storageError) {}
         e.preventDefault();
         e.returnValue = 'Internet is unavailable. Please use the portal Logout option to safely close and save your data.';
         return e.returnValue;
@@ -2675,7 +2698,10 @@ function checkBirthdayTrigger() {
           if(!saved){document.getElementById('saving-lock-modal').classList.add('hidden');alert('Logout paused because the save could not be completed. Your session remains open so you can retry.');return;}
         } catch (e) {console.error('Save on logout error',e);document.getElementById('saving-lock-modal').classList.add('hidden');alert('Logout paused because saving could not be completed.');return;}
       }
-      window.__safePortalLogout=true;await releaseGoogleServerSession();isLoggedIn=false;releaseSingleTabLock();isMasterUnlocked=false;sessionStorage.removeItem('app_authenticated');sessionStorage.removeItem('portal_user_id');currentUserId='';stopServerSessionHeartbeat();stopInactivityMonitoring();window.location.reload();
+      window.__safePortalLogout=true;
+      try{const releaseResult=await releaseGoogleServerSession();if(releaseResult&&releaseResult.status==='offline'){console.warn(releaseResult.message);}}
+      catch(releaseError){document.getElementById('saving-lock-modal').classList.add('hidden');alert('Logout could not complete because the server could not verify this browser/device reservation. Please retry when connected. '+(releaseError.message||''));return;}
+      isLoggedIn=false;releaseSingleTabLock();isMasterUnlocked=false;sessionStorage.removeItem('app_authenticated');sessionStorage.removeItem('portal_user_id');currentUserId='';stopServerSessionHeartbeat();stopInactivityMonitoring();window.location.reload();
     }
 
     function openMasterAuthModal() {
