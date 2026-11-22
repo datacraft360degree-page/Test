@@ -73,7 +73,6 @@
   <main id="portal" aria-live="polite">
     <header class="portal-head">
       <strong>Business Portal</strong>
-      <button class="logout" type="button" id="headerLogout">Logout</button>
     </header>
     <section class="notice">
       <div class="symbol" aria-hidden="true">🛠️</div>
