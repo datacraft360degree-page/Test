@@ -1,3 +1,4 @@
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -73,11 +74,12 @@
   <main id="portal" aria-live="polite">
     <header class="portal-head">
       <strong>Business Portal</strong>
+      <button class="logout" type="button" id="headerLogout">Logout</button>
     </header>
     <section class="notice">
       <div class="symbol" aria-hidden="true">🛠️</div>
       <p>Portal is updating, you saved data is save &amp; secure please visit later.</p>
-      <button class="logout" type="button" id="noticeLogout">Logout</button>
+      
     </section>
   </main>
 
